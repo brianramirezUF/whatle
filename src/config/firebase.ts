@@ -1,10 +1,12 @@
 import { initializeApp } from "firebase/app";
 
-if(!process.env.NEXT_PUBLIC_firebase){
+if(!process.env.firebase){
     throw new Error("Environment variables missing")
 }
 
-const env = JSON.parse(process.env.NEXT_PUBLIC_firebase);
+const env = JSON.parse(process.env.firebase);
+
+console.error("TEST");
 
 const firebaseConfig = {
     apiKey: env.apiKey,
