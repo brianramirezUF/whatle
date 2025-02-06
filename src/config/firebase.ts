@@ -6,6 +6,8 @@ if(!process.env.firebase){
 
 const env = JSON.parse(process.env.firebase);
 
+console.error("TEST");
+
 const firebaseConfig = {
     apiKey: env.apiKey,
     authDomain: env.authDomain,
