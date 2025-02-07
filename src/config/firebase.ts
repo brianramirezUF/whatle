@@ -1,20 +1,16 @@
-import { initializeApp } from "firebase/app";
-
-if(!process.env.firebase){
-    throw new Error("Environment variables missing")
-}
-
-const env = JSON.parse(process.env.firebase);
+import { getApp, getApps, initializeApp } from "firebase/app";
+import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
-    apiKey: env.apiKey,
-    authDomain: env.authDomain,
-    projectId: env.projectId,
-    storageBucket: env.storageBucket,
-    messageSenderId: env.messageSenderId,
-    appId: env.appId,
-    measurementId: env.measurementId,
+    apiKey: process.env.firebase_apiKey,
+    authDomain: process.env.firebase_authDomain,
+    projectId: process.env.firebase_projectId,
+    storageBucket: process.env.firebase_storageBucket,
+    messageSenderId: process.env.firebase_messagingSenderId,
+    appId: process.env.firebase_appId,
+    measurementId: process.env.firebase_measurementId,
 };
 
-const app = initializeApp(firebaseConfig);
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+export const db = getFirestore(app);
 export default app;
