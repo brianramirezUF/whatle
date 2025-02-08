@@ -10,4 +10,4 @@ function RedirectButton(props: { url: string, text: string}){
     )
 }
 
-export{RedirectButton}
+export{ RedirectButton }
