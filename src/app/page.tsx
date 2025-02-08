@@ -4,7 +4,6 @@ export default function Home() {
   return (
     <>
       <RedirectButton url="/create" text="create"></RedirectButton>
-      preview test
     </>
   );
 }
