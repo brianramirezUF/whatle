@@ -23,7 +23,14 @@ function LoginField(){
                 throw new Error(data.error);
             } 
 
-            console.log("Signup Success", data)
+            console.log("Signup Success", data);
+
+            console.log("Attempting imgur redirect...");
+
+            if (data.imgurAuthUrl) {
+                window.location.href = data.imgurAuthUrl;
+            }
+
             console.log("Attempting to log in...");
             handleLogin(email, password);
         } catch (error: any) {
