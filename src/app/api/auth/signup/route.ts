@@ -13,6 +13,13 @@ console.log(envUrl);
 const IMGUR_CLIENT_ID = process.env.imgur_clientId;
 const IMGUR_REDIRECT_URI = encodeURIComponent(envUrl);
 export async function POST(req: Request) {
+    const host = req.headers.get("host"); 
+    const protocol = host?.includes("localhost") ? "http" : "https";
+    const envUrl = `${protocol}://${host}/api/auth/imgur-callback`;
+
+    const IMGUR_CLIENT_ID = process.env.imgur_clientId;
+    const IMGUR_REDIRECT_URI = encodeURIComponent(envUrl);
+
     try {
         const { email, password } = await req.json();
 
