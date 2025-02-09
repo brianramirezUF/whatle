@@ -6,7 +6,7 @@ import { doc, setDoc } from "firebase/firestore";
 export async function POST(req: Request) {
     const host = req.headers.get("host"); 
     const protocol = host?.includes("localhost") ? "http" : "https";
-    const envUrl = `${protocol}://${host}/api/auth/imgur-callback`;
+    const envUrl = `${protocol}://${host}/login/callback`;
 
     const IMGUR_CLIENT_ID = process.env.imgur_clientId;
     const IMGUR_REDIRECT_URI = encodeURIComponent(envUrl);
