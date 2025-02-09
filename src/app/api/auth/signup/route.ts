@@ -3,10 +3,12 @@ import { auth, db } from "@/config/firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 
-export const envUrl = 
-    process.env.NODE_ENV === "production" ? "https://whatle.com/api/auth/imgur-callback":
-    process.env.NEXT_PUBLIC_VERCEL_ENV === "preview"? "https://preview.whatle.com/api/auth/imgur-callback": 
-    "http://localhost:3000/api/auth/imgur-callback";
+const envUrl = 
+process.env.NODE_ENV === "production" ? "https://whatle.com/api/auth/imgur-callback":
+process.env.NEXT_PUBLIC_VERCEL_ENV === "preview"? "https://preview.whatle.com/api/auth/imgur-callback": 
+"http://localhost:3000/api/auth/imgur-callback";
+
+console.log(envUrl);
 
 const IMGUR_CLIENT_ID = process.env.imgur_clientId;
 const IMGUR_REDIRECT_URI = encodeURIComponent(envUrl);
