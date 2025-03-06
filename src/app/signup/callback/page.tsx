@@ -1,4 +1,4 @@
-import { HandleCallback } from "@/components/LoginField";
+import { HandleCallback } from "@/components/SignupField";
 
 export default function LoginCallback(){
 
