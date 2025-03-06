@@ -61,23 +61,7 @@ export default function NavBar() {
           </Link>
         </Button>
         <CategoriesDropdown></CategoriesDropdown>
-        {/* <form
-          onSubmit={handleSearchSubmit}
-          className="relative flex items-center"
-        >
-          <Input
-            type="text"
-            placeholder="Search"
-            value={searchQuery}
-            onChange={handleSearchChange}
-            className="h-8 w-48 rounded-md pr-10 text-sm"
-          />
-          <button type="submit" className="absolute right-2">
-            <Search className="h-4 w-4 text-gray-500" />
-          </button>
-        </form> */}
       </div>
-
       {/* sign up, login buttons */}
       <div className="flex items-center space-x-4">
         <Button variant="default" className="text-sm">
