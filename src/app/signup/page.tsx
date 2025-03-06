@@ -1,9 +1,9 @@
-import { LoginField } from "@/components/LoginField";
+import { SignupField } from "@/components/SignupField";
 
 export default function Signup(){
     return(
         <>
-            <LoginField></LoginField>
+            <SignupField></SignupField>
         </>
     )
 }

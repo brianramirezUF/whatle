@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useState } from "react";
+import { RedirectButton } from "./Buttons";
 
 function SignupField(){
     const [email, setEmail] = useState("");
@@ -52,6 +53,8 @@ function SignupField(){
                 />
             </div>
             <button onClick={() => handleSignUp(email, password)}>Signup</button>
+            <br></br>
+            <RedirectButton url="/login" text="Already have an account? Login here"></RedirectButton>
         </>
     )
 }
