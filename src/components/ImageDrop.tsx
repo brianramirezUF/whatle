@@ -55,8 +55,7 @@ function ImageDrop() {
             try {
                 await fetch('/api/uploadImgurToFirebase', {
                     method: 'POST',
-                    body: JSON.stringify({ link: data.data.link }),
-                    headers: { "Content-Type": "application/json" }
+                    body: data.data.link,
                 });
             } catch (error) {
                 console.error("Failed to save on Firebase", error);
