@@ -6,8 +6,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-
+} from "@/components/ui/table";
+import "./styles.css";
 
 export default function History(){
   const Users = {
@@ -43,47 +43,53 @@ export default function History(){
 
   return(
     <>
-      <h1>
-          Games Played
-      </h1>
-      <Table>
-        <TableCaption>Your top 3 played games.</TableCaption>
-        <TableHeader>
-          <TableRow>
-            <TableHead></TableHead>
-            <TableHead></TableHead>
-            <TableHead>Number of Plays</TableHead>
-            <TableHead>Percent Solved</TableHead>
-            <TableHead>Fastest Solve Time</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {top3.map((game, index) => (
-            <TableRow key={game.id}>
-              <TableCell className="text-right">
-                {game.name}
-              </TableCell>
-              <TableCell>
-                {index + 1}
-              </TableCell>
-              <TableCell>
-                {game.numPlays}
-              </TableCell>
-              <TableCell>
-                {Math.ceil((game.numWins / game.numPlays) * 100)}%
-              </TableCell>
-              <TableCell>
-                {
-                  Math.floor(game.fastestTime / 60) > 0 
-                  ? `${Math.floor(game.fastestTime / 60)}m ` 
-                  : ""
-                }
-                {game.fastestTime % 60}s
-              </TableCell>
+      <div className="container">
+        <h1 className="title text-center font-medium">
+            Games Played
+        </h1>
+        <Table className="table">
+          <TableCaption className="text-center">Your top 3 played games.</TableCaption>
+          <TableHeader>
+            <TableRow className="table-row">
+              <TableHead></TableHead>
+              <TableHead></TableHead>
+              <TableHead className="text-center">Number of Plays</TableHead>
+              <TableHead className="text-center">Percent Solved</TableHead>
+              <TableHead className="text-center">Fastest Solve Time</TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {top3.map((game, index) => (
+              <TableRow className="table-row" key={game.id}>
+                <TableCell className="text-right">
+                  {game.name}
+                </TableCell>
+                <TableCell
+                  className={`text-center ${index === 0 ? "gold-cell" : index === 1 ? "silver-cell" : "bronze-cell"} small-cell`}
+                >
+                  {index + 1}
+                </TableCell>
+                <TableCell className="text-center grey-cell medium-cell">
+                  {game.numPlays}
+                </TableCell>
+                <TableCell
+                  className={`text-center ${(game.numWins / game.numPlays) >= 0.5 ? "green-cell" : "red-cell"} medium-cell`}
+                >
+                  {Math.ceil((game.numWins / game.numPlays) * 100)}%
+                </TableCell>
+                <TableCell className="text-center grey-cell medium-cell">
+                  {
+                    Math.floor(game.fastestTime / 60) > 0 
+                    ? `${Math.floor(game.fastestTime / 60)}m ` 
+                    : ""
+                  }
+                  {game.fastestTime % 60}s
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
     </>
   )
 }

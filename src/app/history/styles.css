@@ -1,0 +1,62 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    width: 100%;
+}
+
+.table {
+    width: 80%;
+    max-width: 800px;
+    table-layout: auto;
+    border-collapse: separate;
+    border-spacing: 20px;
+    margin: auto;
+}
+
+.table td, .table th {
+    font-size: 20px;
+}
+
+.title {
+    font-size: 35px;
+    margin-bottom: 20px;
+}
+
+.small-cell {
+    border-radius: 25px;
+    width: 50px;
+    height: 50px;
+}
+
+.medium-cell {
+    border-radius: 20px;
+    width: 125px;
+    height: 50px;
+}
+
+.gold-cell {
+    background-color: #F1CA1E;
+}
+
+.silver-cell {
+    background-color: #C3C6CB;
+}
+
+.bronze-cell {
+    background-color: #B6834C;
+}
+
+.grey-cell {
+    background-color: #E2E8F0;
+}
+
+.green-cell {
+    background-color: #A2E3AA;
+}
+
+.red-cell {
+    background-color: #EA9090;
+}
