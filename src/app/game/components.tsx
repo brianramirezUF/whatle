@@ -184,6 +184,7 @@ const Game: React.FC<GameProps> = ({ answers, attributes }) => {
         setGuesses([...guesses, guess]);
     }
 
+    // TODO: probably don't need to reupdate each previous guess for a new one, replace to use previous state for previous guesses
     const content = (
         <div>
             {!won && <div>

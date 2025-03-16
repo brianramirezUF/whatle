@@ -122,6 +122,7 @@ const comparisons: Record<CompareType, (guess: any, answer: any) => GuessCorrect
     Array: compareCollection
 };
 
+// Component to display within the game page for each individual attribute
 export const Guess: React.FC<guessProps> = ({ guess, answer, type }) => {
     const result = comparisons[type as CompareType](guess, answer);
     console.log(result);
