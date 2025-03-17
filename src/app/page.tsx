@@ -6,8 +6,11 @@ export default function Home() {
   return (
     <>
       <NavBar></NavBar>
-      <RedirectButton url="/create" text="create"></RedirectButton>
-
+      <ul>
+        <li className='underline table'>Testing Buttons:</li>
+        <li className='rounded mb-1 table bg-gray-200'><RedirectButton url="/create" text="create" /></li>
+        <li className='rounded mb-1 table bg-gray-200'><RedirectButton url="/game" text="play" /></li>
+      </ul>
     </>
   );
 }
