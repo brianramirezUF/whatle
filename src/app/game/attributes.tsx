@@ -3,9 +3,6 @@
 // (for example, if a number is less than: guess displays red with an up arrow, greater than: guess displays red with a down arrow,
 // equal to: guess displays green)
 
-// Define type for specific comparisons
-export type CompareType = 'String' | 'Number' | 'Boolean' | 'Array';
-
 // Define types for attributes and answers
 export interface AttributeType {
     name: string;
@@ -113,6 +110,9 @@ const compareCollection = (guess: Array<string>, answer: Array<string>): GuessCo
         };
     }
 };
+
+// Define type for specific comparisons
+type CompareType = 'String' | 'Number' | 'Boolean' | 'Array';
 
 // Enum containing all possible types for an attribute and their associated comparison function
 const comparisons: Record<CompareType, (guess: any, answer: any) => GuessCorrectness> = {
