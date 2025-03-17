@@ -9,7 +9,9 @@ interface EditableAnswerProps {
     onSave: (name: string, values: { attributes: Record<string, string> }) => void;
 }
 
+// Component enabled when an answer is being edited (pen button on 'Answer' component clicked)
 const EditableAnswer: React.FC<EditableAnswerProps> = ({ attributes, answer, onSave }) => {
+    // Update attribute values
     const [values, setValues] = useState<{ attributes: Record<string, string>}>({
         attributes: attributes.reduce((acc, attr) => ({
             ...acc,
@@ -26,6 +28,7 @@ const EditableAnswer: React.FC<EditableAnswerProps> = ({ attributes, answer, onS
         }));
     };
 
+    // Calls 'handleAnswerSave' in ./page.tsx (GamePage)
     const handleSave = () => {
         onSave(answer.name, values);
     };
@@ -69,6 +72,7 @@ interface AnswerProps {
     onEdit: (name: string) => void;
 }
 
+// Component to display a specific answer
 const Answer: React.FC<AnswerProps> = ({ attributes, answer, onEdit }) => {
     return (
         <div className="p-4 border rounded-lg shadow-md bg-white">
@@ -101,6 +105,7 @@ interface EditableAttributeProps {
     onSave: (oldName: string, newName: string, type: string) => void;
 }
 
+// Component enabled when an attribute is being edited (pen button on 'Attribute' component clicked)
 const EditableAttribute: React.FC<EditableAttributeProps> = ({ attribute, onSave }) => {
     const [name, setName] = useState(attribute.name);
     const [type, setType] = useState(attribute.type);
@@ -134,6 +139,7 @@ interface AttributeProps {
     onEdit: (name: string) => void;
 }
 
+// Component to display a specific attribute and its name/type
 const Attribute: React.FC<AttributeProps> = ({ attribute, onEdit }) => {
     return (
         <div className='p-4 border rounded-lg shadow-md bg-white flex justify-between items-center'>

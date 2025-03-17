@@ -84,7 +84,7 @@ const compareBoolean = (guess: boolean, answer: boolean): GuessCorrectness => {
 };
 
 const compareCollection = (guess: Array<string>, answer: Array<string>): GuessCorrectness => {
-    // iterate and compare each in guess to each in answer (n^2)
+    // iterate and compare each in guess to each in answer
     // make a collection a dictionary, each value would be stored like 
     // {'value': ..., 'type': ...} then each value in the collection can be compared based on the given type
     const correct = answer.filter(x => guess.includes(x));
@@ -115,6 +115,7 @@ const compareCollection = (guess: Array<string>, answer: Array<string>): GuessCo
 type CompareType = 'String' | 'Number' | 'Boolean' | 'Array';
 
 // Enum containing all possible types for an attribute and their associated comparison function
+// NOTE: for new data types, just add a new value to CompareType above, and an associated comparison function here
 const comparisons: Record<CompareType, (guess: any, answer: any) => GuessCorrectness> = {
     String: comparestring,
     Number: compareNumber,

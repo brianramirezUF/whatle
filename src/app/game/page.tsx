@@ -37,6 +37,7 @@ export default function GamePage() {
         setAnswers({ ...answers, [name]: newAnswer });
     };
 
+    // Map answer values to correct answer
     const handleAnswerSave = (name: string, values: {attributes: Record<string, string>}) => {
         setAnswers((prev) => ({
             ...prev,
@@ -49,10 +50,12 @@ export default function GamePage() {
         setAnsEditingName(null);
     };
 
+     // Change ID (name) of current editing answer (called by clicking pen icon in 'Answer' component ./components.tsx)
     const handleAnswerEdit = (name: string) => {
         setAnsEditingName(name);
     };
 
+     // Change ID (name) of current editing attribute (called by clicking pen icon in 'Attribute' component ./components.tsx)
     const handleAttributeEdit = (name: string) => {
         setAttrEditingName(name);
     };
@@ -60,11 +63,14 @@ export default function GamePage() {
     const handleAttributeSave = (oldName: string, newName: string, type: string) => {
         setAttributes((prevAttributes) =>
             prevAttributes.map((attr) =>
+                 // Check oldName to see if attribute key (name) changed 
                 attr.name === oldName ? { name: newName, type } : attr
             )
         );
 
+        // Update existing answers to correctly display changed attributes
         setAnswers((prevAnswers) => {
+             // Copy existing attributes, keeping old values when renaming
             const updatedAnswers: Record<string, AnswerType> = Object.keys(prevAnswers).reduce<Record<string, AnswerType>>(
                 (acc, answerKey) => {
                     const answer = prevAnswers[answerKey];
@@ -107,8 +113,10 @@ export default function GamePage() {
                 Display as JSON
             </a>
             <div className='mt-2'>
+                {/* Display all attributes */}
                 {attributes.map((attribute, index) => (
                     <div key={index} className='my-5 p-5 border-2 border-white-600'>
+                        {/* If an attribute is currently being edited, set that answer component to EditableAttribute */}
                         {attrEditingName === attribute.name ? (
                             <EditableAttribute attribute={attribute} onSave={handleAttributeSave} />
                         ) : (
@@ -133,9 +141,11 @@ export default function GamePage() {
                 Display as JSON
             </a>
             <div className='mt-2'>
+                {/* Display all answers (can't have an answer without any attributes) */}
                 {attributes.length > 0 &&
                     Object.values(answers).map((answer, index) => (
                         <div key={index} className='my-5 p-5 border-2 border-white-600'>
+                            {/* If an answer is currently being edited, set that answer component to EditableAnswer */}
                             {ansEditingName === answer.name ? (
                                 <EditableAnswer
                                     attributes={attributes}
@@ -149,6 +159,7 @@ export default function GamePage() {
                     ))}
             </div>
             <h1 className='font-bold'>Game</h1>
+            {/* TESTING: Game here / TODO: have dedicated page for Games */}
             <Game answers={answers} attributes={attributes} />
         </div>
     );
