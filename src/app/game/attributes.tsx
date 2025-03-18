@@ -116,7 +116,7 @@ type CompareType = 'String' | 'Number' | 'Boolean' | 'Array';
 
 // Enum containing all possible types for an attribute and their associated comparison function
 // NOTE: for new data types, just add a new value to CompareType above, and an associated comparison function here
-const comparisons: Record<CompareType, (guess: any, answer: any) => GuessCorrectness> = {
+export const comparisons: Record<CompareType, (guess: any, answer: any) => GuessCorrectness> = {
     String: comparestring,
     Number: compareNumber,
     Boolean: compareBoolean,
@@ -128,9 +128,11 @@ export const Guess: React.FC<guessProps> = ({ guess, answer, type }) => {
     const result = comparisons[type as CompareType](guess, answer);
     console.log(result);
     const content = (
-        <td className='text-white' style={{ backgroundColor: `${result.status}`}}>
+        // td-> div bc using cards in UI and:
+        //<td> cannot be a child of <div> -> hydration error.
+        <div className='text-white' style={{ backgroundColor: `${result.status}`}}>
             {result.details}
-        </td>
+        </div>
     );
 
     return content;
