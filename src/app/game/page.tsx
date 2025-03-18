@@ -1,168 +1,313 @@
-'use client'
+'use client';
 import { useState } from 'react';
 import { AttributeType, AnswerType } from './attributes';
-import { EditableAnswer, Answer, EditableAttribute, Attribute, Game } from './components';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useEffect, useRef } from 'react';
 
-// TODO: replace component CSS to whatever style we are using + shadcn
 export default function GamePage() {
+    const [gameName, setGameName] = useState<string>("Game Name");
     const [attributes, setAttributes] = useState<AttributeType[]>([]);
-    const [attrEditingName, setAttrEditingName] = useState<string | null>(null);
+    const [editingAttribute, setEditingAttribute] = useState<string | null>(null);
+    const [newAttributeName, setNewAttributeName] = useState<string>("");
     const [answers, setAnswers] = useState<Record<string, AnswerType>>({});
-    const [ansEditingName, setAnsEditingName] = useState<string | null>(null);
+    const [selectedAttribute, setSelectedAttribute] = useState<string | null>(null);
+    const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
+    const [values, setValues] = useState<string[]>(["ValA", "ValB", "ValC", "ValD", "ValE", "ValF"]);
+    const [editingValue, setEditingValue] = useState<string | null>(null);
+    const [editingAnswer, setEditingAnswer] = useState<string | null>(null);
+    const [currentlyEditing, setCurrentlyEditing] = useState<{ type: 'attribute' | 'value' | 'answer' | null; name: string | null }>({ type: null, name: null });
+    
 
-    const addAttribute = () => {
-        const newAttribute: AttributeType = {
-            name: `Attribute ${attributes.length}`,
-            type: 'String',
-        };
 
-        setAttributes([...attributes, newAttribute]);
+    const handleValueSelect = (value: string) => {
+        if (!selectedAnswer || !selectedAttribute) {
+            alert("Please select an answer and an attribute first.");
+            return;
+        }
+    
+        setAnswers((prevAnswers) => ({
+            ...prevAnswers,
+            [selectedAnswer]: {
+                ...prevAnswers[selectedAnswer],
+                attributes: {
+                    ...prevAnswers[selectedAnswer].attributes,
+                    [selectedAttribute]: value, // Assign selected value
+                },
+            },
+        }));
+    };
+    
+    
+
+    
+    const handleAnswerSave = (oldName: string, newName: string) => {
+        if (!newName.trim()) return;
+        setAnswers((prevAnswers) => {
+            const updatedAnswers = { ...prevAnswers };
+            updatedAnswers[newName] = { name: newName, attributes: { ...prevAnswers[oldName].attributes } };
+            delete updatedAnswers[oldName];
+            return updatedAnswers;
+        });
+        setEditingAnswer(null);
     };
 
+    const handleValueSave = (oldValue: string, newValue: string) => {
+        if (!newValue.trim()) return;
+        setValues((prevValues) =>
+            prevValues.map((val) => (val === oldValue ? newValue : val))
+        );
+        setEditingValue(null);
+    };
+    
+    const handleAttributeSave = (oldName: string, newName: string) => {
+        if (!newName.trim()) return;
+    
+        setAttributes((prevAttributes) =>
+            prevAttributes.map((attr) =>
+                attr.name === oldName ? { ...attr, name: newName } : attr
+            )
+        );
+    
+        // Update existing answers to reflect the new attribute name
+        setAnswers((prevAnswers) => {
+            const updatedAnswers: Record<string, AnswerType> = {};
+            Object.keys(prevAnswers).forEach(answerKey => {
+                updatedAnswers[answerKey] = {
+                    ...prevAnswers[answerKey],
+                    attributes: {
+                        ...prevAnswers[answerKey].attributes,
+                        [newName]: prevAnswers[answerKey].attributes[oldName]
+                    }
+                };
+                delete updatedAnswers[answerKey].attributes[oldName];
+            });
+            return updatedAnswers;
+        });
+    
+        setEditingAttribute(null);
+    };
+    
+    // Add New Attribute
+    const addAttribute = () => {
+        const newAttribute: AttributeType = {
+            name: `Attr ${attributes.length + 1}`,
+            type: 'String',
+        };
+        setAttributes([...attributes, newAttribute]);
+    
+        // Add the new attribute to all existing answers with a default "-"
+        setAnswers((prevAnswers) => {
+            const updatedAnswers = { ...prevAnswers };
+            Object.keys(updatedAnswers).forEach(answerKey => {
+                updatedAnswers[answerKey] = {
+                    ...updatedAnswers[answerKey],
+                    attributes: {
+                        ...updatedAnswers[answerKey].attributes,
+                        [newAttribute.name]: '-',
+                    },
+                };
+            });
+            return updatedAnswers;
+        });
+    };
+    
+    
+
+    // Remove Latest Attribute
+    const removeLastAttribute = () => {
+        if (attributes.length === 0) return;
+        const lastAttribute = attributes[attributes.length - 1].name;
+        setAttributes(attributes.slice(0, -1));
+
+        setAnswers((prevAnswers) => {
+            const updatedAnswers = { ...prevAnswers };
+            Object.keys(updatedAnswers).forEach(answerKey => {
+                delete updatedAnswers[answerKey].attributes[lastAttribute];
+            });
+            return updatedAnswers;
+        });
+    };
+
+    // Add New Value
+    const addValue = () => {
+        const newValue = `Val${String.fromCharCode(65 + values.length)}`;
+        setValues([...values, newValue]);
+    };
+
+    // Remove Latest Value
+    const removeLastValue = () => {
+        if (values.length === 0) return;
+        setValues(values.slice(0, -1));
+    };
+
+    // Add New Answer
     const addAnswer = () => {
         if (!attributes.length) return;
-
-        const name = `Answer ${Object.keys(answers).length}`;
+    
+        const name = `Answer ${Object.keys(answers).length + 1}`;
         const newAnswer: AnswerType = {
             name,
             attributes: attributes.reduce<Record<string, string>>(
                 (acc, attr) => ({
                     ...acc,
-                    [attr.name]: '',
+                    [attr.name]: '-', // Default value for each attribute
                 }),
                 {}
             ),
         };
-
         setAnswers({ ...answers, [name]: newAnswer });
     };
+    
+    
 
-    // Map answer values to correct answer
-    const handleAnswerSave = (name: string, values: {attributes: Record<string, string>}) => {
-        setAnswers((prev) => ({
-            ...prev,
-            [name]: {
-                name,
-                attributes: { ...values.attributes },
-            },
-        }));
+    return (
+        <div className="flex flex-col items-center p-10 bg-gray-50 min-h-screen">
+            <h1 className="text-3xl font-bold">CREATE GAME</h1>
 
-        setAnsEditingName(null);
-    };
+            {/* Editable Game Name */}
+            <Input
+                value={gameName}
+                onChange={(e) => setGameName(e.target.value)}
+                className="w-1/3 mt-2 text-center border border-gray-300 rounded-lg px-2 py-1"
+            />
 
-     // Change ID (name) of current editing answer (called by clicking pen icon in 'Answer' component ./components.tsx)
-    const handleAnswerEdit = (name: string) => {
-        setAnsEditingName(name);
-    };
-
-     // Change ID (name) of current editing attribute (called by clicking pen icon in 'Attribute' component ./components.tsx)
-    const handleAttributeEdit = (name: string) => {
-        setAttrEditingName(name);
-    };
-
-    const handleAttributeSave = (oldName: string, newName: string, type: string) => {
-        setAttributes((prevAttributes) =>
-            prevAttributes.map((attr) =>
-                 // Check oldName to see if attribute key (name) changed 
-                attr.name === oldName ? { name: newName, type } : attr
-            )
-        );
-
-        // Update existing answers to correctly display changed attributes
-        setAnswers((prevAnswers) => {
-             // Copy existing attributes, keeping old values when renaming
-            const updatedAnswers: Record<string, AnswerType> = Object.keys(prevAnswers).reduce<Record<string, AnswerType>>(
-                (acc, answerKey) => {
-                    const answer = prevAnswers[answerKey];
-
-                    const updatedAttributes: Record<string, string> = Object.entries(answer.attributes).reduce<Record<string, string>>(
-                        (attrAcc, [key, value]) => {
-                            attrAcc[key === oldName ? newName : key] = value;
-                            return attrAcc;
-                        },
-                        {}
-                    );
-
-                    acc[answerKey] = { ...answer, attributes: updatedAttributes };
-                    return acc;
-                },
-                {} as Record<string, AnswerType> // Explicitly define the accumulator type
-            );
-
-            return updatedAnswers;
-        });
-
-        setAttrEditingName(null);
-    };
-
-    const content = (
-        <div className='m-5'>
-            <h1 className='font-bold'>Attribute List</h1>
-            <button onClick={addAttribute} className='decoration-dashed underline'>
-                Add New Attribute
-            </button>
-            <a
-                target='_blank'
-                rel='noopener noreferrer'
-                className='decoration-dashed underline table'
-                href={
-                    'data:application/json;charset=utf-8,' +
-                    encodeURIComponent(JSON.stringify({ attributes }, null, 2))
-                }
-            >
-                Display as JSON
-            </a>
-            <div className='mt-2'>
-                {/* Display all attributes */}
+            {/* Editable Attributes Section */}
+            <div className="flex flex-col items-center mt-6">
+                <div className="flex space-x-4">
                 {attributes.map((attribute, index) => (
-                    <div key={index} className='my-5 p-5 border-2 border-white-600'>
-                        {/* If an attribute is currently being edited, set that answer component to EditableAttribute */}
-                        {attrEditingName === attribute.name ? (
-                            <EditableAttribute attribute={attribute} onSave={handleAttributeSave} />
+                    <div key={index} className="relative flex items-center space-x-2">
+                        {editingAttribute === attribute.name ? (
+                            <Input
+                                defaultValue={attribute.name}
+                                onChange={(e) => {
+                                    const newName = e.target.value;
+                                    setAttributes((prevAttributes) =>
+                                        prevAttributes.map((attr) =>
+                                            attr.name === attribute.name ? { ...attr, name: newName } : attr
+                                        )
+                                    );
+                                }}
+                                autoFocus
+                                className="w-20 px-2 py-1 border border-gray-300 rounded-lg"
+                            />
                         ) : (
-                            <Attribute attribute={attribute} onEdit={handleAttributeEdit} />
+                            <button
+                                className={`px-4 py-2 rounded-full font-medium ${selectedAttribute === attribute.name ? "bg-red-400 text-white" : "bg-red-200"}`}
+                                onClick={() => setSelectedAttribute(attribute.name)}
+                            >
+                                {attribute.name}
+                            </button>
                         )}
+
+                        <Button
+                            onClick={(e) => {
+                                e.stopPropagation(); // Prevents immediate closing when clicking the button
+                                setEditingAttribute(attribute.name);
+                            }}
+                            className="bg-gray-300 text-black px-3 py-1 rounded-md"
+                        >
+                            Edit
+                        </Button>
                     </div>
                 ))}
+
+                {/* Detects click outside to stop editing */}
+                <div
+                    onClick={() => setEditingAttribute(null)}
+                    className="fixed top-0 left-0 w-full h-full -z-10"
+                />
+
+                </div>
+                <div className="flex space-x-2 mt-2">
+                    <Button onClick={addAttribute} className="bg-red-300 text-black px-4 py-2 rounded-full">+ Attr</Button>
+                    {attributes.length > 0 && (
+                        <Button onClick={removeLastAttribute} className="bg-red-500 text-white px-4 py-2 rounded-full">Remove Last Attribute</Button>
+                    )}
+                </div>
             </div>
-            <h1 className='font-bold'>Answer List</h1>
-            <button onClick={addAnswer} className='decoration-dashed underline'>
-                Add New Answer
-            </button>
-            <a
-                target='_blank'
-                rel='noopener noreferrer'
-                className='decoration-dashed underline table'
-                href={
-                    'data:application/json;charset=utf-8,' +
-                    encodeURIComponent(JSON.stringify({ answers }, null, 2))
-                }
-            >
-                Display as JSON
-            </a>
-            <div className='mt-2'>
-                {/* Display all answers (can't have an answer without any attributes) */}
-                {attributes.length > 0 &&
-                    Object.values(answers).map((answer, index) => (
-                        <div key={index} className='my-5 p-5 border-2 border-white-600'>
-                            {/* If an answer is currently being edited, set that answer component to EditableAnswer */}
-                            {ansEditingName === answer.name ? (
-                                <EditableAnswer
-                                    attributes={attributes}
-                                    answer={answer}
-                                    onSave={handleAnswerSave}
-                                />
-                            ) : (
-                                <Answer attributes={attributes} answer={answer} onEdit={handleAnswerEdit} />
-                            )}
-                        </div>
+
+            {/* Editable Values Section */}
+            <div className="flex flex-col items-center mt-6">
+                <div className="flex space-x-4">
+                    {values.map((value, index) => (
+                        <div key={index} className="flex items-center space-x-2">
+                        {editingValue === value ? (
+                            <Input
+                                defaultValue={value}
+                                onBlur={(e) => handleValueSave(value, e.target.value)}
+                                autoFocus
+                                className="w-20 px-2 py-1 border border-gray-300 rounded-lg"
+                            />
+                        ) : (
+                            <button
+                                className="bg-gray-200 px-4 py-2 rounded-full font-medium hover:bg-gray-300"
+                                onClick={() => handleValueSelect(value)}
+                            >
+                                {value}
+                            </button>
+                        )}
+                        <Button
+                            onClick={() => setEditingValue(value)}
+                            className="bg-gray-300 text-black px-3 py-1 rounded-md"
+                        >
+                            Edit
+                        </Button>
+                    </div>
+                    
                     ))}
+                </div>
+                <div className="flex space-x-2 mt-2">
+                    <Button onClick={addValue} className="bg-blue-300 text-black px-4 py-2 rounded-full">+ Value</Button>
+                    {values.length > 0 && (
+                        <Button onClick={removeLastValue} className="bg-blue-500 text-white px-4 py-2 rounded-full">Remove Last Value</Button>
+                    )}
+                </div>
             </div>
-            <h1 className='font-bold'>Game</h1>
-            {/* TESTING: Game here / TODO: have dedicated page for Games */}
-            <Game answers={answers} attributes={attributes} />
+
+            {/* Answer List */}
+            <div className="mt-6 w-3/4">
+                <h2 className="text-lg font-semibold text-center">Answers</h2>
+                <div className="border border-gray-300 rounded-lg overflow-hidden mt-3">
+                    <table className="w-full border-collapse">
+                        <thead>
+                            <tr className="bg-gray-100">
+                                <th className="border p-2">Name</th>
+                                {attributes.map((attribute, index) => (
+                                    <th key={index} className="border p-2">{attribute.name}</th>
+                                ))}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {Object.entries(answers).map(([answerKey, answer], index) => (
+                                <tr key={index} className="border">
+                                    {/* Editable Answer Name */}
+                                    <td
+                                        className={`border p-2 cursor-pointer ${
+                                            selectedAnswer === answerKey ? "bg-gray-300" : ""
+                                        }`}
+                                        onClick={() => setSelectedAnswer(answerKey)}
+                                    >
+                                        {answer.name}
+                                    </td>
+
+                                    {/* Populate Table with Assigned Attribute Values */}
+                                    {attributes.map((attribute, attrIndex) => (
+                                        <td key={attrIndex} className="border p-2 text-center">
+                                            {answer.attributes[attribute.name] || "-"}
+                                        </td>
+
+                                    ))}
+                                </tr>
+                            ))}
+                        </tbody>
+
+                    </table>
+                </div>
+                <Button onClick={addAnswer} className="w-full bg-gray-200 text-black px-4 py-2 rounded-lg mt-4">
+                    Add Possible Answer
+                </Button>
+            </div>
         </div>
     );
-
-    return content;
 }
