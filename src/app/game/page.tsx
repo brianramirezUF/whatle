@@ -21,23 +21,19 @@ export default function GamePage() {
 
 
 
-    const handleValueSelect = (attributeName: string, value: string) => {
-        if (!selectedAnswer) {
-            alert("Please select an answer first.");
-            return;
-        }
-    
+    const handleValueSelect = (answerKey: string, attributeName: string, value: string) => {
         setAnswers((prevAnswers) => ({
             ...prevAnswers,
-            [selectedAnswer]: {
-                ...prevAnswers[selectedAnswer],
+            [answerKey]: {
+                ...prevAnswers[answerKey],
                 attributes: {
-                    ...prevAnswers[selectedAnswer].attributes,
-                    [attributeName]: value, // Assign selected value
+                    ...prevAnswers[answerKey].attributes,
+                    [attributeName]: value, // Assign value directly
                 },
             },
         }));
     };
+    
     
     const handleValueEdit = (attributeName: string, oldValue: string, newValue: string) => {
         if (!newValue.trim()) return;
@@ -287,27 +283,28 @@ export default function GamePage() {
                                     </td>
 
                                     {/* Dropdowns for Attributes */}
-                                    {attributes.map((attribute, attrIndex) => (
-                                        <td key={attrIndex} className="border p-2 text-center">
-                                            <select
-                                                className="border px-2 py-1 rounded"
-                                                value={answer.attributes[attribute.name] || ""}
-                                                onChange={(e) => handleValueSelect(attribute.name, e.target.value)}
-                                            >
-                                                <option value="">Select</option>
-                                                {(attributeValues[attribute.name] || []).map((val, i) => (
-                                                    <option key={i} value={val}>{val}</option>
-                                                ))}
-                                            </select>
-                                            {/* Button to add new value */}
-                                            <button
-                                                onClick={() => addValue(attribute.name)}
-                                                className="ml-2 bg-blue-500 text-white px-2 py-1 rounded"
-                                            >
-                                                +
-                                            </button>
-                                        </td>
-                                    ))}
+                                        {attributes.map((attribute, attrIndex) => (
+                                            <td key={attrIndex} className="border p-2 text-center">
+                                                <select
+                                                    className="border px-2 py-1 rounded"
+                                                    value={answer.attributes[attribute.name] || ""}
+                                                    onChange={(e) => handleValueSelect(answerKey, attribute.name, e.target.value)}
+                                                >
+                                                    <option value="">Select</option>
+                                                    {(attributeValues[attribute.name] || []).map((val, i) => (
+                                                        <option key={i} value={val}>{val}</option>
+                                                    ))}
+                                                </select>
+                                                {/* Button to add new value */}
+                                                <button
+                                                    onClick={() => addValue(attribute.name)}
+                                                    className="ml-2 bg-blue-500 text-white px-2 py-1 rounded"
+                                                >
+                                                    +
+                                                </button>
+                                            </td>
+                                        ))}
+
                                 </tr>
                             ))}
                         </tbody>
