@@ -17,12 +17,13 @@ export default function GamePage() {
     const [editingValue, setEditingValue] = useState<string | null>(null);
     const [editingAnswer, setEditingAnswer] = useState<string | null>(null);
     const [currentlyEditing, setCurrentlyEditing] = useState<{ type: 'attribute' | 'value' | 'answer' | null; name: string | null }>({ type: null, name: null });
-    
+    const [attributeValues, setAttributeValues] = useState<Record<string, string[]>>({});
 
 
-    const handleValueSelect = (value: string) => {
-        if (!selectedAnswer || !selectedAttribute) {
-            alert("Please select an answer and an attribute first.");
+
+    const handleValueSelect = (attributeName: string, value: string) => {
+        if (!selectedAnswer) {
+            alert("Please select an answer first.");
             return;
         }
     
@@ -32,11 +33,36 @@ export default function GamePage() {
                 ...prevAnswers[selectedAnswer],
                 attributes: {
                     ...prevAnswers[selectedAnswer].attributes,
-                    [selectedAttribute]: value, // Assign selected value
+                    [attributeName]: value, // Assign selected value
                 },
             },
         }));
     };
+    
+    const handleValueEdit = (attributeName: string, oldValue: string, newValue: string) => {
+        if (!newValue.trim()) return;
+    
+        setAttributeValues((prevValues) => ({
+            ...prevValues,
+            [attributeName]: prevValues[attributeName].map((val) => 
+                val === oldValue ? newValue : val
+            ),
+        }));
+    
+        // Update any selected answers that use the edited value
+        setAnswers((prevAnswers) => {
+            const updatedAnswers = { ...prevAnswers };
+            Object.keys(updatedAnswers).forEach(answerKey => {
+                if (updatedAnswers[answerKey].attributes[attributeName] === oldValue) {
+                    updatedAnswers[answerKey].attributes[attributeName] = newValue;
+                }
+            });
+            return updatedAnswers;
+        });
+    
+        setEditingValue(null);
+    };
+    
     
     
 
@@ -130,10 +156,18 @@ export default function GamePage() {
     };
 
     // Add New Value
-    const addValue = () => {
-        const newValue = `Val${String.fromCharCode(65 + values.length)}`;
-        setValues([...values, newValue]);
+    const addValue = (attributeName: string) => {
+        const newValue = prompt(`Enter new value for ${attributeName}:`);
+        if (!newValue || !newValue.trim()) return;
+    
+        setAttributeValues((prevValues) => ({
+            ...prevValues,
+            [attributeName]: [...(prevValues[attributeName] || []), newValue],
+        }));
     };
+    
+    
+    
 
     // Remove Latest Value
     const removeLastValue = () => {
@@ -222,50 +256,12 @@ export default function GamePage() {
                 <div className="flex space-x-2 mt-2">
                     <Button onClick={addAttribute} className="bg-red-300 text-black px-4 py-2 rounded-full">+ Attr</Button>
                     {attributes.length > 0 && (
-                        <Button onClick={removeLastAttribute} className="bg-red-500 text-white px-4 py-2 rounded-full">Remove Last Attribute</Button>
+                        <Button onClick={removeLastAttribute} className="bg-red-500 text-white px-4 py-2 rounded-full">Remove</Button>
                     )}
                 </div>
             </div>
 
             {/* Editable Values Section */}
-            <div className="flex flex-col items-center mt-6">
-                <div className="flex space-x-4">
-                    {values.map((value, index) => (
-                        <div key={index} className="flex items-center space-x-2">
-                        {editingValue === value ? (
-                            <Input
-                                defaultValue={value}
-                                onBlur={(e) => handleValueSave(value, e.target.value)}
-                                autoFocus
-                                className="w-20 px-2 py-1 border border-gray-300 rounded-lg"
-                            />
-                        ) : (
-                            <button
-                                className="bg-gray-200 px-4 py-2 rounded-full font-medium hover:bg-gray-300"
-                                onClick={() => handleValueSelect(value)}
-                            >
-                                {value}
-                            </button>
-                        )}
-                        <Button
-                            onClick={() => setEditingValue(value)}
-                            className="bg-gray-300 text-black px-3 py-1 rounded-md"
-                        >
-                            Edit
-                        </Button>
-                    </div>
-                    
-                    ))}
-                </div>
-                <div className="flex space-x-2 mt-2">
-                    <Button onClick={addValue} className="bg-blue-300 text-black px-4 py-2 rounded-full">+ Value</Button>
-                    {values.length > 0 && (
-                        <Button onClick={removeLastValue} className="bg-blue-500 text-white px-4 py-2 rounded-full">Remove Last Value</Button>
-                    )}
-                </div>
-            </div>
-
-            {/* Answer List */}
             <div className="mt-6 w-3/4">
                 <h2 className="text-lg font-semibold text-center">Answers</h2>
                 <div className="border border-gray-300 rounded-lg overflow-hidden mt-3">
@@ -281,7 +277,6 @@ export default function GamePage() {
                         <tbody>
                             {Object.entries(answers).map(([answerKey, answer], index) => (
                                 <tr key={index} className="border">
-                                    {/* Editable Answer Name */}
                                     <td
                                         className={`border p-2 cursor-pointer ${
                                             selectedAnswer === answerKey ? "bg-gray-300" : ""
@@ -291,23 +286,40 @@ export default function GamePage() {
                                         {answer.name}
                                     </td>
 
-                                    {/* Populate Table with Assigned Attribute Values */}
+                                    {/* Dropdowns for Attributes */}
                                     {attributes.map((attribute, attrIndex) => (
                                         <td key={attrIndex} className="border p-2 text-center">
-                                            {answer.attributes[attribute.name] || "-"}
+                                            <select
+                                                className="border px-2 py-1 rounded"
+                                                value={answer.attributes[attribute.name] || ""}
+                                                onChange={(e) => handleValueSelect(attribute.name, e.target.value)}
+                                            >
+                                                <option value="">Select</option>
+                                                {(attributeValues[attribute.name] || []).map((val, i) => (
+                                                    <option key={i} value={val}>{val}</option>
+                                                ))}
+                                            </select>
+                                            {/* Button to add new value */}
+                                            <button
+                                                onClick={() => addValue(attribute.name)}
+                                                className="ml-2 bg-blue-500 text-white px-2 py-1 rounded"
+                                            >
+                                                +
+                                            </button>
                                         </td>
-
                                     ))}
                                 </tr>
                             ))}
                         </tbody>
-
                     </table>
                 </div>
                 <Button onClick={addAnswer} className="w-full bg-gray-200 text-black px-4 py-2 rounded-lg mt-4">
                     Add Possible Answer
                 </Button>
             </div>
+
+
+            
         </div>
     );
 }
