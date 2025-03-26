@@ -13,8 +13,8 @@
 }
 
 .card {
-    width: 320;
-    height: 160;
+    background-size: cover;
+    background-position: center;
 }
 
 .title {
@@ -30,4 +30,13 @@
 
 .button {
     background-color: grey;
+    color: white;
+    border-radius: 20px;
+    font-size: 20;
+}
+
+.text {
+    background-color: white;
+    border-radius: 25px;
+    padding: 10px;
 }
