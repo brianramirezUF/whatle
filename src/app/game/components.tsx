@@ -9,6 +9,7 @@ interface EditableAnswerProps {
     onSave: (name: string, values: { attributes: Record<string, string> }) => void;
 }
 
+
 // Component enabled when an answer is being edited (pen button on 'Answer' component clicked)
 const EditableAnswer: React.FC<EditableAnswerProps> = ({ attributes, answer, onSave }) => {
     // Update attribute values
