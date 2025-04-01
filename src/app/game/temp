@@ -229,61 +229,33 @@ export default function GamePage() {
           </tr>
         </thead>
         <tbody>
-            {Object.entries(answers).map(([answerKey, answer], rowIndex) => (
-                <tr key={rowIndex} className="hover:bg-gray-50">
-                <td className="border px-4 py-2 font-medium">{answer.name}</td>
-
-                {attributes.map((attr, attrIndex) => (
-                    <td key={attrIndex} className="border px-2 py-1 text-center">
-                    {ansEditingName === answer.name ? (
-                        <input
-                        type="text"
-                        className="w-full px-2 py-1 border border-gray-300 rounded"
-                        value={answer.attributes[attr.name] || ""}
-                        onChange={(e) =>
-                            setAnswers((prev) => ({
-                            ...prev,
-                            [answerKey]: {
-                                ...prev[answerKey],
-                                attributes: {
-                                ...prev[answerKey].attributes,
-                                [attr.name]: e.target.value,
-                                },
-                            },
-                            }))
-                        }
-                        />
-                    ) : (
-                        <span>{answer.attributes[attr.name]}</span>
-                    )}
-                    </td>
-                ))}
-
-                <td className="border px-2 py-1 text-center">
-                    {ansEditingName === answer.name ? (
-                    <Button
-                        onClick={() =>
-                        handleAnswerSave(answer.name, { attributes: answer.attributes })
-                        }
-                        size="sm"
-                        className="bg-green-500 text-white"
-                    >
-                        Save
-                    </Button>
-                    ) : (
-                    <Button
-                        onClick={() => handleAnswerEdit(answer.name)}
-                        size="sm"
-                        className="bg-blue-500 text-white"
-                    >
-                        Edit
-                    </Button>
-                    )}
-                </td>
-                </tr>
-            ))}
-            </tbody>
-
+          {Object.entries(answers).map(([answerKey, answer], rowIndex) => (
+            <tr key={rowIndex} className="hover:bg-gray-50">
+              <td className="border px-4 py-2 font-medium">{answer.name}</td>
+              {attributes.map((attr, attrIndex) => (
+                <td key={attrIndex} className="border px-2 py-1 text-center">
+                <input
+                  type="text"
+                  className="w-full px-2 py-1 border border-gray-300 rounded"
+                  value={answer.attributes[attr.name] || ""}
+                  onChange={(e) =>
+                    setAnswers((prev) => ({
+                      ...prev,
+                      [answerKey]: {
+                        ...prev[answerKey],
+                        attributes: {
+                          ...prev[answerKey].attributes,
+                          [attr.name]: e.target.value,
+                        },
+                      },
+                    }))
+                  }
+                />
+              </td>              
+              ))}
+            </tr>
+          ))}
+        </tbody>
       </table>
     </div>
 
