@@ -1,34 +1,28 @@
 'use client'
 import { useState } from "react";
 import { RedirectButton } from "./Buttons";
+import { auth } from "@/config/firebase";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { useRouter } from "next/navigation";
 
-function LoginField(){
+function LoginField() {
     const [email, setEmail] = useState("");
-    const [password, setPassword] = useState(""); 
+    const [password, setPassword] = useState("");
+    const [error, setError] = useState("");
+    const router = useRouter();
 
     const handleLogin = async (email: string, password: string) => {
-        try{
-            const response = await fetch("/api/auth/login", {
-                method: "POST",
-                headers: { 
-                    "Content-Type": "application/json" 
-                },
-                body: JSON.stringify({ email, password }),
-            });
-    
-            const data = await response.json();
-
-            if (!response.ok){
-                throw new Error(data.error);
-            } 
-            
-            console.log("Login Success", data)
-        } catch (error) {
+        setError("");
+        try {
+            await signInWithEmailAndPassword(auth, email, password);
+            router.push('/');
+        } catch (error: any) {
+            setError(error.message);
             console.error("Login Error", error);
         }
     }
 
-    return(
+    return (
         <>
             <div>
                 <input 
@@ -46,6 +40,7 @@ function LoginField(){
                     onChange={(e) => setPassword(e.target.value)} 
                 />
             </div>
+            {error && <p className="text-red-500">{error}</p>}
             <button onClick={() => handleLogin(email, password)}>Login</button>
             <br></br>
             <RedirectButton url="/signup" text="Don't have an account? Signup here"></RedirectButton>
