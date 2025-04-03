@@ -1,7 +1,7 @@
 'use client'
 import { Icons } from '@/components/icons'
 import { useState } from 'react';
-import { AttributeType, AnswerType } from '../create-game/attributes';
+import { AttributeType, AnswerType } from '../create/attributes';
 import { Game, GameProps } from './components';
 import { JsonParser } from '@/components/JsonParser';
 import { Card, CardContent } from "@/components/ui/card";
