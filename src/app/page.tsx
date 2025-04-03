@@ -8,7 +8,8 @@ export default function Home() {
       <NavBar></NavBar>
       <ul>
         <li className='underline table'>Testing Buttons:</li>
-        <li className='rounded mb-1 table bg-gray-200'><RedirectButton url="/create-game" text="create" /></li>
+        <li className='rounded mb-1 table bg-gray-200'><RedirectButton url="/upload" text="upload" /></li>
+        <li className='rounded mb-1 table bg-gray-200'><RedirectButton url="/create" text="create" /></li>
         <li className='rounded mb-1 table bg-gray-200'><RedirectButton url="/play" text="play" /></li>
       </ul>
     </>
