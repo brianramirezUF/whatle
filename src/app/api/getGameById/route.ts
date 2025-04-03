@@ -3,6 +3,9 @@ import { db } from "@/config/firebase";
 import { doc, getDoc } from 'firebase/firestore';
 
 // GET /api/getGameById?id=<gameId>
+// fb postman test:
+// http://localhost:3000/api/getGameById?id=hcCnbAKvmGRKwOep94Am
+
 export async function GET(req: Request)  {
     const { searchParams } = new URL(req.url);
     const gameId = searchParams.get("id");
