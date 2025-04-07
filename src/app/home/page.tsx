@@ -73,7 +73,7 @@ export default function Home(){
         <h1 className="subtitle text-center font-medium">
           Create Your Own Game:
         </h1>
-        <RedirectButton url="/game" text="Create" className="button  w-[125px] h-[40px]"/>
+        <RedirectButton url="/create" text="Create" className="button  w-[125px] h-[40px]"/>
       </div>
   )
 }
