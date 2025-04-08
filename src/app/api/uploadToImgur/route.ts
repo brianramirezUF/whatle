@@ -9,11 +9,16 @@ export const config = {
 export async function POST(req: Request){
     try {
         const body = await req.formData();
+        const { searchParams } = new URL(req.url);
+        const imgurAccessToken = searchParams.get("imgurAccessToken");
+        const imgurRefreshToken = searchParams.get("imgurRefreshToken");
+
+        console.log(imgurAccessToken, imgurRefreshToken)
 
         const response = await fetch('https://api.imgur.com/3/image', {
             method: 'POST',
             headers: {
-                Authorization: `Client-ID ${process.env.imgur_clientId}`
+                Authorization: `Client-ID ${imgurAccessToken}`
             },
             body: body
         });

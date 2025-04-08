@@ -1,28 +1,40 @@
 'use client'
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { RedirectButton } from "./Buttons";
-import { auth } from "@/config/firebase";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { useRouter } from "next/navigation";
 
-function LoginField() {
+function SignupField(){
     const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [error, setError] = useState("");
-    const router = useRouter();
+    const [password, setPassword] = useState(""); 
 
-    const handleLogin = async (email: string, password: string) => {
-        setError("");
-        try {
-            await signInWithEmailAndPassword(auth, email, password);
-            router.push('/');
+    const handleSignUp = async (email: string, password: string) => {
+        try{
+            const response = await fetch("/api/auth/signup", {
+                method: "POST",
+                headers: { 
+                    "Content-Type": "application/json" 
+                },
+                body: JSON.stringify({ email, password }),
+            });
+    
+            const data = await response.json();
+
+            if (!response.ok){
+                throw new Error(data.error);
+            } 
+
+            console.log("Signup Success", data);
+
+            console.log("Attempting imgur redirect...");
+
+            if (data.imgurAuthUrl) {
+                window.location.href = data.imgurAuthUrl;
+            }
         } catch (error: any) {
-            setError(error.message);
-            console.error("Login Error", error);
+            console.error("Signup Error", error);
         }
     }
 
-    return (
+    return(
         <>
             <div>
                 <input 
@@ -40,10 +52,9 @@ function LoginField() {
                     onChange={(e) => setPassword(e.target.value)} 
                 />
             </div>
-            {error && <p className="text-red-500">{error}</p>}
-            <button onClick={() => handleLogin(email, password)}>Login</button>
+            <button onClick={() => handleSignUp(email, password)}>Signup</button>
             <br></br>
-            <RedirectButton url="/signup" text="Don't have an account? Signup here"></RedirectButton>
+            <RedirectButton url="/login" text="Already have an account? Login here"></RedirectButton>
         </>
     )
 }
@@ -67,4 +78,4 @@ function HandleCallback () {
     )
 }
 
-export { LoginField, HandleCallback }
+export { SignupField, HandleCallback }

@@ -1,6 +1,6 @@
-'use client';
-
-import { useState, useRef } from "react";
+'use client'
+import { useAuth } from "@/contexts/AuthContext";
+import { useState, useRef, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2, Upload, Trash2 } from "lucide-react";
@@ -8,10 +8,9 @@ import { cn } from "@/lib/utils";
 
 function ImageDrop() {
     const [image, setImage] = useState<string | null>(null);
+    const { imgurTokens } = useAuth();
     const [uploading, setUploading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-
-    // Use useRef instead of useState
     const fileInputRef = useRef<HTMLInputElement | null>(null);
 
     const upload = async (file: File) => {
@@ -21,10 +20,14 @@ function ImageDrop() {
 
             const formData = new FormData();
             formData.append("image", file);
+            if (!imgurTokens) {
+                throw new Error("Missing imgur tokens")
+            }
+            const url = `/api/uploadToImgur?imgurAccessToken=${encodeURIComponent(imgurTokens.accessToken)}&imgurRefreshToken=${encodeURIComponent(imgurTokens.refreshToken)}`;
 
-            const response = await fetch("/api/uploadToImgur", {
+            const response = await fetch(url, {
                 method: "POST",
-                body: formData
+                body: formData,
             });
 
             if (!response.ok) throw new Error("Upload failed");

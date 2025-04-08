@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { JsonParser } from '@/components/JsonParser';
 import { GameProps } from '../play/components';
+import ProtectedRoute from '@/components/ProtectedRoute'
 
 export default function CreateGame() {
     const [attributes, setAttributes] = useState<AttributeType[]>([]);
@@ -292,5 +293,5 @@ export default function CreateGame() {
         </div>
     );
 
-    return content;
+    return <ProtectedRoute> {content} </ProtectedRoute>;
 }
