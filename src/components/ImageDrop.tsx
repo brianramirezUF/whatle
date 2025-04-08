@@ -1,17 +1,23 @@
 'use client'
+import { useAuth } from "@/contexts/AuthContext";
 import { useState, useEffect } from "react";
 
 function ImageDrop(){
     const [image, setImage] = useState<string | null>(null);
+    const { imgurTokens } = useAuth();
 
     const upload = async (file: File) => {
         try{
             const formData = new FormData();
             formData.append("image", file);
+            if (!imgurTokens) {
+                throw new Error("Missing imgur tokens")
+            }
+            const url = `/api/uploadToImgur?imgurAccessToken=${encodeURIComponent(imgurTokens.accessToken)}&imgurRefreshToken=${encodeURIComponent(imgurTokens.refreshToken)}`;
 
-            const response = await fetch("/api/uploadToImgur", {
+            const response = await fetch(url, {
                 method: "POST",
-                body: formData
+                body: formData,
             });
 
             if (!response.ok) {

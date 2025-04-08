@@ -7,8 +7,8 @@ import { doc, getDoc } from 'firebase/firestore';
 interface AuthContextType {
   currentUser: User | null;
   imgurTokens: {
-    accessToken: string | null;
-    refreshToken: string | null;
+    accessToken: string;
+    refreshToken: string;
   } | null;
   loading: boolean;
 }
@@ -24,8 +24,8 @@ export const useAuth = () => useContext(AuthContext);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [imgurTokens, setImgurTokens] = useState<{
-    accessToken: string | null;
-    refreshToken: string | null;
+    accessToken: string;
+    refreshToken: string;
   } | null>(null);
   const [loading, setLoading] = useState(true);
 
