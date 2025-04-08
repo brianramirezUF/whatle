@@ -1,6 +1,6 @@
 import { Icons } from '@/components/icons'
 import { useState } from 'react';
-import { Guess, AttributeType, AnswerType, comparisons } from '../create/attributes';
+import { Guess, AttributeType, AnswerType, comparisons } from '../create/[gameId]/attributes';
 import { Card, CardContent } from "@/components/ui/card";
 import React from 'react';
 import "./styles.css";
