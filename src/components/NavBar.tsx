@@ -20,16 +20,16 @@ import {
   NavigationMenuTrigger,
   NavigationMenuViewport,
   navigationMenuTriggerStyle
-} 
-from "@/components/ui/navigation-menu"
+}
+  from "@/components/ui/navigation-menu"
 
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} 
-from "@/components/ui/dropdown-menu";
+}
+  from "@/components/ui/dropdown-menu";
 import React from "react";
 
 export default function NavBar() {
@@ -48,7 +48,7 @@ export default function NavBar() {
     <nav className="flex items-center justify-between p-3 bg-white shadow-md">
       <div>
         <h1 className="text-lg font-bold">
-          {<Logo/>} 
+          {<Logo />}
         </h1>
       </div>
 
@@ -56,8 +56,8 @@ export default function NavBar() {
       <div className="flex items-center space-x-6 ">
         <Button variant="link" className="text-sm select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
 
-          <Link href="/popular" passHref> 
-              Popular
+          <Link href="/popular" passHref>
+            Popular
           </Link>
         </Button>
         <CategoriesDropdown></CategoriesDropdown>
@@ -81,13 +81,13 @@ export default function NavBar() {
       {/* sign up, login buttons */}
       <div className="flex items-center space-x-4">
         <Button variant="default" className="text-sm">
-        <Link href="/signup" passHref> 
-              Sign Up
+          <Link href="/signup" passHref>
+            Sign Up
           </Link>
         </Button>
         <Button variant="outline" className="text-sm">
-        <Link href="/login" passHref> 
-              Login
+          <Link href="/login" passHref>
+            Login
           </Link>
         </Button>
       </div>
@@ -108,34 +108,33 @@ export function CategoriesDropdown() {
         >
           Categories
           <ChevronDown
-            className={`ml-1 h-4 w-4 transition-transform duration-200 ${
-              isOpen ? "rotate-180" : "rotate-0"
-            }`}
+            className={`ml-1 h-4 w-4 transition-transform duration-200 ${isOpen ? "rotate-180" : "rotate-0"
+              }`}
           />
         </Button>
       </DropdownMenuTrigger>
-          <DropdownMenuContent className="">
-            <DropdownMenuItem>
-              <Link href="/games" passHref> 
-                Games
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-            <Link href="/tvmovies" passHref> 
-                TV/Movies
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-            <Link href="/irl" passHref> 
-                IRL
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-            <Link href="/other" passHref> 
-                Other
-              </Link>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
+      <DropdownMenuContent className="">
+        <DropdownMenuItem>
+          <Link href="/games" passHref>
+            Games
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem>
+          <Link href="/tvmovies" passHref>
+            TV/Movies
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem>
+          <Link href="/irl" passHref>
+            IRL
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem>
+          <Link href="/other" passHref>
+            Other
+          </Link>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
     </DropdownMenu>
   );
 }
