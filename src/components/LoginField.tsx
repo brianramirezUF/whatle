@@ -1,5 +1,5 @@
 'use client'
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { RedirectButton } from "./Buttons";
 import { auth } from "@/config/firebase";
 import { signInWithEmailAndPassword } from "firebase/auth";
@@ -48,4 +48,23 @@ function LoginField() {
     )
 }
 
-export { LoginField }
+function HandleCallback () {
+
+    useEffect(() => {
+        const fragment = new URLSearchParams(window.location.hash.substring(1));
+        const refreshToken = fragment.get("refresh_token");
+        const user = new URLSearchParams(window.location.search).get("state");
+
+        if (refreshToken && user) {
+            window.location.href = `/api/auth/imgur-callback?access_token=${refreshToken}&state=${user}`;
+        } else {
+            console.error("Missing access token or user state");
+        }
+    }, []);
+
+    return (
+        <></>
+    )
+}
+
+export { LoginField, HandleCallback }

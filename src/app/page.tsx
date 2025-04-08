@@ -2,6 +2,8 @@
 import { RedirectButton } from '@/components/Buttons'
 import { useAuth } from '@/contexts/AuthContext';
 import { useEffect } from 'react';
+import React from 'react';
+import { NavBar } from '@/components/NavBar'
 
 export default function Home() {
 
@@ -14,7 +16,13 @@ export default function Home() {
 
   return (
     <>
-      <RedirectButton url="/create" text="create"></RedirectButton>
+      <NavBar></NavBar>
+      <ul>
+        <li className='underline table'>Testing Buttons:</li>
+        <li className='rounded mb-1 table bg-gray-200'><RedirectButton url="/upload" text="upload" /></li>
+        <li className='rounded mb-1 table bg-gray-200'><RedirectButton url="/create" text="create" /></li>
+        <li className='rounded mb-1 table bg-gray-200'><RedirectButton url="/play" text="play" /></li>
+      </ul>
     </>
   );
 }
