@@ -1,8 +1,19 @@
+"use client"
 import { RedirectButton } from '@/components/Buttons'
+import { useAuth } from '@/contexts/AuthContext';
+import { useEffect } from 'react';
 import React from 'react';
 import { NavBar } from '@/components/NavBar'
 
 export default function Home() {
+
+  const authProvider = useAuth();
+
+  useEffect(() => {
+    console.log('AuthContext contents:', authProvider)
+  }, []);
+
+
   return (
     <>
       <NavBar></NavBar>
