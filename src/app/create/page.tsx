@@ -1,61 +1,100 @@
 'use client'
 import { Card, CardContent } from '@/components/ui/card'
+import {
+    Carousel,
+    CarouselContent,
+    CarouselItem,
+    CarouselNext,
+    CarouselPrevious,
+} from '@/components/ui/carousel'
+import { Button } from '@/components/ui/button'
+import { RedirectButton } from '@/components/Buttons'
 import './styles.css';
-
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 
 interface Game {
     id: string,
-    userId: string,
+    uid: string,
     name: string,
     icon: string,
     plays: string
 };
 
 export default function GameList() {
-  const [games, setGames] = useState([]);
-  // TODO: add UseContext
-  const [userId, setUserId] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+    const [games, setGames] = useState([]);
+    // TODO: add UseContext
+    const [uid, setUID] = useState('');
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const fetchGames = async () => {
-      try {
-        // const response = await fetch(`https://localhost:3000/api/getGamesByUserId?userId=${userId}`);
-        const response = await fetch(`https://localhost:3000/api/getGamesByUserId?uid=blah`);
-        
-        if (!response.ok) {
-          throw new Error('Failed to fetch games');
-        }
-        const data = await response.json();
-        console.log(data);
-        setGames(data);
-      } catch (error: any) {
-        setError(error.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchGames();
-  }, [userId]);
+    useEffect(() => {
+        const fetchGames = async () => {
+            try {
+                // TODO: uncomment when added UseContext for uid
+                // const response = await fetch(`http://localhost:3000/api/getGamesByUserId?uid=${uid}`);
+                const response = await fetch(`http://localhost:3000/api/getGamesByUserId?uid=blah`);
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
+                if (!response.ok) {
+                    throw new Error('Failed to fetch games');
+                }
+                const data = await response.json();
+                console.log(data);
+                setGames(data);
+            } catch (error: any) {
+                setError(error.message);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchGames();
+    }, [uid]);
 
-  if (error) {
-    return <div>Error: {error}</div>;
-  }
+    if (loading) {
+        return <div>Loading...</div>;
+    }
 
-  return (
-    <div>
-      <h1>Game List</h1>
-      <ul>
-        {games.map((game: Game, index) => (
-          <li key={index}>{game.name}</li>
-        ))}
-      </ul>
-    </div>
-  );
+    if (error) {
+        return <div>Error: {error}</div>;
+    }
+
+    const gamesList = games.length ? (
+        <Carousel>
+            <CarouselContent className='pb-4'>
+                {games.map((game: Game, index) => (
+                    <CarouselItem key={index} className={games.length < 3 ? '' : 'basis-1/3'}>
+                        <div className='p-1'>
+                            <Link href={`create/${game.id}`}>
+                                <Card
+                                    className='card'
+                                    style={game.icon ? {
+                                        backgroundImage: `url(${game.icon})`,
+                                    } : {}}
+                                >
+                                    <CardContent className='card-content flex aspect-square items-center justify-center p-6'>
+                                        <span className='text-3xl font-semibold text'>{game.name}</span>
+                                    </CardContent>
+                                </Card>
+                            </Link>
+                        </div>
+                    </CarouselItem>
+                ))}
+            </CarouselContent>
+            <CarouselPrevious />
+            <CarouselNext />
+        </Carousel>
+    ) : 'No Games';
+
+    return (
+        <div className='container'>
+            <h1 className='title text-center font-medium'>
+                Edit Your Existing Games:
+            </h1>
+            {gamesList}
+            <h1 className='subtitle text-center font-medium'>
+                Create A New Game:
+            </h1>
+            <RedirectButton url='/create' text='Create' className='button  w-[125px] h-[40px]' />
+        </div>
+    );
 };
