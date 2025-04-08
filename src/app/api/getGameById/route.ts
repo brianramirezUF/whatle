@@ -23,7 +23,7 @@ export async function GET(req: Request)  {
         }
 
         const gameData = gameSnapshot.data();
-        return NextResponse.json({ id: gameSnapshot.id, ...gameData }, { status: 200 });
+        return NextResponse.json({ id: gameSnapshot.id, name: gameData.name, icon: gameData.icon }, { status: 200 });
     } 
     
     catch (error: any) {
