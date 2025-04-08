@@ -18,7 +18,7 @@ export async function GET(req: Request) {
         const games = querySnapshot.docs.map((gameDoc) => {
             const data = gameDoc.data();
             return {
-                id: data.id,
+                id: gameDoc.id,
                 uid: data.uid,
                 name: data.name,
                 icon: data.icon,
