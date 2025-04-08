@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card"
 import {
   Carousel,
@@ -6,7 +9,6 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel"
-import { Button } from "@/components/ui/button"
 import { RedirectButton } from '@/components/Buttons'
 import "./styles.css";
 
@@ -17,31 +19,30 @@ type Game = {
 };
 
 export default function Home(){
-  const Games = [
-    {
-      id: "4",
-      name: "MLBdle",
-      icon: "https://i.imgur.com/B7wb5i6_d.webp?maxwidth=520&shape=thumb&fidelity=high",
-    },
-    {
-      id: "2",
-      name: "Pokedle",
-      icon: "https://i.imgur.com/5ValAxb.jpeg",
-    },
-    {
-      id: "3",
-      name: "NBAdle",
-      icon: "https://i.imgur.com/PV54ZYq_d.webp?maxwidth=520&shape=thumb&fidelity=high",
-    },
-    {
-      id: "1",
-      name: "Marvelde",
-      icon: "https://i.imgur.com/YZwdjey.jpeg",
-    },
-  ];
-  
+  const [popularGames, setPopularGames] = useState<Game[]>([]);
+
   // call endpoint to receive featured games
-  const featuredGames = Games;
+  useEffect(() => {
+    fetch("/api/getPopularGames")
+      .then((res) => res.json())
+      .then((games) => {
+        setPopularGames(games);
+        console.log("Fetched popular games:", games);
+      })
+      .catch((err) => {
+        console.error("Failed to fetch popular games:", err);
+      });
+  }, []);
+  
+  if (popularGames.length == 0) {
+    return (
+      <div className="container">
+        <h1 className="title text-center font-medium">
+            Loading Games...
+        </h1>
+      </div>
+    )
+  }
 
   return(
       <div className="container">
@@ -50,7 +51,7 @@ export default function Home(){
         </h1>
         <Carousel>
           <CarouselContent className="pb-4">
-          {featuredGames.map((game, index) => (
+          {popularGames.map((game, index) => (
             <CarouselItem key={index} className="basis-1/3">
               <div className="p-1">
                 <Card

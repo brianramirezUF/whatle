@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import {
   Table,
   TableBody,
@@ -18,48 +21,40 @@ type GameHistory = {
 };
 
 export default function History(){
-  const Users = {
-    history: {
-      "4": {
-        id: 4,
-        name: "MLBdle",
-        numPlays: 1,
-        numWins: 2,
-        fastestTime: 106
-      },
-      "2": {
-        id: 2,
-        name: "Pokedle",
-        numPlays: 10,
-        numWins: 1,
-        fastestTime: 192
-      },
-      "3": {
-        id: 3,
-        name: "NBAdle",
-        numPlays: 3,
-        numWins: 2,
-        fastestTime: 106
-      },
-      "1": {
-        id: 1,
-        name: "Marvelde",
-        numPlays: 20,
-        numWins: 13,
-        fastestTime: 53
-      },
-    }
+  const [userHistory, setUserHistory] = useState<GameHistory[]>([]);
+  
+  // call endpoint to receive user history
+  useEffect(() => {
+    fetch("/api/getUserHistoryById?id=lKWKGCmoUWM5ggLm1pv90ltIlFU2")
+      .then((res) => res.json())
+      .then((history) => {
+        setUserHistory(history);
+        console.log("Fetched user history:", history);
+      })
+      .catch((err) => {
+        console.error("Failed to fetch user history:", err);
+      });
+  }, []);
+
+  if (userHistory.length == 0) {
+    return (
+      <div className="container">
+        <h1 className="title text-center font-medium">
+          No games played yet.
+        </h1>
+      </div>
+    )
   }
   
-  // call endpoint to receive current user's history
-  const history: { [key: string]: GameHistory } = Users.history;
-
   // iterate through map of history to determine top 3 played games
   let top1: GameHistory | undefined;
   let top2: GameHistory | undefined;
   let top3: GameHistory | undefined;
 
-  Object.entries(history).forEach(([key, game]) => {
+  Object.entries(userHistory).forEach(([key, game]) => {
+    // check if game is undefined
+    if (!game) return;
+
     // check if game has been played the most
     if (top1 == undefined) {
       top1 = game;
@@ -82,6 +77,7 @@ export default function History(){
   });
 
   const topGames: (GameHistory | undefined)[] = [top1, top2, top3].filter(Boolean);
+  console.log(topGames);
 
   return(
       <div className="container">
