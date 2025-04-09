@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/carousel"
 import { RedirectButton } from '@/components/Buttons'
 import "./styles.css";
+import Link from "next/link";
 
 type Game = {
   id: string;
@@ -53,18 +54,20 @@ export default function Home(){
           <CarouselContent className="pb-4">
           {popularGames.map((game, index) => (
             <CarouselItem key={index} className="basis-1/3">
-              <div className="p-1">
-                <Card
-                  className="card"
-                  style={game.icon ? {
-                    backgroundImage: `url(${game.icon})`,
-                  } : {}}
-                >
-                  <CardContent className="card-content flex aspect-square items-center justify-center p-6">
-                    <span className="text-3xl font-semibold text">{game.name}</span>
-                  </CardContent>
-                </Card>
-              </div>
+              <Link href={{ pathname: "/play", query: { id: game.id } }}>
+                <div className="p-1">
+                  <Card
+                    className="card"
+                    style={game.icon ? {
+                      backgroundImage: `url(${game.icon})`,
+                    } : {}}
+                  >
+                    <CardContent className="card-content flex aspect-square items-center justify-center p-6">
+                      <span className="text-3xl font-semibold text">{game.name}</span>
+                    </CardContent>
+                  </Card>
+                </div>
+              </Link>
             </CarouselItem>
           ))}
           </CarouselContent>
