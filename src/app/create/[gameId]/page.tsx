@@ -333,6 +333,7 @@ export default function CreateGame() {
                 </div>
             )}
             <a
+                download = {gameName + '.json'}
                 target='_blank'
                 rel='noopener noreferrer'
                 className='decoration-dashed underline table'
