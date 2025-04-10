@@ -4,6 +4,9 @@ import { Guess, AttributeType, AnswerType, comparisons, GuessStatus } from '../c
 import { Card, CardContent } from "@/components/ui/card";
 import React from 'react';
 import "./styles.css";
+import { getAuth } from "firebase/auth";
+
+
 
 const Games = [
   {
@@ -85,11 +88,61 @@ const Game: React.FC<GameProps> = ({ answers, attributes, gameName }) => {
   };
 
   // Update guesses array (each guess is an index of an answer from the 'answers' array)
-  const makeGuess = (guess: string) => {
-    if (!guess) return;
-
-    setGuesses([...guesses, guess]);
-  }
+  const makeGuess = async (guess: string) => {
+    if (!guess || !correctAnswer) return;
+  
+    setGuesses((prev) => [...prev, guess]);
+  
+    const isWin = guess === correctAnswer.name;
+    won = isWin;
+  
+    const auth = getAuth();
+    const currentUser = auth.currentUser;
+  
+    if (!currentUser) {
+      console.error("❌ No user is logged in.");
+      alert("❌ You must be logged in to track progress.");
+      return;
+    }
+  
+    const userId = currentUser.uid;
+    const gameId = "4"; // Or whatever game you're testing
+    const timeTaken = Math.floor(Math.random() * 100) + 1;
+  
+    const payload = {
+      userId,
+      gameId,
+      gameName,
+      won: isWin,
+      timeTaken,
+    };
+  
+  
+    try {
+      const res = await fetch("/api/updateUserHistory", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+  
+      const data = await res.json();
+  
+      if (!res.ok) {
+        console.error("❌ API Error Response:", data);
+        alert("❌ Failed to update Firebase: " + (data.error || "Unknown error"));
+        return;
+      }
+  
+    } catch (err: any) {
+      console.error("❌ Network/Code Error:", err.message);
+      alert("❌ Error updating Firebase: " + err.message);
+    }
+  };
+  
+  
+  
 
   const renderHeaders = () => (
     <>

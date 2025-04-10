@@ -11,6 +11,7 @@ const firebaseConfig = {
     appId: process.env.NEXT_PUBLIC_firebase_appId,
     measurementId: process.env.NEXT_PUBLIC_firebase_measurementId,
   };
+   
 
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 export const db = getFirestore(app);
