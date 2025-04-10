@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { AttributeType, AnswerType } from './attributes';
 import { EditableAnswer, Answer, EditableAttribute, Attribute } from './components';
 import { Button } from "@/components/ui/button";
@@ -7,18 +7,68 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { JsonParser } from '@/components/JsonParser';
 import { GameProps } from '../../play/components';
-import { useSearchParams } from 'next/navigation'
+import { useParams } from 'next/navigation'
 
 export default function CreateGame() {
-    // Routing
-    const searchParams = useSearchParams();
-    const gameId = searchParams.get('gameId');
-
     const [attributes, setAttributes] = useState<AttributeType[]>([]);
     const [attrEditingName, setAttrEditingName] = useState<string | null>(null);
     const [answers, setAnswers] = useState<Record<string, AnswerType>>({});
     const [ansEditingName, setAnsEditingName] = useState<string | null>(null);
     const [gameName, setGameName] = useState<string>("Game Name");
+
+    // Routing
+    const params = useParams();
+    const gameId = params.gameId;
+
+    useEffect(() => {
+        const loadGame = async () => {
+            try {
+                const response = await fetch(`http://localhost:3000/api/getGameById?id=${gameId}`);
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch game');
+                }
+
+                const data = await response.json();
+                if (data.gameName) {
+                    setGameName(data?.gameName);
+                }
+
+                if (data.attributes) {
+                    setAttributes(data?.attributes);
+                }
+
+                if (data.answers) {
+                    setAnswers(data?.answers);
+                }
+
+            }
+            catch (err) {
+                console.log('Error:', err);
+            }
+        };
+
+        loadGame();
+    }, [gameId]);
+
+    const uploadGame = async () => {
+        try {
+            const response = await fetch(`http://localhost:3000/api/uploadGame`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'uid': '4hpuyDafThVkcNydHboynbr4Fz42' // TODO: replace with uid from current logged in user
+                },
+                body: JSON.stringify({ name: gameName, answers, attributes }, null, 2)
+            });
+
+            const result = await response.json();
+            console.log('Server Response:', result);
+        }
+        catch (err) {
+            console.log('Error:', err);
+        }
+    };
 
     const handleJSON = (data: GameProps) => {
         setAnswers(data.answers);
@@ -293,7 +343,13 @@ export default function CreateGame() {
             >
                 Get Game as JSON
             </a>
-            <JsonParser onParse={handleJSON}/>
+            <JsonParser onParse={handleJSON} />
+            <Button
+                onClick={uploadGame}
+                className="bg-green-300 text-black px-4 py-2 rounded-full"
+            >
+                Upload Game
+            </Button>
         </div>
     );
 
