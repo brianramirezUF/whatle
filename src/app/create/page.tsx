@@ -13,6 +13,7 @@ import './styles.css';
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import ProtectedRoute from '@/components/ProtectedRoute'
+import { useAuth } from '@/contexts/AuthContext'
 
 interface Game {
     id: string,
@@ -26,15 +27,15 @@ export default function GameList() {
     const [games, setGames] = useState([]);
     // TODO: add UseContext
     const [uid, setUID] = useState('');
-    const [loading, setLoading] = useState(true);
+    const { currentUser } = useAuth();
+    const [isLoading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     useEffect(() => {
         const fetchGames = async () => {
             try {
                 // TODO: uncomment when added UseContext for uid
-                // const response = await fetch(`http://localhost:3000/api/getGamesByUserId?uid=${uid}`);
-                const response = await fetch(`http://localhost:3000/api/getGamesByUserId?uid=4hpuyDafThVkcNydHboynbr4Fz42`);
+                const response = await fetch(`http://localhost:3000/api/getGamesByUserId?uid=${currentUser?.uid}`);
 
                 if (!response.ok) {
                     throw new Error('Failed to fetch games');
@@ -51,7 +52,7 @@ export default function GameList() {
         fetchGames();
     }, [uid]);
 
-    if (loading) {
+    if (isLoading) {
         return <div>Loading...</div>;
     }
 
