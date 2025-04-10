@@ -67,8 +67,7 @@ export default function NavBar() {
         <CategoriesDropdown></CategoriesDropdown>
         <form
           onSubmit={handleSearchSubmit}
-          className="relative flex items-center"
-        >
+          className="relative flex items-center">
           <Input
             type="text"
             placeholder="Search"
@@ -82,7 +81,6 @@ export default function NavBar() {
         </form>
       </div>
       {/* sign up, login cbuttons */}
-    
       <div className="flex items-center space-x-4"> 
         {!currentUser ? (
           <>
