@@ -6,15 +6,23 @@ import { doc, collection, setDoc, query, getDocs, where } from 'firebase/firesto
 // PUT /api/uploadGame
 export async function POST(req: Request) {
     const body = await req.json();
-    // Store uid (uploading user) in the req headers
-    const uid = req.headers.get('uid');
+    const uid = body.uid;
+    /*const idToken = req.headers.get('Authorization')?.split('Bearer ')[1];
+    
+    if (!idToken) {
+        return NextResponse.json({ error: 'Unauthorized: No token provided' }, { status: 401 });
+    }*/
 
     try {
+        // Verify the ID token
+        /*const decodedToken = await adminAuth.verifyIdToken(idToken);
+        const uid = decodedToken.uid; // Extract uid from the decoded token*/
+
         // Game names are unique on a per user basis (two users can have the same game name,
         // but one user cannot have multiple of the same name)
         const gameRef = query(collection(db, 'games'), where('name', '==', body.name), where('uid', '==', uid));
         const gameSnapshot = await getDocs(gameRef);
-
+        
         if (gameSnapshot.docs.length === 0) {
             // Game does not exist, create new document
             const gamePointer = doc(collection(db, 'games'));
