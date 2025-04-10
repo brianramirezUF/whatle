@@ -22,9 +22,17 @@ export default function PlayGame() {
         fetch(`/api/getGameById?id=${gameId}`)
           .then((res) => res.json())
           .then((game) => {
-            setAttributes(game.attributes);
-            setAnswers(game.answers);
-            setGameName(game.name);
+            if (game.attributes) {
+              setAttributes(game.attributes);
+            }
+
+            if (game.answers) {
+              setAnswers(game.answers);
+            }
+
+            if (game.name) {
+              setGameName(game.name);
+            }
             console.log("Fetched game:", game);
           })
           .catch((err) => {
@@ -41,8 +49,8 @@ export default function PlayGame() {
     const content = (
         <div>
             <JsonParser onParse={handleJSON}/>
-            <h1 className='font-bold'>Game</h1>
-            <Game answers={answers} attributes={attributes} gameName={gameName}/>
+            <h1 className='font-bold'>{gameName}</h1>
+            <Game answers={answers} attributes={attributes} name={gameName}/>
         </div>
     );
 
