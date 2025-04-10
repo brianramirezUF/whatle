@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { JsonParser } from '@/components/JsonParser';
 import { GameProps } from '../../play/components';
 import { useParams } from 'next/navigation'
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function CreateGame() {
     const [attributes, setAttributes] = useState<AttributeType[]>([]);
@@ -19,6 +20,7 @@ export default function CreateGame() {
     // Routing
     const params = useParams();
     const gameId = params.gameId;
+    const { currentUser } = useAuth();
 
     useEffect(() => {
         const loadGame = async () => {
@@ -30,8 +32,9 @@ export default function CreateGame() {
                 }
 
                 const data = await response.json();
-                if (data.gameName) {
-                    setGameName(data?.gameName);
+                console.group('Retrieved Game:', data);
+                if (data.name) {
+                    setGameName(data?.name);
                 }
 
                 if (data.attributes) {
@@ -52,12 +55,16 @@ export default function CreateGame() {
     }, [gameId]);
 
     const uploadGame = async () => {
+        if (!currentUser) return;
+
         try {
+            const idToken = await currentUser.getIdToken();
             const response = await fetch(`http://localhost:3000/api/uploadGame`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'uid': '4hpuyDafThVkcNydHboynbr4Fz42' // TODO: replace with uid from current logged in user
+                    'uid': `${currentUser?.uid}`,
+                    Authorization: `Bearer ${idToken}`
                 },
                 body: JSON.stringify({ name: gameName, answers, attributes }, null, 2)
             });
