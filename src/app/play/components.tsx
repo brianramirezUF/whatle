@@ -1,6 +1,6 @@
 import { Icons } from '@/components/icons'
 import { useState } from 'react';
-import { Guess, AttributeType, AnswerType, comparisons } from '../create/attributes';
+import { Guess, AttributeType, AnswerType, comparisons, GuessStatus } from '../create/attributes';
 import { Card, CardContent } from "@/components/ui/card";
 import React from 'react';
 import "./styles.css";
@@ -129,8 +129,22 @@ const Game: React.FC<GameProps> = ({ answers, attributes, gameName }) => {
                 backgroundColor: comparisons[attr.type as keyof typeof comparisons](
                   guessedAnswer.attributes[attr.name],
                   correctAnswer.attributes[attr.name]
-                ).status
-              }} >
+                ).status,
+                backgroundImage: (() => {
+                  const status = comparisons[attr.type as keyof typeof comparisons](
+                    guessedAnswer.attributes[attr.name],
+                    correctAnswer.attributes[attr.name]
+                  ).status;
+            
+                  if (status === GuessStatus.OVER) return `url('/svgs/arrowDown.svg')`;
+                  if (status === GuessStatus.UNDER) return `url('/svgs/arrowUp.svg')`;
+                  return 'none';
+                })(),
+                backgroundSize: 'cover',
+                backgroundRepeat: 'no-repeat',
+                backgroundPosition: 'center',
+              }}
+              >
               <CardContent className="text-center ">
                 <div className="flex items-center justify-center">
                   <span className="text-2xl text-center guess-text ">

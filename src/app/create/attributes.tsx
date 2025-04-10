@@ -20,12 +20,14 @@ interface guessProps {
     type: string
 };
 
-enum GuessStatus {
+export enum GuessStatus {
     CORRECT = '#4CAF50',
     INCORRECT = '#F44336',
-    PARTIAL = '#FF9800',
-    OVER = '#2196F3',
-    UNDER = '#3F51B5',
+    PARTIAL = '#FF9801',
+    UNDER = '#FF9800',
+    OVER = '#FF9802',
+    // OVER = '#2196F3',
+    // UNDER = '#3F51B5',
 }
 
 interface GuessCorrectness {
@@ -130,7 +132,12 @@ export const Guess: React.FC<guessProps> = ({ guess, answer, type }) => {
     const content = (
         // td-> div bc using cards in UI and:
         //<td> cannot be a child of <div> -> hydration error.
-        <div className='text-white' style={{ backgroundColor: `${result.status}`}}>
+        <div 
+            className='text-white' 
+            // style={{ 
+            // backgroundColor: `${result.status}`
+            // }}
+        >
             {result.details}
         </div>
     );

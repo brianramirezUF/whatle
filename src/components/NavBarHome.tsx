@@ -9,6 +9,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { nanoid } from "nanoid";
 import { cn } from "@/lib/utils";
+import { useAuth } from '@/contexts/AuthContext';
 
 import {
   NavigationMenu,
@@ -43,27 +44,32 @@ export default function NavBar() {
     event.preventDefault();
     console.log("Search Query:", searchQuery);
   };
-
+  const { currentUser, loading } = useAuth();
   return (
     <nav className="flex items-center justify-between p-3 bg-white shadow-md">
       <div>
-        <h1 className="text-lg font-bold">
-          {<Logo/>} 
-        </h1>
+        <Link href="/home" passHref>
+          <h1 className="text-lg font-bold">
+            {<Logo/>} 
+          </h1>
+        </Link>
       </div>
 
       {/* Middle Section */}
       <div className="flex items-center space-x-6 ">
         <Button variant="link" className="text-sm select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
 
-          <Link href="/popular" passHref> 
+          <Link href="/home" passHref> 
               Popular
           </Link>
         </Button>
         <CategoriesDropdown></CategoriesDropdown>
       </div>
       {/* sign up, login buttons */}
-      <div className="flex items-center space-x-4">
+      
+      <div className="flex items-center space-x-4"> 
+        {!currentUser ? (
+          <>
         <Button variant="default" className="text-sm">
         <Link href="/signup" passHref> 
               Sign Up
@@ -73,7 +79,23 @@ export default function NavBar() {
         <Link href="/login" passHref> 
               Login
           </Link>
-        </Button>
+        </Button>   
+        </>
+        ) :
+        (
+          <>
+            <Button variant="link" className="text-sm select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+              <Link href="/play" passHref> 
+                  My Games
+              </Link>
+            </Button>
+            <Button variant="link" className="text-sm select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+              <Link href="/history" passHref> 
+                  History
+              </Link>
+            </Button>
+          </>
+        )}
       </div>
     </nav>
   );

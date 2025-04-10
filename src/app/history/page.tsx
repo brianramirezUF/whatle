@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import {
   Table,
   TableBody,
@@ -7,6 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useAuth } from '@/contexts/AuthContext';
 import "./styles.css";
 
 type GameHistory = {
@@ -18,48 +22,66 @@ type GameHistory = {
 };
 
 export default function History(){
-  const Users = {
-    history: {
-      "4": {
-        id: 4,
-        name: "MLBdle",
-        numPlays: 1,
-        numWins: 2,
-        fastestTime: 106
-      },
-      "2": {
-        id: 2,
-        name: "Pokedle",
-        numPlays: 10,
-        numWins: 1,
-        fastestTime: 192
-      },
-      "3": {
-        id: 3,
-        name: "NBAdle",
-        numPlays: 3,
-        numWins: 2,
-        fastestTime: 106
-      },
-      "1": {
-        id: 1,
-        name: "Marvelde",
-        numPlays: 20,
-        numWins: 13,
-        fastestTime: 53
-      },
+  const { currentUser, loading } = useAuth();
+  const [userHistory, setUserHistory] = useState<GameHistory[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(true);
+  
+  // call endpoint to receive user history
+  useEffect(() => {
+    if (currentUser) {
+      fetch(`/api/getUserHistoryById?id=${currentUser.uid}`)
+        .then((res) => res.json())
+        .then((history) => {
+          setUserHistory(history);
+          console.log("Fetched user history:", history);
+          setLoadingHistory(false);
+        })
+        .catch((err) => {
+          console.error("Failed to fetch user history:", err);
+          setLoadingHistory(false);
+        });
     }
+  }, []);
+
+  if (!currentUser) {
+    return (
+      <div className="container">
+        <h1 className="title text-center font-medium">
+          Login to view your history!
+        </h1>
+      </div>
+    )
+  }
+
+  if (loadingHistory) {
+    return (
+      <div className="container">
+        <h1 className="title text-center font-medium">
+          Loading game history...
+        </h1>
+      </div>
+    )
+  }
+
+  if (Object.keys(userHistory).length === 0) {
+    return (
+      <div className="container">
+        <h1 className="title text-center font-medium">
+          No games played yet.
+        </h1>
+      </div>
+    )
   }
   
-  // call endpoint to receive current user's history
-  const history: { [key: string]: GameHistory } = Users.history;
-
   // iterate through map of history to determine top 3 played games
   let top1: GameHistory | undefined;
   let top2: GameHistory | undefined;
   let top3: GameHistory | undefined;
 
-  Object.entries(history).forEach(([key, game]) => {
+  Object.entries(userHistory).forEach(([key, game]) => {
+    // check if game is undefined
+    if (!game) return;
+
     // check if game has been played the most
     if (top1 == undefined) {
       top1 = game;
@@ -82,6 +104,7 @@ export default function History(){
   });
 
   const topGames: (GameHistory | undefined)[] = [top1, top2, top3].filter(Boolean);
+  console.log(topGames);
 
   return(
       <div className="container">
