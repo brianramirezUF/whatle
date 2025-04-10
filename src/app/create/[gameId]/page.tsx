@@ -15,6 +15,7 @@ export default function CreateGame() {
     const [attrEditingName, setAttrEditingName] = useState<string | null>(null);
     const [answers, setAnswers] = useState<Record<string, AnswerType>>({});
     const [ansEditingName, setAnsEditingName] = useState<string | null>(null);
+    const [tempAnswerName, setTempAnswerName] = useState<string>("");
     const [gameName, setGameName] = useState<string>("Game Name");
 
     // Routing
@@ -94,7 +95,8 @@ export default function CreateGame() {
     const addAnswer = () => {
         if (!attributes.length) return;
 
-        const name = `Answer ${Object.keys(answers).length}`;
+        let name = `Answer ${Object.keys(answers).length}`;
+
         const newAnswer: AnswerType = {
             name,
             attributes: attributes.reduce<Record<string, string>>(
