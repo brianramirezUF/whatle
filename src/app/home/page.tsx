@@ -54,7 +54,7 @@ export default function Home(){
           <CarouselContent className="pb-4">
           {popularGames.map((game, index) => (
             <CarouselItem key={index} className="basis-1/3">
-              <Link href={{ pathname: "/play", query: { id: game.id } }}>
+              <Link href={`/play/${game.id}`}>
                 <div className="p-1">
                   <Card
                     className="card"
