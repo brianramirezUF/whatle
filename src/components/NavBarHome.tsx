@@ -57,7 +57,7 @@ export default function NavBar() {
       <div className="flex items-center space-x-6 ">
         <Button variant="link" className="text-sm select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
 
-          <Link href="/popular" passHref> 
+          <Link href="/home" passHref> 
               Popular
           </Link>
         </Button>
@@ -66,7 +66,7 @@ export default function NavBar() {
       {/* sign up, login buttons */}
       
       <div className="flex items-center space-x-4"> 
-        {!currentUser && (
+        {!currentUser ? (
           <>
         <Button variant="default" className="text-sm">
         <Link href="/signup" passHref> 
@@ -79,6 +79,20 @@ export default function NavBar() {
           </Link>
         </Button>   
         </>
+        ) :
+        (
+          <>
+            <Button variant="link" className="text-sm select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+              <Link href="/play" passHref> 
+                  My Games
+              </Link>
+            </Button>
+            <Button variant="link" className="text-sm select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+              <Link href="/history" passHref> 
+                  History
+              </Link>
+            </Button>
+          </>
         )}
       </div>
     </nav>
