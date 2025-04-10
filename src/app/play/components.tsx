@@ -31,7 +31,7 @@ const Games = [
 export interface GameProps {
   answers: Record<string, AnswerType>,
   attributes: AttributeType[],
-  gameName: string
+  name: string
 }
 
 const Game: React.FC<GameProps> = ({ answers, attributes, gameName }) => {

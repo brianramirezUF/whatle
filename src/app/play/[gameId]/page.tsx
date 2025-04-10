@@ -2,28 +2,29 @@
 
 import { Icons } from '@/components/icons'
 import { useState, useEffect } from 'react';
-import { AttributeType, AnswerType } from '../create/attributes';
-import { Game, GameProps } from './components';
+import { AttributeType, AnswerType } from '../../create/attributes';
+import { Game, GameProps } from '../components';
 import { JsonParser } from '@/components/JsonParser';
 import { Card, CardContent } from "@/components/ui/card";
 import React from 'react';
-import { useSearchParams } from "next/navigation";
+import { useParams } from "next/navigation";
 
 export default function PlayGame() {
     const [attributes, setAttributes] = useState<AttributeType[]>([]);
     const [answers, setAnswers] = useState<Record<string, AnswerType>>({});
     const [gameName, setGameName] = useState<string>('');
-    const [game, setGame] = useState<GameProps>();
 
-    const searchParams = useSearchParams();
-    const id = searchParams.get("id");
+    const params = useParams();
+    const gameId = params.gameId;
 
     // call endpoint to receive game information
       useEffect(() => {
-        fetch(`/api/getGameById?id=${id}`)
+        fetch(`/api/getGameById?id=${gameId}`)
           .then((res) => res.json())
           .then((game) => {
-            setGame(game);
+            setAttributes(game.attributes);
+            setAnswers(game.answers);
+            setGameName(game.name);
             console.log("Fetched game:", game);
           })
           .catch((err) => {
@@ -34,7 +35,7 @@ export default function PlayGame() {
     const handleJSON = (data: GameProps) => {
         setAnswers(data.answers);
         setAttributes(data.attributes);
-        setGameName(data.gameName);
+        setGameName(data.name);
     }
 
     const content = (
