@@ -96,7 +96,7 @@ export default function GameList() {
             <h1 className='subtitle text-center font-medium'>
                 Create A New Game:
             </h1>
-            <RedirectButton url='/create' text='Create' className='button  w-[125px] h-[40px]' />
+            <RedirectButton url='/create/new-game' text='Create' className='button  w-[125px] h-[40px]' />
         </div>
     );
 

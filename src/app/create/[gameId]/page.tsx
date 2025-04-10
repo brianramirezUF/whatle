@@ -51,8 +51,9 @@ export default function CreateGame() {
                 console.log('Error:', err);
             }
         };
-
-        loadGame();
+        if (gameId != 'new-game') {
+            loadGame();
+        }
     }, [gameId]);
 
     const uploadGame = async () => {
