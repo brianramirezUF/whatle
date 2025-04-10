@@ -48,9 +48,11 @@ export default function NavBar() {
   return (
     <nav className="flex items-center justify-between p-3 bg-white shadow-md">
       <div>
-        <h1 className="text-lg font-bold">
-          {<Logo/>} 
-        </h1>
+        <Link href="/home" passHref>
+          <h1 className="text-lg font-bold">
+            {<Logo/>} 
+          </h1>
+        </Link>
       </div>
 
       {/* Middle Section */}
