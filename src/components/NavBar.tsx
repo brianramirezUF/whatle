@@ -21,16 +21,16 @@ import {
   NavigationMenuTrigger,
   NavigationMenuViewport,
   navigationMenuTriggerStyle
-} 
-from "@/components/ui/navigation-menu"
+}
+  from "@/components/ui/navigation-menu"
 
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} 
-from "@/components/ui/dropdown-menu";
+}
+  from "@/components/ui/dropdown-menu";
 import React from "react";
 
 export default function NavBar() {
@@ -85,13 +85,13 @@ export default function NavBar() {
         {!currentUser ? (
           <>
         <Button variant="default" className="text-sm">
-        <Link href="/signup" passHref> 
-              Sign Up
+          <Link href="/signup" passHref>
+            Sign Up
           </Link>
         </Button>
         <Button variant="outline" className="text-sm">
-        <Link href="/login" passHref> 
-              Login
+          <Link href="/login" passHref>
+            Login
           </Link>
         </Button>   
         </>
@@ -129,34 +129,33 @@ export function CategoriesDropdown() {
         >
           Categories
           <ChevronDown
-            className={`ml-1 h-4 w-4 transition-transform duration-200 ${
-              isOpen ? "rotate-180" : "rotate-0"
-            }`}
+            className={`ml-1 h-4 w-4 transition-transform duration-200 ${isOpen ? "rotate-180" : "rotate-0"
+              }`}
           />
         </Button>
       </DropdownMenuTrigger>
-          <DropdownMenuContent className="">
-            <DropdownMenuItem>
-              <Link href="/games" passHref> 
-                Games
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-            <Link href="/tvmovies" passHref> 
-                TV/Movies
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-            <Link href="/irl" passHref> 
-                IRL
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-            <Link href="/other" passHref> 
-                Other
-              </Link>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
+      <DropdownMenuContent className="">
+        <DropdownMenuItem>
+          <Link href="/games" passHref>
+            Games
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem>
+          <Link href="/tvmovies" passHref>
+            TV/Movies
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem>
+          <Link href="/irl" passHref>
+            IRL
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem>
+          <Link href="/other" passHref>
+            Other
+          </Link>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
     </DropdownMenu>
   );
 }
