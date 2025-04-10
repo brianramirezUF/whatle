@@ -37,7 +37,7 @@ export interface GameProps {
   name: string
 }
 
-const Game: React.FC<GameProps> = ({ answers, attributes, gameName }) => {
+const Game: React.FC<GameProps> = ({ answers, attributes, name }) => {
   const [guesses, setGuesses] = useState<string[]>([]);
   const [curGuess, setCurGuess] = useState<string>('');
   const [correctAnswer, setCorrectAnswer] = useState<AnswerType | null>(null);
@@ -112,7 +112,7 @@ const Game: React.FC<GameProps> = ({ answers, attributes, gameName }) => {
     const payload = {
       userId,
       gameId,
-      gameName,
+      name,
       won: isWin,
       timeTaken,
     };
@@ -220,7 +220,7 @@ const Game: React.FC<GameProps> = ({ answers, attributes, gameName }) => {
   return (
     <div className="flex flex-col justify-center items-center p-4">
       <div className="max-w-6xl w-full flex flex-col bg-white rounded-lg p-6 mb-4 justify-center items-center">
-        <h2 className="text-xl mb-4 font-bold text-center">{gameName}</h2>
+        <h2 className="text-xl mb-4 font-bold text-center">{name}</h2>
         <div className="flex items-center gap-2 w-full max-w-md">
           {!won &&
             <div className="relative w-full">
