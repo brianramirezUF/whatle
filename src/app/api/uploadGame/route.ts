@@ -2,12 +2,13 @@ import { NextResponse } from 'next/server';
 import { db } from '@/config/firebase';
 import { doc, collection, setDoc, query, getDocs, where } from 'firebase/firestore';
 
+// TODO: update firebase rules and authentication to verify correct user is updating correct
 // PUT /api/uploadGame
 export async function POST(req: Request) {
     const body = await req.json();
     // Store uid (uploading user) in the req headers
     const uid = req.headers.get('uid');
-    
+
     try {
         // Game names are unique on a per user basis (two users can have the same game name,
         // but one user cannot have multiple of the same name)
