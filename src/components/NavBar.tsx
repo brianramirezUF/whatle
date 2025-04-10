@@ -9,6 +9,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { nanoid } from "nanoid";
 import { cn } from "@/lib/utils";
+import { useAuth } from '@/contexts/AuthContext';
 
 import {
   NavigationMenu,
@@ -33,6 +34,7 @@ from "@/components/ui/dropdown-menu";
 import React from "react";
 
 export default function NavBar() {
+  const { currentUser, loading } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -77,9 +79,11 @@ export default function NavBar() {
           </button>
         </form>
       </div>
-
-      {/* sign up, login buttons */}
-      <div className="flex items-center space-x-4">
+      {/* sign up, login cbuttons */}
+    
+      <div className="flex items-center space-x-4"> 
+        {!currentUser && (
+          <>
         <Button variant="default" className="text-sm">
         <Link href="/signup" passHref> 
               Sign Up
@@ -89,8 +93,11 @@ export default function NavBar() {
         <Link href="/login" passHref> 
               Login
           </Link>
-        </Button>
+        </Button>   
+        </>
+        )}
       </div>
+
     </nav>
   );
 }

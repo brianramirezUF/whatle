@@ -9,6 +9,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { nanoid } from "nanoid";
 import { cn } from "@/lib/utils";
+import { useAuth } from '@/contexts/AuthContext';
 
 import {
   NavigationMenu,
@@ -43,7 +44,7 @@ export default function NavBar() {
     event.preventDefault();
     console.log("Search Query:", searchQuery);
   };
-
+  const { currentUser, loading } = useAuth();
   return (
     <nav className="flex items-center justify-between p-3 bg-white shadow-md">
       <div>
@@ -63,7 +64,10 @@ export default function NavBar() {
         <CategoriesDropdown></CategoriesDropdown>
       </div>
       {/* sign up, login buttons */}
-      <div className="flex items-center space-x-4">
+      
+      <div className="flex items-center space-x-4"> 
+        {!currentUser && (
+          <>
         <Button variant="default" className="text-sm">
         <Link href="/signup" passHref> 
               Sign Up
@@ -73,7 +77,9 @@ export default function NavBar() {
         <Link href="/login" passHref> 
               Login
           </Link>
-        </Button>
+        </Button>   
+        </>
+        )}
       </div>
     </nav>
   );
