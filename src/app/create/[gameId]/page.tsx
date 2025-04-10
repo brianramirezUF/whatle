@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react';
-import { AttributeType, AnswerType } from './attributes';
-import { EditableAnswer, Answer, EditableAttribute, Attribute } from './components';
+import { AttributeType, AnswerType } from '../attributes';
+import { EditableAnswer, Answer, EditableAttribute, Attribute } from '../components';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
