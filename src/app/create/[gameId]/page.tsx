@@ -63,10 +63,9 @@ export default function CreateGame() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'uid': `${currentUser?.uid}`,
                     Authorization: `Bearer ${idToken}`
                 },
-                body: JSON.stringify({ name: gameName, answers, attributes }, null, 2)
+                body: JSON.stringify({ name: gameName, answers, attributes, uid: currentUser.uid }, null, 2)
             });
 
             const result = await response.json();
@@ -80,7 +79,7 @@ export default function CreateGame() {
     const handleJSON = (data: GameProps) => {
         setAnswers(data.answers);
         setAttributes(data.attributes);
-        setGameName(data.gameName);
+        setGameName(data.name);
     }
 
     const addAttribute = () => {
@@ -345,7 +344,7 @@ export default function CreateGame() {
                 className='decoration-dashed underline table'
                 href={
                     'data:application/json;charset=utf-8,' +
-                    encodeURIComponent(JSON.stringify({ gameName, answers, attributes }, null, 2))
+                    encodeURIComponent(JSON.stringify({ name: gameName, answers, attributes }, null, 2))
                 }
             >
                 Get Game as JSON
