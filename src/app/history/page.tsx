@@ -10,6 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useAuth } from '@/contexts/AuthContext';
 import "./styles.css";
 
 type GameHistory = {
@@ -21,22 +22,48 @@ type GameHistory = {
 };
 
 export default function History(){
+  const { currentUser, loading } = useAuth();
   const [userHistory, setUserHistory] = useState<GameHistory[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(true);
   
   // call endpoint to receive user history
   useEffect(() => {
-    fetch("/api/getUserHistoryById?id=lKWKGCmoUWM5ggLm1pv90ltIlFU2")
-      .then((res) => res.json())
-      .then((history) => {
-        setUserHistory(history);
-        console.log("Fetched user history:", history);
-      })
-      .catch((err) => {
-        console.error("Failed to fetch user history:", err);
-      });
+    if (currentUser) {
+      fetch(`/api/getUserHistoryById?id=${currentUser.uid}`)
+        .then((res) => res.json())
+        .then((history) => {
+          setUserHistory(history);
+          console.log("Fetched user history:", history);
+          setLoadingHistory(false);
+        })
+        .catch((err) => {
+          console.error("Failed to fetch user history:", err);
+          setLoadingHistory(false);
+        });
+    }
   }, []);
 
-  if (userHistory.length == 0) {
+  if (!currentUser) {
+    return (
+      <div className="container">
+        <h1 className="title text-center font-medium">
+          Login to view your history!
+        </h1>
+      </div>
+    )
+  }
+
+  if (loadingHistory) {
+    return (
+      <div className="container">
+        <h1 className="title text-center font-medium">
+          Loading game history...
+        </h1>
+      </div>
+    )
+  }
+
+  if (Object.keys(userHistory).length === 0) {
     return (
       <div className="container">
         <h1 className="title text-center font-medium">
