@@ -162,7 +162,7 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name }) => {
 
       return (
         <React.Fragment key={`row-${rowIndex}`}>
-          <div>
+           <div>
             <Card className="p-2 bg-gray-100 flex font-bold items-center justify-center aspect-square min-w-[100px] max-w-[300px] card"
               style={Games[3].icon ? {
                 backgroundImage: `url(${Games[3].icon})`,
@@ -175,6 +175,7 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name }) => {
             </Card>
           </div>
           {attributes.map((attr: AttributeType, colIndex: number) => (
+             <div style={{ animationDelay: `${colIndex * .4}s` }} className="fade-in">
             <Card
               key={`${rowIndex}-${colIndex}`}
               className="p-2 shadow-md flex items-center justify-center border aspect-square min-w-[100px] max-w-[300px]"
@@ -210,6 +211,7 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name }) => {
                 </div>
               </CardContent>
             </Card>
+            </div>
           ))}
 
         </React.Fragment>
