@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import React from 'react';
 import "./styles.css";
 import { getAuth } from "firebase/auth";
-
+import { ConfettiBurst } from '@/components/ConfettiBurst';
 
 
 const Games = [
@@ -37,6 +37,8 @@ export interface GameProps {
   name: string
 }
 
+
+
 const Game: React.FC<GameProps> = ({ answers, attributes, name }) => {
   const [guesses, setGuesses] = useState<string[]>([]);
   const [curGuess, setCurGuess] = useState<string>('');
@@ -44,6 +46,7 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name }) => {
   const [filteredAnswers, setFilteredAnswers] = useState<AnswerType[]>(Object.values(answers));
   const [showDropdown, setShowDropdown] = useState(false);
   let won = false;
+  const [confettiBursts, setConfettiBursts] = useState<{ id: number; x: number; y: number }[]>([]);
 
   if (!Object.keys(answers).length) {
     return <h1>No answers.</h1>
@@ -96,6 +99,7 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name }) => {
     const isWin = guess === correctAnswer.name;
     won = isWin;
   
+  
     const auth = getAuth();
     const currentUser = auth.currentUser;
   
@@ -116,7 +120,42 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name }) => {
       won: isWin,
       timeTaken,
     };
-  
+
+    const launchBursts = (count = 5) => {
+      const bursts = Array.from({ length: count }).map((_, i) => {
+        const id = Date.now() + i;
+        // const x = Math.random() * window.innerWidth * 0.8 + window.innerWidth * 0.1;
+        // const y = Math.random() * window.innerHeight * 0.4 + window.innerHeight * 0.2;
+        const screenCenterX = window.innerWidth / 2;
+        const screenCenterY = window.innerHeight / 2;
+
+        const jitterRange = 250; // Try 30, 100, 200 for different feels
+        const jitterX = (Math.random() - 0.5) * jitterRange;
+        const jitterY = (Math.random() - 0.5) * jitterRange;
+
+
+        //const jitterX = (Math.random() - 0.5) * 100; // -50 to +50 px
+        //const jitterY = (Math.random() - 0.5) * 100;
+
+        const x = screenCenterX + jitterX;
+        const y = screenCenterY + jitterY;
+
+
+        return { id, x, y };
+      });
+    
+      setConfettiBursts(bursts); // Single state update → single re-render
+    
+      setTimeout(() => {
+        setConfettiBursts([]);
+      }, 2500);
+    };
+
+    if (isWin) {
+      setConfettiBursts([]);
+      launchBursts();
+    }
+
   
     try {
       const res = await fetch("/api/updateUserHistory", {
@@ -130,14 +169,14 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name }) => {
       const data = await res.json();
   
       if (!res.ok) {
-        console.error("❌ API Error Response:", data);
-        alert("❌ Failed to update Firebase: " + (data.error || "Unknown error"));
-        return;
+        // console.error("❌ API Error Response:", data);
+        // alert("❌ Failed to update Firebase: " + (data.error || "Unknown error"));
+        // return;
       }
   
     } catch (err: any) {
       console.error("❌ Network/Code Error:", err.message);
-      alert("❌ Error updating Firebase: " + err.message);
+      //alert("❌ Error updating Firebase: " + err.message);
     }
   };
   
@@ -162,7 +201,7 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name }) => {
 
       return (
         <React.Fragment key={`row-${rowIndex}`}>
-          <div>
+           <div>
             <Card className="p-2 bg-gray-100 flex font-bold items-center justify-center aspect-square min-w-[100px] max-w-[300px] card"
               style={Games[3].icon ? {
                 backgroundImage: `url(${Games[3].icon})`,
@@ -175,6 +214,7 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name }) => {
             </Card>
           </div>
           {attributes.map((attr: AttributeType, colIndex: number) => (
+            <div key={`cell-${rowIndex}-${colIndex}`} style={{ animationDelay: `${colIndex * 0.4}s` }} className="fade-in">
             <Card
               key={`${rowIndex}-${colIndex}`}
               className="p-2 shadow-md flex items-center justify-center border aspect-square min-w-[100px] max-w-[300px]"
@@ -210,15 +250,18 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name }) => {
                 </div>
               </CardContent>
             </Card>
+            </div>
           ))}
 
         </React.Fragment>
       );
     });
   };
-
-  return (
+  return ( 
     <div className="flex flex-col justify-center items-center p-4">
+    {confettiBursts.map((burst) => (
+      <ConfettiBurst key={burst.id} x={burst.x} y={burst.y} id={burst.id} />
+    ))}
       <div className="max-w-6xl w-full flex flex-col bg-white rounded-lg p-6 mb-4 justify-center items-center">
         <h2 className="text-xl mb-4 font-bold text-center">{name}</h2>
         <div className="flex items-center gap-2 w-full max-w-md">
