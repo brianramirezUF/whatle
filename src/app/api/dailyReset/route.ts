@@ -3,7 +3,7 @@ import { db } from '@/config/firebase';
 import { doc, collection, updateDoc, getDocs } from 'firebase/firestore';
 
 export async function GET(req: Request) {
-    const authHeader = req.headers.get('x-cron-secret');
+    const authHeader = req.headers.get('authorization');
     if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
         return NextResponse.json({ error: 'Unauthorized.' }, { status: 401 });
     }
