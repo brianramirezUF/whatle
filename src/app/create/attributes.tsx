@@ -1,3 +1,4 @@
+import { Card, CardContent } from "@/components/ui/card";
 // define all possible comparison functions, so you can compare a users guess to the correct answer and return the expected functionality
 // based on the return, you can modify the display in the GamePage 
 // (for example, if a number is less than: guess displays red with an up arrow, greater than: guess displays red with a down arrow,
@@ -17,7 +18,9 @@ export interface AnswerType {
 interface guessProps {
     guess: string,
     answer: string,
-    type: string
+    type: string,
+    rowIndex?: number,
+    colIndex?: number,
 };
 
 export enum GuessStatus {
@@ -86,12 +89,13 @@ const compareBoolean = (guess: boolean, answer: boolean): GuessCorrectness => {
 };
 
 const compareCollection = (guess: Array<string>, answer: Array<string>): GuessCorrectness => {
-    // iterate and compare each in guess to each in answer
-    // make a collection a dictionary, each value would be stored like 
-    // {'value': ..., 'type': ...} then each value in the collection can be compared based on the given type
     const correct = answer.filter(x => guess.includes(x));
     const extra = guess.filter(x => !answer.includes(x));
     const missingCount = answer.length - correct.length;
+
+    console.log('Correct:', correct);
+    console.log('Extra:', extra);
+    console.log('Missing Count:', missingCount)
 
     if (missingCount === 0 && extra.length === 0) {
         return {
@@ -114,7 +118,7 @@ const compareCollection = (guess: Array<string>, answer: Array<string>): GuessCo
 };
 
 // Define type for specific comparisons
-type CompareType = 'String' | 'Number' | 'Boolean' | 'Array';
+type CompareType = 'String' | 'Number' | 'Boolean' | 'Collection';
 
 // Enum containing all possible types for an attribute and their associated comparison function
 // NOTE: for new data types, just add a new value to CompareType above, and an associated comparison function here
@@ -122,25 +126,52 @@ export const comparisons: Record<CompareType, (guess: any, answer: any) => Guess
     String: comparestring,
     Number: compareNumber,
     Boolean: compareBoolean,
-    Array: compareCollection
+    Collection: compareCollection
 };
 
 // Component to display within the game page for each individual attribute
-export const Guess: React.FC<guessProps> = ({ guess, answer, type }) => {
-    const result = comparisons[type as CompareType](guess, answer);
-    console.log(result);
-    const content = (
-        // td-> div bc using cards in UI and:
-        //<td> cannot be a child of <div> -> hydration error.
-        <div 
-            className='text-white' 
-            // style={{ 
-            // backgroundColor: `${result.status}`
-            // }}
+export const Guess: React.FC<guessProps> = ({ guess, answer, type, rowIndex = 0, colIndex = 0 }) => {
+    let result;
+    if (answer.includes(',')) {
+        const answerArray = answer.split(',');
+        const guessArray = guess.split(',');
+        result = comparisons['Collection'](guessArray, answerArray);
+    }
+    else {
+        result = comparisons[type as keyof typeof comparisons](guess, answer);
+    }
+    const { status, details } = result;
+
+    const backgroundImage = (() => {
+        if (status === GuessStatus.OVER) return `url('/svgs/arrowDown.svg')`;
+        if (status === GuessStatus.UNDER) return `url('/svgs/arrowUp.svg')`;
+        return 'none';
+    })();
+
+    return (
+        <div
+        key={`cell-${rowIndex}-${colIndex}`}
+        style={{ animationDelay: `${colIndex * 0.4}s` }}
+        className="fade-in"
         >
-            {result.details}
+        <Card
+            className="p-2 shadow-md flex items-center justify-center border aspect-square min-w-[100px] max-w-[300px]"
+            style={{
+            backgroundColor: status,
+            backgroundImage,
+            backgroundSize: 'cover',
+            backgroundRepeat: 'no-repeat',
+            backgroundPosition: 'center',
+            }}
+        >
+            <CardContent className="text-center ">
+            <div className="flex items-center justify-center">
+                <span className="text-2xl text-center guess-text text-white">
+                {details}
+                </span>
+            </div>
+            </CardContent>
+        </Card>
         </div>
     );
-
-    return content;
 };
