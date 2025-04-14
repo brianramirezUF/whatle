@@ -9,6 +9,7 @@ import { JsonParser } from '@/components/JsonParser';
 import { GameProps } from '../../play/components';
 import { useParams } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext';
+import { toast } from "sonner";
 
 export default function CreateGame() {
     const [attributes, setAttributes] = useState<AttributeType[]>([]);
@@ -71,9 +72,14 @@ export default function CreateGame() {
 
             const result = await response.json();
             console.log('Server Response:', result);
-        }
-        catch (err) {
+            toast("✅ Game uploaded!", {
+                description: `${gameName} was saved successfully.`,
+            });
+        } catch (err) {
             console.log('Error:', err);
+            toast("❌ Upload failed", {
+                description: "Something went wrong while uploading the game.",
+            });
         }
     };
 
