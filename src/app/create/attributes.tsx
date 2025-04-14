@@ -1,5 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { comparisons, GuessStatus } from "@/lib/guessComparison";
+import { GuessStatus } from "@/lib/guessComparison";
 // define all possible comparison functions, so you can compare a users guess to the correct answer and return the expected functionality
 // based on the return, you can modify the display in the GamePage 
 // (for example, if a number is less than: guess displays red with an up arrow, greater than: guess displays red with a down arrow,
