@@ -208,7 +208,7 @@ export default function CreateGame() {
                 />
             </div>
 
-            <h1 className='font-bold'>Attribute List</h1>
+            <h2 className="text-2xl font-bold text-center mb-4">Attribute List</h2>
             <div className="flex flex-col items-center mt-6 w-full">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
                     {attributes.map((attribute, index) => (
@@ -251,8 +251,8 @@ export default function CreateGame() {
                     )}
                 </div>
             </div>
-
-            <h1 className='font-bold'>Answer List</h1>
+            <h2 className="text-2xl font-bold text-center mb-7"></h2>
+            <h2 className="text-2xl font-bold text-center mb-2">Answer List</h2>
             <div className="flex flex-col items-center mt-10 w-full">
                 <div className="flex space-x-2 mb-4">
                     <Button
@@ -283,7 +283,7 @@ export default function CreateGame() {
 
             {attributes.length > 0 && Object.keys(answers).length > 0 && (
                 <div className="mt-6 w-full overflow-x-auto">
-                    <h2 className="text-xl font-semibold text-center mb-2">Answers</h2>
+                    <h2 className="text-2xl font-bold text-center mb-2">Answers</h2>
                     <div className="border border-gray-300 rounded-lg shadow-sm">
                         <table className="w-full text-sm text-left border-collapse">
                             <thead className="bg-gray-100">
