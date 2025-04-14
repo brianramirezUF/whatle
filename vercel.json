@@ -1,0 +1,11 @@
+{
+    "crons": [
+      {
+        "path": "/api/dailyReset",
+        "schedule": "0 0 * * *",
+        "headers": {
+          "x-cron-secret": "@CRON_SECRET"
+        }
+      }
+    ]
+  }
