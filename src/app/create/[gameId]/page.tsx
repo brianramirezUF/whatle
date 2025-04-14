@@ -16,6 +16,7 @@ export default function CreateGame() {
     const [attrEditingName, setAttrEditingName] = useState<string | null>(null);
     const [answers, setAnswers] = useState<Record<string, AnswerType>>({});
     const [ansEditingName, setAnsEditingName] = useState<string | null>(null);
+    const [tempAnswerName, setTempAnswerName] = useState<string>("");
     const [gameName, setGameName] = useState<string>("Game Name");
 
     // Routing
@@ -101,7 +102,8 @@ export default function CreateGame() {
     const addAnswer = () => {
         if (!attributes.length) return;
 
-        const name = `Answer ${Object.keys(answers).length}`;
+        let name = `Answer ${Object.keys(answers).length}`;
+
         const newAnswer: AnswerType = {
             name,
             attributes: attributes.reduce<Record<string, string>>(
@@ -117,21 +119,40 @@ export default function CreateGame() {
     };
 
     // Map answer values to correct answer
-    const handleAnswerSave = (name: string, values: { attributes: Record<string, string> }) => {
-        setAnswers((prev) => ({
-            ...prev,
-            [name]: {
-                name,
-                attributes: { ...values.attributes },
-            },
-        }));
+    const handleAnswerSave = (
+    oldName: string,
+    values: { attributes: Record<string, string> }
+    ) => {
+    setAnswers((prev) => {
+        const updated = { ...prev };
 
-        setAnsEditingName(null);
-    };
+        // name hasn’t changed, just update attributes
+        if (oldName === tempAnswerName) {
+            updated[oldName] = {
+                name: oldName,
+                attributes: { ...values.attributes },
+            };
+            return updated;
+        }
+
+        delete updated[oldName];
+        updated[tempAnswerName] = {
+            name: tempAnswerName,
+            attributes: { ...values.attributes },
+        };
+
+        return updated;
+    });
+
+    setAnsEditingName(null);
+    setTempAnswerName('');
+};
+
 
     // Change ID (name) of current editing answer (called by clicking pen icon in 'Answer' component ./components.tsx)
     const handleAnswerEdit = (name: string) => {
         setAnsEditingName(name);
+        setTempAnswerName(name);  
     };
 
     // Change ID (name) of current editing attribute (called by clicking pen icon in 'Attribute' component ./components.tsx)
@@ -186,9 +207,6 @@ export default function CreateGame() {
                     className="w-[300px] text-center border border-gray-300 rounded-lg px-2 py-1"
                 />
             </div>
-
-
-
 
             <h1 className='font-bold'>Attribute List</h1>
             <div className="flex flex-col items-center mt-6 w-full">
@@ -281,7 +299,17 @@ export default function CreateGame() {
                             <tbody>
                                 {Object.entries(answers).map(([answerKey, answer], rowIndex) => (
                                     <tr key={rowIndex} className="hover:bg-gray-50">
-                                        <td className="border px-4 py-2 font-medium">{answer.name}</td>
+                                        <td className="border px-4 py-2">
+                                            {ansEditingName === answer.name ? 
+                                            (
+                                                <input
+                                                    type="text"
+                                                    className="w-full px-2 py-1 border border-gray-300 rounded"
+                                                    value={tempAnswerName}
+                                                    onChange={(e) => setTempAnswerName(e.target.value)}
+                                                /> 
+                                            ) : (answer.name)}  
+                                        </td>
 
                                         {attributes.map((attr, attrIndex) => (
                                             <td key={attrIndex} className="border px-2 py-1 text-center">
