@@ -1,15 +1,13 @@
 import { NextResponse } from "next/server";
 import { db } from "@/config/firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
-console.log("🔥 POST /api/updateUserHistory hit");
 
 export async function POST(req: Request) {
   try {
-    const { userId, gameId, gameName, won, timeTaken } = await req.json();
-    console.log("Received update history request:", { userId, gameId, gameName, won, timeTaken });
+    const { userId, gameId, name, won, timeTaken } = await req.json();
+    console.log("Received update history request:", { userId, gameId, name, won, timeTaken });
 
-
-    if (!userId || !gameId || !gameName || typeof won !== "boolean" || typeof timeTaken !== "number") {
+    if (!userId || !gameId || !name || typeof won !== "boolean" || typeof timeTaken !== "number") {
       return NextResponse.json({ error: "Missing or invalid parameters" }, { status: 400 });
     }
 
@@ -25,7 +23,7 @@ export async function POST(req: Request) {
 
     const currentGame = prevHistory[gameId] || {
       id: gameId,
-      name: gameName,
+      name: name,
       numPlays: 0,
       numWins: 0,
       fastestTime: Number.MAX_SAFE_INTEGER,
@@ -44,9 +42,8 @@ export async function POST(req: Request) {
     };
 
     await setDoc(userRef, { ...userData, history: updatedHistory });
-    console.log("✅ Firestore updated for user:", userId);
-    console.log("📦 Updated history object:", updatedHistory);
-
+    /*console.log("✅ Firestore updated for user:", userId);
+    console.log("📦 Updated history object:", updatedHistory);*/
 
     return NextResponse.json({ success: true, updatedGame }, { status: 200 });
 
