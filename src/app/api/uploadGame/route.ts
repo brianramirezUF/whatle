@@ -36,7 +36,8 @@ export async function POST(req: Request) {
 
             return NextResponse.json({ id: gameDoc.id, message: 'Game updated successfully' }, { status: 200 });
         }
-    } catch (error: any) {
+    } 
+    catch (error: any) {
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }

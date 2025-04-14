@@ -62,7 +62,7 @@ export default function CreateGame() {
 
         try {
             const idToken = await currentUser.getIdToken();
-            const response = await fetch(`http://localhost:3000/api/uploadGame`, {
+            const response = await fetch('/api/uploadGame', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
