@@ -35,7 +35,7 @@ export default function GameList() {
         const fetchGames = async () => {
             try {
                 // TODO: uncomment when added UseContext for uid
-                const response = await fetch(`http://localhost:3000/api/getGamesByUserId?uid=${currentUser?.uid}`);
+                const response = await fetch(`/api/getGamesByUserId?uid=${currentUser?.uid}`);
 
                 if (!response.ok) {
                     throw new Error('Failed to fetch games');
