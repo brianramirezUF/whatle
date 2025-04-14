@@ -93,26 +93,26 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name }) => {
   // Update guesses array (each guess is an index of an answer from the 'answers' array)
   const makeGuess = async (guess: string) => {
     if (!guess || !correctAnswer) return;
-  
+
     setGuesses((prev) => [...prev, guess]);
-  
+
     const isWin = guess === correctAnswer.name;
     won = isWin;
-  
-  
+
+
     const auth = getAuth();
     const currentUser = auth.currentUser;
-  
+
     if (!currentUser) {
       console.error("❌ No user is logged in.");
       alert("❌ You must be logged in to track progress.");
       return;
     }
-  
+
     const userId = currentUser.uid;
     const gameId = "4"; // Or whatever game you're testing
     const timeTaken = Math.floor(Math.random() * 100) + 1;
-  
+
     const payload = {
       userId,
       gameId,
@@ -143,9 +143,9 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name }) => {
 
         return { id, x, y };
       });
-    
+
       setConfettiBursts(bursts); // Single state update → single re-render
-    
+
       setTimeout(() => {
         setConfettiBursts([]);
       }, 2500);
@@ -156,7 +156,7 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name }) => {
       launchBursts();
     }
 
-  
+
     try {
       const res = await fetch("/api/updateUserHistory", {
         method: "POST",
@@ -165,23 +165,23 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name }) => {
         },
         body: JSON.stringify(payload),
       });
-  
+
       const data = await res.json();
-  
+
       if (!res.ok) {
         // console.error("❌ API Error Response:", data);
         // alert("❌ Failed to update Firebase: " + (data.error || "Unknown error"));
         // return;
       }
-  
+
     } catch (err: any) {
       console.error("❌ Network/Code Error:", err.message);
       //alert("❌ Error updating Firebase: " + err.message);
     }
   };
-  
-  
-  
+
+
+
 
   const renderHeaders = () => (
     <>
@@ -201,7 +201,7 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name }) => {
 
       return (
         <React.Fragment key={`row-${rowIndex}`}>
-           <div>
+          <div>
             <Card className="p-2 bg-gray-100 flex font-bold items-center justify-center aspect-square min-w-[100px] max-w-[300px] card"
               style={Games[3].icon ? {
                 backgroundImage: `url(${Games[3].icon})`,
@@ -214,54 +214,24 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name }) => {
             </Card>
           </div>
           {attributes.map((attr: AttributeType, colIndex: number) => (
-            <div key={`cell-${rowIndex}-${colIndex}`} style={{ animationDelay: `${colIndex * 0.4}s` }} className="fade-in">
-            <Card
-              key={`${rowIndex}-${colIndex}`}
-              className="p-2 shadow-md flex items-center justify-center border aspect-square min-w-[100px] max-w-[300px]"
-              style={{
-                backgroundColor: comparisons[attr.type as keyof typeof comparisons](
-                  guessedAnswer.attributes[attr.name],
-                  correctAnswer.attributes[attr.name]
-                ).status,
-                backgroundImage: (() => {
-                  const status = comparisons[attr.type as keyof typeof comparisons](
-                    guessedAnswer.attributes[attr.name],
-                    correctAnswer.attributes[attr.name]
-                  ).status;
-            
-                  if (status === GuessStatus.OVER) return `url('/svgs/arrowDown.svg')`;
-                  if (status === GuessStatus.UNDER) return `url('/svgs/arrowUp.svg')`;
-                  return 'none';
-                })(),
-                backgroundSize: 'cover',
-                backgroundRepeat: 'no-repeat',
-                backgroundPosition: 'center',
-              }}
-              >
-              <CardContent className="text-center ">
-                <div className="flex items-center justify-center">
-                  <span className="text-2xl text-center guess-text ">
-                    <Guess
-                      guess={guessedAnswer.attributes[attr.name] || 'Value'}
-                      answer={correctAnswer.attributes[attr.name] || 'Value'}
-                      type={attr.type}
-                    />
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
-            </div>
+            <Guess
+              key={`cell-${rowIndex}-${colIndex}`}
+              colIndex={colIndex}
+              rowIndex={rowIndex}
+              guess={guessedAnswer.attributes[attr.name] || 'Value'}
+              answer={correctAnswer.attributes[attr.name] || 'Value'}
+              type={attr.type}
+            />
           ))}
-
         </React.Fragment>
       );
     });
   };
-  return ( 
+  return (
     <div className="flex flex-col justify-center items-center p-4">
-    {confettiBursts.map((burst) => (
-      <ConfettiBurst key={burst.id} x={burst.x} y={burst.y} id={burst.id} />
-    ))}
+      {confettiBursts.map((burst) => (
+        <ConfettiBurst key={burst.id} x={burst.x} y={burst.y} id={burst.id} />
+      ))}
       <div className="max-w-6xl w-full flex flex-col bg-white rounded-lg p-6 mb-4 justify-center items-center">
         <h2 className="text-xl mb-4 font-bold text-center">{name}</h2>
         <div className="flex items-center gap-2 w-full max-w-md">
