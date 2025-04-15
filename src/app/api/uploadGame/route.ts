@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/config/firebase';
 import { doc, collection, setDoc, query, getDocs, where } from 'firebase/firestore';
+import { Answer } from '@/app/create/components';
 
 // TODO: update firebase rules and authentication to verify correct user is updating correct
 // PUT /api/uploadGame
@@ -32,7 +33,10 @@ export async function POST(req: Request) {
         } else {
             // Game exists, update document
             const gameDoc = gameSnapshot.docs[0];
-            await setDoc(gameDoc.ref, { ...body, uid }, { merge: true });
+            const gameData = gameDoc.data();
+
+            // Don't merge answers
+            await setDoc(gameDoc.ref, { ...body, ...gameData, answers: body.answers, attributes: body.attributes, uid });
 
             return NextResponse.json({ id: gameDoc.id, message: 'Game updated successfully' }, { status: 200 });
         }
