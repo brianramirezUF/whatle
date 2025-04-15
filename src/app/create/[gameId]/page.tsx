@@ -100,8 +100,12 @@ export default function CreateGame() {
         setAnswers(data.answers);
         setAttributes(data.attributes);
         setGameName(data.name);
+        if (data.maxGuesses) {
+            setMaxGuesses(data.maxGuesses);
+            setMaxGuessesInput(data.maxGuesses.toString());
+          }
     }
-
+ 
     const addAttribute = () => {
         const newAttribute: AttributeType = {
             name: `Attribute ${attributes.length}`,

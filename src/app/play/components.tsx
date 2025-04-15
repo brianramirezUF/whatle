@@ -47,16 +47,18 @@ export interface GameProps {
   answers: Record<string, AnswerType>,
   attributes: AttributeType[],
   name: string,
-  gameId?: string
+  gameId?: string,
+  maxGuesses?: number;
 }
 
-const Game: React.FC<GameProps> = ({ answers, attributes, name, gameId }) => {
+const Game: React.FC<GameProps> = ({ answers, attributes, name, gameId, maxGuesses }) => {
   const [guesses, setGuesses] = useState<GuessResultContainer[]>([]);
   const [guessNames, setGuessNames] = useState<string[]>([]);
   const [curGuess, setCurGuess] = useState<string>('');
   const [filteredAnswers, setFilteredAnswers] = useState<AnswerType[]>(Object.values(answers));
   const [showDropdown, setShowDropdown] = useState(false);
   const [won, setWon] = useState(false);
+  const [isLost, setIsLost] = useState(false);
   const [confettiBursts, setConfettiBursts] = useState<{ id: number; x: number; y: number }[]>([]);
 
   if (!Object.keys(answers).length) {
@@ -87,6 +89,7 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name, gameId }) => {
 
   const resetGame = () => {
     setWon(false);
+    setIsLost(false);
     setGuesses([]);
     setGuessNames([]);
     setCurGuess('');
@@ -95,6 +98,7 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name, gameId }) => {
   // Update guesses array (each guess is an index of an answer from the 'answers' array)
   const makeGuess = async (guess: string) => {
     if (!guess || won) return;
+
     if (guessNames.includes(guess)) return;
 
     const res = await fetch("/api/checkGuess", {
@@ -106,12 +110,18 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name, gameId }) => {
     if (!res.ok) {
       throw new Error('Failed to make guess.');
     }
-
-    setGuessNames((prev) => [...prev, guess]);
     
-
     const { results, isWin } = await res.json();
     setWon(isWin);
+    setGuessNames((prev) => [...prev, guess]);
+
+    const newGuessCount = guessNames.length + 1;
+    const isGuessLimitReached = maxGuesses && newGuessCount >= maxGuesses && !isWin;
+
+    if (isGuessLimitReached) {
+      setIsLost(true); // UI will still reflect loss
+    }
+
     setGuesses((prev) => [...prev, { result: results, name: guess }]);
 
     const auth = getAuth();
@@ -123,10 +133,11 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name, gameId }) => {
       return;
     }
 
+
     const userId = currentUser.uid;
     const timeTaken = Math.floor(Math.random() * 100) + 1;
 
-    const payload = {
+    const payload = { 
       userId,
       gameId,
       name,
@@ -172,8 +183,13 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name, gameId }) => {
       }, attributes.length * 400);
     }
 
-    // Only update history when the user wins
-    if (isWin) {
+    if (isGuessLimitReached) { // losing animation
+      
+
+    }
+
+    // update if win OR lose
+    if (isWin || isGuessLimitReached) {
       try {
         const res = await fetch("/api/updateUserHistory", {
           method: "POST",
@@ -184,7 +200,7 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name, gameId }) => {
         });
   
         if (!res.ok) {
-          // console.error("❌ API Error Response:", data);
+          console.error("❌ API Error Response:");
           // alert("❌ Failed to update Firebase: " + (data.error || "Unknown error"));
           // return;
         }
@@ -239,13 +255,27 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name, gameId }) => {
 
   return (
     <div className="flex flex-col justify-center items-center p-4">
+      {maxGuesses && (
+        <p className="mt-2 text-sm text-gray-600 text-center">
+          Guesses: {guessNames.length} / {maxGuesses}
+        </p>
+      )}
+
+
       {confettiBursts.map((burst) => (
         <ConfettiBurst key={burst.id} x={burst.x} y={burst.y} id={burst.id} />
       ))}
+
+      {isLost && (
+        <p className="mt-4 text-lg font-semibold text-red-600 lost-text">
+          ❌ You lost! Try again next time! ❌
+        </p>
+      )}
       <div className="max-w-6xl w-full flex flex-col bg-white rounded-lg p-6 mb-4 justify-center items-center">
         <h2 className="text-xl mb-4 font-bold text-center">{name}</h2>
 
-        {!won &&
+
+        {!won && !isLost &&
           <div className="flex items-center gap-2 w-full max-w-md">
             <div className="relative w-full">
               <input
