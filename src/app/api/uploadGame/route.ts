@@ -32,7 +32,10 @@ export async function POST(req: Request) {
         } else {
             // Game exists, update document
             const gameDoc = gameSnapshot.docs[0];
-            await setDoc(gameDoc.ref, { ...body, uid }, { merge: true });
+            const gameData = gameDoc.data();
+
+            // Don't merge answers
+            await setDoc(gameDoc.ref, { ...body, ...gameData, answers: body.answers, attributes: body.attributes, uid });
 
             return NextResponse.json({ id: gameDoc.id, message: 'Game updated successfully' }, { status: 200 });
         }
