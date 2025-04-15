@@ -20,6 +20,8 @@ export default function CreateGame() {
     const [tempAnswerName, setTempAnswerName] = useState<string>("");
     const [gameName, setGameName] = useState<string>("Game Name");
     const [isLoading, setIsLoading] = useState(true);
+    const [maxGuesses, setMaxGuesses] = useState<number>(6); 
+    const [maxGuessesInput, setMaxGuessesInput] = useState<string>('6');
 
     // Routing
     const params = useParams();
@@ -42,6 +44,10 @@ export default function CreateGame() {
                 if (data.name) {
                     setGameName(data?.name);
                 }
+
+                if (data.maxGuesses !== undefined) {
+                    setMaxGuesses(data.maxGuesses);
+                }                
 
                 if (data.attributes) {
                     setAttributes(data?.attributes);
@@ -73,7 +79,8 @@ export default function CreateGame() {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${idToken}`
                 },
-                body: JSON.stringify({ name: gameName, answers, attributes, uid: currentUser.uid }, null, 2)
+                body: JSON.stringify({ name: gameName, answers, attributes, uid: currentUser.uid, maxGuesses }, null, 2)
+
             });
 
             const result = await response.json();
@@ -93,8 +100,12 @@ export default function CreateGame() {
         setAnswers(data.answers);
         setAttributes(data.attributes);
         setGameName(data.name);
+        if (data.maxGuesses) {
+            setMaxGuesses(data.maxGuesses);
+            setMaxGuessesInput(data.maxGuesses.toString());
+          }
     }
-
+ 
     const addAttribute = () => {
         const newAttribute: AttributeType = {
             name: `Attribute ${attributes.length}`,
@@ -220,12 +231,33 @@ export default function CreateGame() {
 
             <div className="flex flex-col items-center text-center space-y-3 mb-6">
                 <h1 className="text-3xl font-bold">CREATE GAME</h1>
-
                 <Input
                     value={gameName}
                     onChange={(e) => setGameName(e.target.value)}
                     className="w-[300px] text-center border border-gray-300 rounded-lg px-2 py-1"
                 />
+                <label className="text-sm font-medium">Max Guesses</label>
+                <Input
+                    type="number"
+                    min={1}
+                    step={1}
+                    value={maxGuessesInput}
+                    onChange={(e) => {
+                        const cleaned = e.target.value.replace(/^0+(?=\d)/, '');
+                        setMaxGuessesInput(cleaned);
+                    }}
+                    onBlur={() => {
+                        const parsed = parseInt(maxGuessesInput, 10);
+                        if (!isNaN(parsed) && parsed >= 1) {
+                            setMaxGuesses(parsed);
+                        } 
+                        else {
+                            setMaxGuesses(1);
+                            setMaxGuessesInput('1');
+                        }
+                    }}
+                    className="w-[300px] text-center border border-gray-300 rounded-lg px-2 py-1"
+                    />
             </div>
 
             <h2 className="text-2xl font-bold text-center mb-4">Attribute List</h2>
@@ -397,7 +429,7 @@ export default function CreateGame() {
                 className='decoration-dashed underline table'
                 href={
                     'data:application/json;charset=utf-8,' +
-                    encodeURIComponent(JSON.stringify({ name: gameName, answers, attributes }, null, 2))
+                    encodeURIComponent(JSON.stringify({ name: gameName, answers, attributes, uid: currentUser?.uid || '', maxGuesses }, null, 2))
                 }
             >
                 Get Game as JSON

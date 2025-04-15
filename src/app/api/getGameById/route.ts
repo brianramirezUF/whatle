@@ -30,7 +30,8 @@ export async function GET(req: Request)  {
             name: gameData.name, 
             uid: gameData.uid,
             daily_plays: gameData.daily_plays,
-            total_plays: gameData.total_plays
+            total_plays: gameData.total_plays,
+            maxGuesses: gameData.maxGuesses ?? null 
         }, 
         { status: 200 });
     } 
