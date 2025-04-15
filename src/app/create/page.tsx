@@ -15,14 +15,7 @@ import Link from 'next/link';
 import ProtectedRoute from '@/components/ProtectedRoute'
 import { useAuth } from '@/contexts/AuthContext'
 import LoadingSpinner from '@/components/LoadingSpinner'
-
-interface Game {
-    id: string,
-    uid: string,
-    name: string,
-    icon: string,
-    plays: string
-};
+import { GameCard, GameCardProps } from '@/components/GameCard'
 
 export default function GameList() {
     const [games, setGames] = useState([]);
@@ -64,22 +57,9 @@ export default function GameList() {
     const gamesList = games.length ? (
         <Carousel>
             <CarouselContent className='pb-4'>
-                {games.map((game: Game, index) => (
+                {games.map((game: GameCardProps, index) => (
                     <CarouselItem key={index} className={games.length < 3 ? '' : 'basis-1/3'}>
-                        <div className='p-1'>
-                            <Link href={`create/${game.id}`}>
-                                <Card
-                                    className='card'
-                                    style={game.icon ? {
-                                        backgroundImage: `url(${game.icon})`,
-                                    } : {}}
-                                >
-                                    <CardContent className='card-content flex aspect-square items-center justify-center p-6'>
-                                        <span className='text-3xl font-semibold text'>{game.name}</span>
-                                    </CardContent>
-                                </Card>
-                            </Link>
-                        </div>
+                        <GameCard {...game} />
                     </CarouselItem>
                 ))}
             </CarouselContent>
