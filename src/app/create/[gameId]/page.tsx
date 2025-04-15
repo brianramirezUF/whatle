@@ -30,6 +30,8 @@ export default function CreateGame() {
     useEffect(() => {
         const loadGame = async () => {
             try {
+                if (gameId == 'new-game') return;
+
                 const response = await fetch(`http://localhost:3000/api/getGameById?id=${gameId}`);
 
                 if (!response.ok) {
@@ -61,9 +63,8 @@ export default function CreateGame() {
                 setIsLoading(false);
             }
         };
-        if (gameId != 'new-game') {
-            loadGame();
-        }
+        
+        loadGame();
     }, [gameId]);
 
     const uploadGame = async () => {
