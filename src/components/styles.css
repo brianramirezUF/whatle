@@ -28,3 +28,32 @@
   opacity: 0;
   will-change: transform, opacity;
 }
+
+.login-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 85vh;
+  width: 100%;
+}
+
+.login-title {
+  margin-top: 15;
+  margin-bottom: 10;
+}
+
+.login-button {
+  border-radius: 10px;
+  font-size: 15;
+  padding: 5 10;
+  margin: 10;
+}
+
+.login-button-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  margin-top: 5;
+}
