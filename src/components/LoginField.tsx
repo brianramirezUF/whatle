@@ -19,7 +19,7 @@ function LoginField() {
         setError("");
         try {
             await signInWithEmailAndPassword(auth, email, password);
-            router.push('/home');
+            router.push('/');
         } catch (error: any) {
             setError("Invalid login, please try again.");
             console.error("Login Error", error);
