@@ -113,7 +113,7 @@ const EditableAttribute: React.FC<EditableAttributeProps> = ({ attribute, onSave
   const [type, setType] = useState(attribute.type);
 
   return (
-      <div className='p-4 border rounded-lg shadow-md bg-white flex gap-4 items-center'>
+    <div className='p-4 border rounded-lg shadow-md bg-white flex justify-between items-center transition-shadow hover:shadow-xl cursor-pointer'>
           <input
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -137,21 +137,37 @@ const EditableAttribute: React.FC<EditableAttributeProps> = ({ attribute, onSave
 };
 
 interface AttributeProps {
-  attribute: AttributeType;
-  onEdit: (name: string) => void;
+    attribute: AttributeType;
+    onEdit: (name: string) => void;
+    onDelete: (name: string) => void; // ✅ Add this
 }
+  
 
 // Component to display a specific attribute and its name/type
-const Attribute: React.FC<AttributeProps> = ({ attribute, onEdit }) => {
-  return (
-      <div className='p-4 border rounded-lg shadow-md bg-white flex justify-between items-center'>
-          <div>
-              <span className='font-semibold'>{attribute.name}</span>
-              <span className='text-gray-500 ml-2'>({attribute.type})</span>
-          </div>
-          <Icons.pen onClick={() => onEdit(attribute.name)} className="cursor-pointer text-gray-500 hover:text-gray-700" />
+const Attribute: React.FC<AttributeProps> = ({ attribute, onEdit, onDelete }) => {
+    return (
+      <div
+        className='p-4 border rounded-lg shadow-md bg-white flex justify-between items-center cursor-pointer'
+        onClick={() => onEdit(attribute.name)} // ✅ Clicking anywhere edits...
+      >
+        <div>
+          <span className='font-semibold'>{attribute.name}</span>
+          <span className='text-gray-500 ml-2'>({attribute.type})</span>
+        </div>
+  
+        <button
+          onClick={(e) => {
+            e.stopPropagation(); // ✅ Prevents click from triggering edit
+            onDelete(attribute.name);
+          }}
+          className="bg-red-500 text-white px-3 py-1 text-sm rounded hover:bg-red-600"
+        >
+          Delete
+        </button>
       </div>
-  );
-};
+    );
+  };
+  
+  
 
 export { EditableAnswer, Answer, EditableAttribute, Attribute };

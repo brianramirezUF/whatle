@@ -15,6 +15,7 @@ import Link from 'next/link';
 import ProtectedRoute from '@/components/ProtectedRoute'
 import { useAuth } from '@/contexts/AuthContext'
 
+
 interface Game {
     id: string,
     uid: string,

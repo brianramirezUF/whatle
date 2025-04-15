@@ -221,32 +221,31 @@ export default function CreateGame() {
             <div className="flex flex-col items-center mt-6 w-full">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
                     {attributes.map((attribute, index) => (
-                        <Card key={index}>
-                            <CardContent className="p-4 relative">
-                            {attrEditingName === attribute.name ? (
-                                <EditableAttribute attribute={attribute} onSave={handleAttributeSave} />
-                            ) : (
-                                <>
-                                <Attribute attribute={attribute} onEdit={handleAttributeEdit} />
-                                <button
-                                    className="absolute top-2 right-2 text-red-500 hover:text-red-700 text-lg"
-                                    onClick={() => {
-                                    setAttributes(attributes.filter((_, i) => i !== index));
-                                    setAnswers((prev) => {
-                                        const updated = { ...prev };
-                                        Object.keys(updated).forEach((key) => {
-                                        delete updated[key].attributes[attribute.name];
-                                        });
-                                        return updated;
-                                    });
-                                    }}
-                                >
-                                    ✕
-                                </button>
-                                </>
-                            )}
-                            </CardContent>
-                      </Card>                      
+                        <Card
+                            key={index}
+                            className="!bg-transparent !border-none !shadow-none hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer"
+                            >
+                        <CardContent className="p-4 relative bg-transparent">
+                          {attrEditingName === attribute.name ? (
+                            <EditableAttribute attribute={attribute} onSave={handleAttributeSave} />
+                          ) : (
+                            <Attribute
+                              attribute={attribute}
+                              onEdit={handleAttributeEdit}
+                              onDelete={(name) => {
+                                setAttributes((prev) => prev.filter((attr) => attr.name !== name));
+                                setAnswers((prev) => {
+                                  const updated = { ...prev };
+                                  Object.keys(updated).forEach((key) => {
+                                    delete updated[key].attributes[name];
+                                  });
+                                  return updated;
+                                });
+                              }}
+                            />
+                          )}
+                        </CardContent>
+                      </Card>                                            
                     ))}
                 </div>
 
