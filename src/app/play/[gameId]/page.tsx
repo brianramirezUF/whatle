@@ -1,16 +1,14 @@
 "use client";
 
-import { Icons } from '@/components/icons'
 import { useState, useEffect } from 'react';
-import { AttributeType, AnswerType } from '../../create/attributes';
 import { Game, GameProps } from '../components';
-import { JsonParser } from '@/components/JsonParser';
-import { Card, CardContent } from "@/components/ui/card";
 import { useParams } from 'next/navigation';
+import LoadingSpinner from '@/components/LoadingSpinner';
 import React from 'react';
 
 export default function PlayGame() {
     const [gameData, setGameData] = useState<GameProps | null>();
+    const [isLoading, setIsLoading] = useState(true);
     const params = useParams();
     const gameId = params.gameId as string;
 
@@ -23,6 +21,9 @@ export default function PlayGame() {
         })
         .catch((err) => {
           console.error("Failed to fetch game:", err);
+        })
+        .finally(() => {
+          setIsLoading(false);
         });
     }, [gameId]);
      
@@ -33,6 +34,14 @@ export default function PlayGame() {
         }
       }); 
     };
+
+    if (isLoading) {
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-white">
+          <LoadingSpinner />
+        </div>
+      );
+    }
 
     const content = (
         <div>
