@@ -45,7 +45,17 @@ export async function POST(req: Request) {
     /*console.log("✅ Firestore updated for user:", userId);
     console.log("📦 Updated history object:", updatedHistory);*/
 
-    return NextResponse.json({ success: true, updatedGame }, { status: 200 });
+    const gameRef = doc(db, 'games', gameId);
+    const gameSnap = await getDoc(gameRef);
+    
+    if (!gameSnap.exists()) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+    
+    const gameData = gameSnap.data();
+    await setDoc(gameRef, {...gameData, daily_plays: gameData.daily_plays + 1, total_plays: gameData.total_plays + 1 });
+
+    return NextResponse.json({ success: true }, { status: 200 });
 
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
