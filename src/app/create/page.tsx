@@ -59,7 +59,7 @@ export default function GameList() {
             <CarouselContent className='pb-4 w-full max-w-5xl mx-auto'>
                 {games.map((game: GameCardProps, index) => (
                     <CarouselItem key={index} className={games.length < 3 ? '' : 'basis-1/3'}>
-                        <GameCard {...game} />
+                        <GameCard {...game} play={false} />
                     </CarouselItem>
                 ))}
             </CarouselContent>
