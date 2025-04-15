@@ -1,6 +1,6 @@
 import { Icons } from '@/components/icons'
 import { useState } from 'react';
-import { Guess, AttributeType, AnswerType, comparisons  } from './attributes';
+import { Guess, AttributeType, AnswerType } from './attributes';
 import { Card, CardContent } from "@/components/ui/card";
 import React from 'react';
 

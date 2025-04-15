@@ -1,61 +1,127 @@
 'use client'
 import { useEffect, useState } from "react";
 import { RedirectButton } from "./Buttons";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import "./styles.css";
 
 function SignupField(){
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState(""); 
+    const [emailError, setEmailError] = useState("");
+    const [passwordError, setPasswordError] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
+
+    const isValidEmail = (email : string) : boolean => {
+        const atIndex = email.indexOf("@");
+        if (atIndex == -1 || atIndex == 0 || atIndex == email.length - 1) {
+          return false;
+        }
+        const domain = email.substring(atIndex + 1);
+        const periodIndex = domain.indexOf(".");
+        if (periodIndex == -1 || periodIndex == 0 || periodIndex == domain.length - 1) {
+          return false;
+        }
+        return true;
+    }
+
+    const isValidPassword = (password : string) : boolean => {
+        return (password.length >= 8 ? true : false);
+    }
 
     const handleSignUp = async (email: string, password: string) => {
-        try{
-            const response = await fetch("/api/auth/signup", {
-                method: "POST",
-                headers: { 
-                    "Content-Type": "application/json" 
-                },
-                body: JSON.stringify({ email, password }),
-            });
-    
-            const data = await response.json();
+        setEmailError("");
+        setPasswordError("");
 
-            if (!response.ok){
-                throw new Error(data.error);
-            } 
+        const validEmail = isValidEmail(email);
+        const validPassword = isValidPassword(password);
 
-            console.log("Signup Success", data);
+        if (validEmail && validPassword) {
+            try{
+                const response = await fetch("/api/auth/signup", {
+                    method: "POST",
+                    headers: { 
+                        "Content-Type": "application/json" 
+                    },
+                    body: JSON.stringify({ email, password }),
+                });
+        
+                const data = await response.json();
 
-            console.log("Attempting imgur redirect...");
+                if (!response.ok){
+                    throw new Error(data.error);
+                } 
 
-            if (data.imgurAuthUrl) {
-                window.location.href = data.imgurAuthUrl;
+                console.log("Signup Success", data);
+
+                console.log("Attempting imgur redirect...");
+
+                if (data.imgurAuthUrl) {
+                    window.location.href = data.imgurAuthUrl;
+                }
+            } catch (error: any) {
+                console.error("Signup Error", error);
             }
-        } catch (error: any) {
-            console.error("Signup Error", error);
+        } else {
+            setEmailError(validEmail ? "" : "Please enter a valid email.");
+            setPasswordError(validPassword ? "" : "Please enter a password with 8+ characters.");
         }
     }
 
     return(
-        <>
-            <div>
-                <input 
-                    type="email" 
-                    placeholder="Enter email" 
-                    value={email} 
-                    onChange={(e) => setEmail(e.target.value)} 
+        <div className="login-container">
+            <h1 className="login-title text-center font-medium text-[40px]">
+                Sign up
+            </h1>
+            <h2 className="login-title text-center font-medium">
+                Email
+            </h2>
+            <Input 
+                type="email" 
+                placeholder="Enter email" 
+                value={email} 
+                onChange={(e) => setEmail(e.target.value)} 
+                className="w-[300px] border border-gray-300 rounded-lg px-2 py-1"
+            />
+            {emailError && <p className="text-red-500">{emailError}</p>}
+            <h2 className="login-title text-center font-medium">
+                Password
+            </h2>
+            <Input 
+                type={showPassword == false ? "password" : "text"}
+                placeholder="Enter password" 
+                value={password} 
+                onChange={(e) => setPassword(e.target.value)} 
+                className="w-[300px] border border-gray-300 rounded-lg px-2 py-1"
+            />
+            {passwordError && <p className="text-red-500">{passwordError}</p>}
+            <div className="login-button-container">
+                <Checkbox
+                    id="show"
+                    checked={showPassword}
+                    onCheckedChange={(checked) => setShowPassword(Boolean(checked))}
                 />
+                <label
+                    htmlFor="show"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 m-3"
+                >
+                    Show password
+                </label>
             </div>
-            <div>
-                <input 
-                    type="password" 
-                    placeholder="Enter password" 
-                    value={password} 
-                    onChange={(e) => setPassword(e.target.value)} 
-                />
+            <div className="login-button-container">
+                <button
+                    onClick={() => handleSignUp(email, password)}className="login-button bg-gray-200 text-black"
+                >
+                    Sign up
+                </button>
+                <RedirectButton
+                    url="/login"
+                    text="Log in"
+                    className="login-button bg-black text-white"
+                >
+                </RedirectButton>
             </div>
-            <button onClick={() => handleSignUp(email, password)}>Signup</button>
-            <br></br>
-            <RedirectButton url="/login" text="Already have an account? Login here"></RedirectButton>
-        </>
+        </div>
     )
 }
 

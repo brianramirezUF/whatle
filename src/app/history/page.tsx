@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/table";
 import { useAuth } from '@/contexts/AuthContext';
 import "./styles.css";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 type GameHistory = {
   id: number;
@@ -24,7 +25,7 @@ type GameHistory = {
 export default function History(){
   const { currentUser, loading } = useAuth();
   const [userHistory, setUserHistory] = useState<GameHistory[]>([]);
-  const [loadingHistory, setLoadingHistory] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   
   // call endpoint to receive user history
   useEffect(() => {
@@ -34,11 +35,12 @@ export default function History(){
         .then((history) => {
           setUserHistory(history);
           console.log("Fetched user history:", history);
-          setLoadingHistory(false);
         })
         .catch((err) => {
           console.error("Failed to fetch user history:", err);
-          setLoadingHistory(false);
+        })
+        .finally(() => {
+          setIsLoading(false);
         });
     }
   }, []);
@@ -53,13 +55,9 @@ export default function History(){
     )
   }
 
-  if (loadingHistory) {
+  if (isLoading) {
     return (
-      <div className="container">
-        <h1 className="title text-center font-medium">
-          Loading game history...
-        </h1>
-      </div>
+      <LoadingSpinner />
     )
   }
 
