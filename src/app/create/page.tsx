@@ -14,6 +14,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import ProtectedRoute from '@/components/ProtectedRoute'
 import { useAuth } from '@/contexts/AuthContext'
+import LoadingSpinner from '@/components/LoadingSpinner'
 
 interface Game {
     id: string,
@@ -28,7 +29,7 @@ export default function GameList() {
     // TODO: add UseContext
     const [uid, setUID] = useState('');
     const { currentUser } = useAuth();
-    const [isLoading, setLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
 
     useEffect(() => {
@@ -46,14 +47,14 @@ export default function GameList() {
             } catch (error: any) {
                 setError(error.message);
             } finally {
-                setLoading(false);
+                setIsLoading(false);
             }
         };
         fetchGames();
     }, [uid]);
 
     if (isLoading) {
-        return <div>Loading...</div>;
+        return <LoadingSpinner />;
     }
 
     if (error) {

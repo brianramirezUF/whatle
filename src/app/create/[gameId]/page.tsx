@@ -9,6 +9,7 @@ import { JsonParser } from '@/components/JsonParser';
 import { GameProps } from '../../play/components';
 import { useParams } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext';
+import LoadingSpinner from '@/components/LoadingSpinner';
 import { toast } from "sonner";
 
 export default function CreateGame() {
@@ -18,6 +19,7 @@ export default function CreateGame() {
     const [ansEditingName, setAnsEditingName] = useState<string | null>(null);
     const [tempAnswerName, setTempAnswerName] = useState<string>("");
     const [gameName, setGameName] = useState<string>("Game Name");
+    const [isLoading, setIsLoading] = useState(true);
 
     // Routing
     const params = useParams();
@@ -46,10 +48,12 @@ export default function CreateGame() {
                 if (data.answers) {
                     setAnswers(data?.answers);
                 }
-
             }
             catch (err) {
                 console.log('Error:', err);
+            }
+            finally {
+                setIsLoading(false);
             }
         };
         if (gameId != 'new-game') {
@@ -203,6 +207,12 @@ export default function CreateGame() {
 
         setAttrEditingName(null);
     };
+
+    if (isLoading) {
+        return (
+            <LoadingSpinner />
+        );
+    }
 
     const content = (
         <div className='m-5'>
