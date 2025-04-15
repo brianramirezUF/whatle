@@ -14,6 +14,7 @@ export interface AttributeType {
 export interface AnswerType {
     name: string;
     attributes: Record<string, string>;
+    icon?: string;
 }
 
 interface guessProps {

@@ -8,34 +8,11 @@ import "./styles.css";
 import { getAuth } from "firebase/auth";
 import { ConfettiBurst } from '@/components/ConfettiBurst';
 
-
-const Games = [
-  {
-    id: "4",
-    name: "MLBdle",
-    icon: "https://i.imgur.com/B7wb5i6_d.webp?maxwidth=520&shape=thumb&fidelity=high",
-  },
-  {
-    id: "2",
-    name: "Pokedle",
-    icon: "https://i.imgur.com/5ValAxb.jpeg",
-  },
-  {
-    id: "3",
-    name: "NBAdle",
-    icon: "https://i.imgur.com/PV54ZYq_d.webp?maxwidth=520&shape=thumb&fidelity=high",
-  },
-  {
-    id: "1",
-    name: "Marvelde",
-    icon: "https://i.imgur.com/YZwdjey.jpeg",
-  },
-];
-
 type GuessResult = {
   guess: string;
   status: GuessStatus;
   details?: string;
+  icon?: string;
 };
 
 type GuessResultContainer = {
@@ -212,9 +189,10 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name, gameId }) => {
       return (
         <React.Fragment key={`row-${rowIndex}`}>
           <div>
+            <>{console.log(answers[guess.name].icon)}</>
             <Card className="p-2 bg-gray-100 flex font-bold items-center justify-center aspect-square min-w-[100px] max-w-[300px] card"
-              style={Games[3].icon ? {
-                backgroundImage: `url(${Games[3].icon})`,
+              style={answers[guess.name].icon ? {
+                backgroundImage: `url(${answers[guess.name].icon})`,
               } : {}}
             >
               <CardContent className="card-content flex aspect-square items-center justify-center truncate">
