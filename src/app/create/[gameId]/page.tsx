@@ -21,6 +21,7 @@ export default function CreateGame() {
     const [gameName, setGameName] = useState<string>("Game Name");
     const [isLoading, setIsLoading] = useState(true);
     const [maxGuesses, setMaxGuesses] = useState<number>(6); 
+    const [maxGuessesInput, setMaxGuessesInput] = useState<string>('6');
 
     // Routing
     const params = useParams();
@@ -235,10 +236,24 @@ export default function CreateGame() {
                 <Input
                     type="number"
                     min={1}
-                    value={maxGuesses}
-                    onChange={(e) => setMaxGuesses(Number(e.target.value))}
+                    step={1}
+                    value={maxGuessesInput}
+                    onChange={(e) => {
+                        const cleaned = e.target.value.replace(/^0+(?=\d)/, '');
+                        setMaxGuessesInput(cleaned);
+                    }}
+                    onBlur={() => {
+                        const parsed = parseInt(maxGuessesInput, 10);
+                        if (!isNaN(parsed) && parsed >= 1) {
+                            setMaxGuesses(parsed);
+                        } 
+                        else {
+                            setMaxGuesses(1);
+                            setMaxGuessesInput('1');
+                        }
+                    }}
                     className="w-[300px] text-center border border-gray-300 rounded-lg px-2 py-1"
-                />
+                    />
             </div>
 
             <h2 className="text-2xl font-bold text-center mb-4">Attribute List</h2>
@@ -410,7 +425,7 @@ export default function CreateGame() {
                 className='decoration-dashed underline table'
                 href={
                     'data:application/json;charset=utf-8,' +
-                    encodeURIComponent(JSON.stringify({ name: gameName, answers, attributes }, null, 2))
+                    encodeURIComponent(JSON.stringify({ name: gameName, answers, attributes, uid: currentUser?.uid || '', maxGuesses }, null, 2))
                 }
             >
                 Get Game as JSON
