@@ -51,19 +51,18 @@ export default function NavBar() {
       <div>
         <Link href="/" passHref>
           <h1 className="text-lg font-bold">
-            {<Logo/>} 
+            {<Logo />}
           </h1>
         </Link>
       </div>
 
       {/* Middle Section */}
       <div className="flex items-center space-x-6 ">
-        <Button variant="link" className="text-sm select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
-
-          <Link href="/" passHref> 
-              Popular
-          </Link>
-        </Button>
+        <Link href="/" passHref>
+          <Button variant="link" className="text-sm select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+            Popular
+          </Button>
+        </Link>
         <CategoriesDropdown></CategoriesDropdown>
         <form
           onSubmit={handleSearchSubmit}
@@ -81,35 +80,35 @@ export default function NavBar() {
         </form>
       </div>
       {/* sign up, login cbuttons */}
-      <div className="flex items-center space-x-4"> 
+      <div className="flex items-center space-x-4">
         {!currentUser ? (
           <>
-        <Button variant="default" className="text-sm">
-          <Link href="/signup" passHref>
-            Sign Up
-          </Link>
-        </Button>
-        <Button variant="outline" className="text-sm">
-          <Link href="/login" passHref>
-            Login
-          </Link>
-        </Button>   
-        </>
-        ) :
-        (
-          <>
-            <Button variant="link" className="text-sm select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
-              <Link href="/play" passHref> 
-                  My Games
-              </Link>
-            </Button>
-            <Button variant="link" className="text-sm select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
-              <Link href="/history" passHref> 
-                  History
-              </Link>
-            </Button>
+            <Link href="/signup" passHref>
+              <Button variant="default" className="text-sm">
+                Sign Up
+              </Button>
+            </Link>
+            <Link href="/login" passHref>
+              <Button variant="outline" className="text-sm">
+                Login
+              </Button>
+            </Link>
           </>
-        )}
+        ) :
+          (
+            <>
+              <Link href="/play" passHref>
+                <Button variant="link" className="text-sm select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                  My Games
+                </Button>
+              </Link>
+              <Link href="/history" passHref>
+                <Button variant="link" className="text-sm select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                  History
+                </Button>
+              </Link>
+            </>
+          )}
       </div>
 
     </nav>
