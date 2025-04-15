@@ -23,17 +23,18 @@ export async function GET(req: Request)  {
         }
 
         const gameData = gameSnapshot.data();
-
-        return NextResponse.json({
+        return NextResponse.json({ 
             id: gameSnapshot.id,
-            name: gameData.name,
+            answers: gameData.answers, 
+            attributes: gameData.attributes, 
+            name: gameData.name, 
             uid: gameData.uid,
-            answers: gameData.answers,
-            attributes: gameData.attributes,
+            daily_plays: gameData.daily_plays,
+            total_plays: gameData.total_plays,
             maxGuesses: gameData.maxGuesses ?? null 
-        }, { status: 200 });
+        }, 
+        { status: 200 });
     } 
-    
     catch (error: any) {
         return NextResponse.json({ error: error.message }, { status: 500 });
     }

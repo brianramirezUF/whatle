@@ -26,7 +26,7 @@ export async function POST(req: Request) {
         if (gameSnapshot.docs.length === 0) {
             // Game does not exist, create new document
             const gamePointer = doc(collection(db, 'games'));
-            const gameRef = await setDoc(gamePointer, { ...body, uid });
+            const gameRef = await setDoc(gamePointer, { ...body, uid, daily_plays: 0, total_plays: 0 });
 
             return NextResponse.json({ ref: gameRef, message: 'Game uploaded successfully' }, { status: 201 });
         } else {

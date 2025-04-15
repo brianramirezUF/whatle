@@ -29,7 +29,7 @@ export async function GET(req: Request) {
             const randomAnswer = keys[Math.floor(Math.random() * keys.length)];
             await updateDoc(docSnap.ref, {
                 correct_answer: randomAnswer,
-                daily_plays: 0,
+                daily_plays: 0
             });
         });
 
