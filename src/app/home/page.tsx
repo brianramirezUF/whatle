@@ -51,7 +51,7 @@ export default function Home(){
             Featured Games:
         </h1>
         <Carousel>
-          <CarouselContent className="pb-4">
+          <CarouselContent className="pb-4 w-full max-w-5xl mx-auto">
           {popularGames.map((game, index) => (
             <CarouselItem key={index} className="basis-1/3">
               <Link href={`/play/${game.id}`}>
