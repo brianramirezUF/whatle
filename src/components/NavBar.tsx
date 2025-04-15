@@ -49,7 +49,7 @@ export default function NavBar() {
   return (
     <nav className="flex items-center justify-between p-3 bg-white shadow-md">
       <div>
-        <Link href="/home" passHref>
+        <Link href="/" passHref>
           <h1 className="text-lg font-bold">
             {<Logo/>} 
           </h1>
@@ -60,7 +60,7 @@ export default function NavBar() {
       <div className="flex items-center space-x-6 ">
         <Button variant="link" className="text-sm select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
 
-          <Link href="/home" passHref> 
+          <Link href="/" passHref> 
               Popular
           </Link>
         </Button>

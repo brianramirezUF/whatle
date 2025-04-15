@@ -39,6 +39,7 @@ import {
 import { RedirectButton } from '@/components/Buttons'
 import "./styles.css";
 import Link from "next/link";
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 type Game = {
   id: string;
@@ -48,6 +49,7 @@ type Game = {
 
 export default function Home(){
   const [popularGames, setPopularGames] = useState<Game[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   // call endpoint to receive featured games
   useEffect(() => {
@@ -59,16 +61,15 @@ export default function Home(){
       })
       .catch((err) => {
         console.error("Failed to fetch popular games:", err);
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
   }, []);
   
-  if (popularGames.length == 0) {
+  if (isLoading) {
     return (
-      <div className="container">
-        <h1 className="title text-center font-medium">
-            Loading Games...
-        </h1>
-      </div>
+      <LoadingSpinner />
     )
   }
 
@@ -78,7 +79,7 @@ export default function Home(){
             Featured Games:
         </h1>
         <Carousel>
-          <CarouselContent className="pb-4">
+          <CarouselContent className="pb-4 w-full max-w-5xl mx-auto">
           {popularGames.map((game, index) => (
             <CarouselItem key={index} className="basis-1/3">
               <Link href={`/play/${game.id}`}>
@@ -108,3 +109,4 @@ export default function Home(){
       </div>
   )
 }
+
