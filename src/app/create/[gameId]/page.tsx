@@ -10,6 +10,7 @@ import { GameProps } from '../../play/components';
 import { useParams } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import { toast } from "sonner";
 
 export default function CreateGame() {
     const [attributes, setAttributes] = useState<AttributeType[]>([]);
@@ -76,9 +77,14 @@ export default function CreateGame() {
 
             const result = await response.json();
             console.log('Server Response:', result);
-        }
-        catch (err) {
+            toast("✅ Game uploaded!", {
+                description: `${gameName} was saved successfully.`,
+            });
+        } catch (err) {
             console.log('Error:', err);
+            toast("❌ Upload failed", {
+                description: "Something went wrong while uploading the game.",
+            });
         }
     };
 
@@ -100,8 +106,17 @@ export default function CreateGame() {
     const addAnswer = () => {
         if (!attributes.length) return;
 
-        let name = `Answer ${Object.keys(answers).length}`;
-
+        const existingIndices = Object.keys(answers)
+        .map((key) => parseInt(key.replace("Answer ", ""), 10))
+        .filter((num) => !isNaN(num));
+      
+        let newIndex = 0;
+        while (existingIndices.includes(newIndex)) {
+            newIndex++;
+        }
+        
+        let name = `Answer ${newIndex}`;
+      
         const newAnswer: AnswerType = {
             name,
             attributes: attributes.reduce<Record<string, string>>(
@@ -212,19 +227,36 @@ export default function CreateGame() {
                 />
             </div>
 
-            <h1 className='font-bold'>Attribute List</h1>
+            <h2 className="text-2xl font-bold text-center mb-4">Attribute List</h2>
             <div className="flex flex-col items-center mt-6 w-full">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
                     {attributes.map((attribute, index) => (
                         <Card key={index}>
-                            <CardContent className="p-4">
-                                {attrEditingName === attribute.name ? (
-                                    <EditableAttribute attribute={attribute} onSave={handleAttributeSave} />
-                                ) : (
-                                    <Attribute attribute={attribute} onEdit={handleAttributeEdit} />
-                                )}
+                            <CardContent className="p-4 relative">
+                            {attrEditingName === attribute.name ? (
+                                <EditableAttribute attribute={attribute} onSave={handleAttributeSave} />
+                            ) : (
+                                <>
+                                <Attribute attribute={attribute} onEdit={handleAttributeEdit} />
+                                <button
+                                    className="absolute top-2 right-2 text-red-500 hover:text-red-700 text-lg"
+                                    onClick={() => {
+                                    setAttributes(attributes.filter((_, i) => i !== index));
+                                    setAnswers((prev) => {
+                                        const updated = { ...prev };
+                                        Object.keys(updated).forEach((key) => {
+                                        delete updated[key].attributes[attribute.name];
+                                        });
+                                        return updated;
+                                    });
+                                    }}
+                                >
+                                    ✕
+                                </button>
+                                </>
+                            )}
                             </CardContent>
-                        </Card>
+                      </Card>                      
                     ))}
                 </div>
 
@@ -235,28 +267,10 @@ export default function CreateGame() {
                     >
                         + Add Attribute
                     </Button>
-                    {attributes.length > 0 && (
-                        <Button
-                            onClick={() => {
-                                const last = attributes[attributes.length - 1].name;
-                                setAttributes(attributes.slice(0, -1));
-                                setAnswers((prev) => {
-                                    const updated = { ...prev };
-                                    Object.keys(updated).forEach((key) => {
-                                        delete updated[key].attributes[last];
-                                    });
-                                    return updated;
-                                });
-                            }}
-                            className="bg-red-500 text-white px-4 py-2 rounded-full"
-                        >
-                            Remove
-                        </Button>
-                    )}
                 </div>
             </div>
-
-            <h1 className='font-bold'>Answer List</h1>
+            <h2 className="text-2xl font-bold text-center mb-7"></h2>
+            <h2 className="text-2xl font-bold text-center mb-2">Answer List</h2>
             <div className="flex flex-col items-center mt-10 w-full">
                 <div className="flex space-x-2 mb-4">
                     <Button
@@ -265,20 +279,6 @@ export default function CreateGame() {
                     >
                         + Add Answer
                     </Button>
-                    {Object.keys(answers).length > 0 && (
-                        <Button
-                            onClick={() => {
-                                const answerKeys = Object.keys(answers);
-                                const last = answerKeys[answerKeys.length - 1];
-                                const updated = { ...answers };
-                                delete updated[last];
-                                setAnswers(updated);
-                            }}
-                            className="bg-blue-500 text-white px-4 py-2 rounded-full"
-                        >
-                            Remove
-                        </Button>
-                    )}
                 </div>
 
 
@@ -287,7 +287,7 @@ export default function CreateGame() {
 
             {attributes.length > 0 && Object.keys(answers).length > 0 && (
                 <div className="mt-6 w-full overflow-x-auto">
-                    <h2 className="text-xl font-semibold text-center mb-2">Answers</h2>
+                    <h2 className="text-2xl font-bold text-center mb-2">Answers</h2>
                     <div className="border border-gray-300 rounded-lg shadow-sm">
                         <table className="w-full text-sm text-left border-collapse">
                             <thead className="bg-gray-100">
@@ -341,27 +341,39 @@ export default function CreateGame() {
                                             </td>
                                         ))}
 
-                                        <td className="border px-2 py-1 text-center">
-                                            {ansEditingName === answer.name ? (
-                                                <Button
-                                                    onClick={() =>
-                                                        handleAnswerSave(answer.name, { attributes: answer.attributes })
-                                                    }
-                                                    size="sm"
-                                                    className="bg-green-500 text-white"
-                                                >
-                                                    Save
-                                                </Button>
-                                            ) : (
-                                                <Button
-                                                    onClick={() => handleAnswerEdit(answer.name)}
-                                                    size="sm"
-                                                    className="bg-blue-500 text-white"
-                                                >
-                                                    Edit
-                                                </Button>
-                                            )}
+                                        <td className="border px-2 py-1 text-center flex justify-center gap-2">
+                                        {ansEditingName === answer.name ? (
+                                            <Button
+                                            onClick={() => handleAnswerSave(answer.name, { attributes: answer.attributes })}
+                                            size="sm"
+                                            className="bg-green-500 text-white"
+                                            >
+                                            Save
+                                            </Button>
+                                        ) : (
+                                            <>
+                                            <Button
+                                                onClick={() => handleAnswerEdit(answer.name)}
+                                                size="sm"
+                                                className="bg-blue-500 text-white"
+                                            >
+                                                Edit
+                                            </Button>
+                                            <Button
+                                                onClick={() => {
+                                                const updated = { ...answers };
+                                                delete updated[answer.name];
+                                                setAnswers(updated);
+                                                }}
+                                                size="sm"
+                                                className="bg-red-500 text-white"
+                                            >
+                                                Delete
+                                            </Button>
+                                            </>
+                                        )}
                                         </td>
+
                                     </tr>
                                 ))}
                             </tbody>
