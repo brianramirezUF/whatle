@@ -13,15 +13,10 @@ import { RedirectButton } from '@/components/Buttons'
 import "./styles.css";
 import Link from "next/link";
 import LoadingSpinner from '@/components/LoadingSpinner';
-
-type Game = {
-  id: string;
-  name: string;
-  icon: string;
-};
+import { GameCard, GameCardProps } from '@/components/GameCard'
 
 export default function Home(){
-  const [popularGames, setPopularGames] = useState<Game[]>([]);
+  const [popularGames, setPopularGames] = useState<GameCardProps[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // call endpoint to receive featured games
@@ -55,20 +50,7 @@ export default function Home(){
           <CarouselContent className="pb-4 w-full max-w-5xl mx-auto">
           {popularGames.map((game, index) => (
             <CarouselItem key={index} className="basis-1/3">
-              <Link href={`/play/${game.id}`}>
-                <div className="p-1">
-                  <Card
-                    className="card"
-                    style={game.icon ? {
-                      backgroundImage: `url(${game.icon})`,
-                    } : {}}
-                  >
-                    <CardContent className="card-content flex aspect-square items-center justify-center p-6">
-                      <span className="text-3xl font-semibold text">{game.name}</span>
-                    </CardContent>
-                  </Card>
-                </div>
-              </Link>
+              <GameCard { ...game } />
             </CarouselItem>
           ))}
           </CarouselContent>
