@@ -52,6 +52,7 @@ export interface GameProps {
 
 const Game: React.FC<GameProps> = ({ answers, attributes, name, gameId }) => {
   const [guesses, setGuesses] = useState<GuessResultContainer[]>([]);
+  const [guessNames, setGuessNames] = useState<string[]>([]);
   const [curGuess, setCurGuess] = useState<string>('');
   const [filteredAnswers, setFilteredAnswers] = useState<AnswerType[]>(Object.values(answers));
   const [showDropdown, setShowDropdown] = useState(false);
@@ -71,7 +72,7 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name, gameId }) => {
     }
 
     const matches = Object.values(answers).filter(ans =>
-      ans.name.toLowerCase().includes(value.toLowerCase())
+      ans.name.toLowerCase().includes(value.toLowerCase()) && !guessNames.includes(ans.name)
     );
 
     setFilteredAnswers(matches);
@@ -87,12 +88,14 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name, gameId }) => {
   const resetGame = () => {
     setWon(false);
     setGuesses([]);
+    setGuessNames([]);
     setCurGuess('');
   };
 
   // Update guesses array (each guess is an index of an answer from the 'answers' array)
   const makeGuess = async (guess: string) => {
     if (!guess || won) return;
+    if (guessNames.includes(guess)) return;
 
     const res = await fetch("/api/checkGuess", {
       method: "POST",
@@ -103,6 +106,9 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name, gameId }) => {
     if (!res.ok) {
       throw new Error('Failed to make guess.');
     }
+
+    setGuessNames((prev) => [...prev, guess]);
+    
 
     const { results, isWin } = await res.json();
     setWon(isWin);
@@ -246,6 +252,9 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name, gameId }) => {
                 type="text"
                 value={curGuess}
                 onChange={(e) => handleInputChange(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key == 'Enter') e.preventDefault();
+                }}
                 onFocus={() => setShowDropdown(filteredAnswers.length > 0)}
                 placeholder="Type to search..."
                 className="w-full border rounded p-2"
