@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/config/firebase';
 import { doc, collection, setDoc, query, getDocs, where } from 'firebase/firestore';
-import { Answer } from '@/app/create/components';
 
 // TODO: update firebase rules and authentication to verify correct user is updating correct
 // PUT /api/uploadGame
