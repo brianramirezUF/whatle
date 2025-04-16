@@ -61,6 +61,12 @@ function SignupField(){
                 }
             } catch (error: any) {
                 console.error("Signup Error", error);
+                
+                if (error.message.includes("auth/email-already-in-use")) {
+                    setEmailError("This email is already in use.");
+                } else {
+                    setEmailError("Signup failed. Please try again.");
+                }
             }
         } else {
             setEmailError(validEmail ? "" : "Please enter a valid email.");
