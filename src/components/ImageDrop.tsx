@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 
 function ImageDrop() {
     const [image, setImage] = useState<string | null>(null);
-    const { imgurTokens } = useAuth();
+    const { currentUser, imgurTokens, refreshImgurTokens } = useAuth();
     const [uploading, setUploading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -30,7 +30,27 @@ function ImageDrop() {
                 body: formData,
             });
 
-            if (!response.ok) throw new Error("Upload failed");
+            if (!response.ok) {
+                try {
+                    if(!currentUser){
+                        throw new Error("User not logged in");
+                    }
+                    console.log("Old", imgurTokens);
+                    const refreshedTokens = await refreshImgurTokens(currentUser.uid, imgurTokens.refreshToken);
+                    console.log("New", refreshedTokens);
+                    if(!refreshedTokens){
+                        throw new Error("Failed to refresh tokens");
+                    }
+                    const url = `/api/uploadToImgur?imgurAccessToken=${encodeURIComponent(refreshedTokens.accessToken)}&imgurRefreshToken=${encodeURIComponent(refreshedTokens.refreshToken)}`;
+                    await fetch(url, {
+                        method: "POST",
+                        body: formData,
+                    });
+
+                } catch {
+                    throw new Error("Upload failed");
+                }
+            }
 
             const data = await response.json();
             return data;

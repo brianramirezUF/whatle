@@ -18,15 +18,16 @@ export async function POST(req: Request){
         const response = await fetch('https://api.imgur.com/3/image', {
             method: 'POST',
             headers: {
-                Authorization: `Client-ID ${imgurAccessToken}`
+                Authorization: `Bearer ${imgurAccessToken}`
             },
             body: body
         });
 
         const data = await response.json();
+        console.log(data);
 
         if(!response.ok){
-            throw new Error(data.data.error);
+            throw new Error(data);
         }
 
         return NextResponse.json(data);
