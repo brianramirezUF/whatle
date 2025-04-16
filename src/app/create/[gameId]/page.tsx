@@ -441,12 +441,14 @@ export default function CreateGame() {
                         </table>
                     </div>
 
-                    <Button
-                        onClick={addAnswer}
-                        className="w-full mt-4 bg-gray-200 text-black px-4 py-2 rounded-lg"
-                    >
-                        Add Possible Answer
-                    </Button>
+                    <div className="flex justify-center mt-6">
+                        <Button
+                            onClick={uploadGame}
+                            className="bg-green-400 hover:bg-green-600 text-black font-semibold px-6 py-2 rounded-full shadow-md transition duration-300"
+                        >
+                            Upload Game
+                        </Button>
+                    </div>
                 </div>
             )}
             <a
@@ -462,12 +464,7 @@ export default function CreateGame() {
                 Get Game as JSON
             </a>
             <JsonParser onParse={handleJSON} />
-            <Button
-                onClick={uploadGame}
-                className="bg-green-300 text-black px-4 py-2 rounded-full"
-            >
-                Upload Game
-            </Button>
+            
         </div>
     );
 
