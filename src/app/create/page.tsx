@@ -61,24 +61,64 @@ export default function GameList() {
         return <div>Error: {error}</div>;
     }
 
-    const gamesList = games.length ? (
+    const fillerGame: Game = {
+        id: "filler",
+        uid: "filler",
+        name: "...",
+        icon: "",
+        plays: "0",
+    };
+      
+    function padWithFiller(games: Game[]): Game[] {
+        const length = games.length;
+  
+        if (length >= 1 && length < 5) {
+            const fillersNeeded = 5 - length;
+            const fillerGames = Array(fillersNeeded).fill(fillerGame).map((filler, index) => ({
+            ...filler,
+            id: `filler-${index}`,
+            uid: `filler-${index}`,
+            }));
+            return [...games, ...fillerGames];
+        }
+
+        return games;
+    }
+
+    const paddedGames = padWithFiller(games); 
+    console.log(paddedGames);
+
+    const gamesList = paddedGames.length ? (
         <Carousel>
-            <CarouselContent className='pb-4'>
-                {games.map((game: Game, index) => (
-                    <CarouselItem key={index} className={games.length < 3 ? '' : 'basis-1/3'}>
+            <CarouselContent className='pb-4 w-full max-w-5xl mx-auto'>
+                {paddedGames.map((game: Game, index) => (
+                    <CarouselItem key={index} className={'basis-1/5'}>
                         <div className='p-1'>
-                            <Link href={`create/${game.id}`}>
+                            {game.name === "..." ? 
                                 <Card
                                     className='card'
                                     style={game.icon ? {
                                         backgroundImage: `url(${game.icon})`,
                                     } : {}}
                                 >
-                                    <CardContent className='card-content flex aspect-square items-center justify-center p-6'>
-                                        <span className='text-3xl font-semibold text'>{game.name}</span>
+                                    <CardContent className="card-content flex aspect-square items-center justify-center p-6">
+                                        <span className={`text-3xl font-semibold ${game.name === "..." ? "filler-text opacity-60 italic" : "real-text"}`}>{game.name}</span>
                                     </CardContent>
                                 </Card>
-                            </Link>
+                                : 
+                                <Link href={`create/${game.id}`}>
+                                    <Card
+                                        className='card'
+                                        style={game.icon ? {
+                                            backgroundImage: `url(${game.icon})`,
+                                        } : {}}
+                                    >
+                                        <CardContent className="card-content flex aspect-square items-center justify-center p-6">
+                                            <span className={`text-3xl font-semibold ${game.name === "..." ? "filler-text opacity-60 italic" : "real-text"}`}>{game.name}</span>
+                                        </CardContent>
+                                    </Card>
+                                </Link>
+                            }  
                         </div>
                     </CarouselItem>
                 ))}

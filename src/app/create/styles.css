@@ -3,9 +3,10 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    height: 100vh;
+    height: 78vh;
     width: 100vw;
     max-width: 100%;
+    margin-top: 7vh;
 }
 
 .carousel {
@@ -39,4 +40,12 @@
     background-color: white;
     border-radius: 25px;
     padding: 10px;
+}
+
+.real-text {
+    color: black;
+}
+
+.filler-text {
+    color: gray;
 }
