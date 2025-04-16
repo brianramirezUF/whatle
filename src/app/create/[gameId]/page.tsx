@@ -79,15 +79,21 @@ export default function CreateGame() {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${idToken}`
                 },
-                body: JSON.stringify({ name: gameName, answers, attributes, uid: currentUser.uid, maxGuesses }, null, 2)
+                body: JSON.stringify({ id: gameId, name: gameName, answers, attributes, maxGuesses }, null, 2)
 
             });
 
             const result = await response.json();
-            console.log('Server Response:', result);
-            toast("✅ Game uploaded!", {
-                description: `${gameName} was saved successfully.`,
-            });
+            if (!response.ok) {
+                toast("❌ Upload failed!", {
+                    description: result.error
+                });
+            }
+            else {
+                toast("✅ Game uploaded!", {
+                    description: result.message
+                });
+            }            
         } catch (err) {
             console.log('Error:', err);
             toast("❌ Upload failed", {

@@ -1,5 +1,4 @@
-// pages/api/verifyGuess.ts (or wherever your API is)
-import { comparisons } from "@/lib/guessComparison"; // move your logic to a shared module
+import { comparisons } from "@/lib/guessComparison";
 import { NextResponse } from "next/server";
 import { db } from "@/config/firebase";
 import { doc, getDoc } from 'firebase/firestore';
@@ -32,6 +31,7 @@ export async function POST(req: Request) {
         for (let i = 0; i < gameData.attributes.length; i++) {
             let result;
             const curAttribute = gameData.attributes[i];
+            
             const correctAttribute = correctAnswer.attributes[curAttribute.name];
             const guessedAttribute = guessedAnswer.attributes[curAttribute.name];
 

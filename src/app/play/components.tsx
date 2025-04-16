@@ -81,7 +81,7 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name, gameId, maxGuess
     const res = await fetch("/api/checkGuess", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ gameId, guess }), // make sure `gameId` is available in this scope
+      body: JSON.stringify({ gameId, guess })
     });
 
     if (!res.ok) {
