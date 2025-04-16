@@ -204,6 +204,7 @@ export default function CreateGame() {
 
         const newAnswer: AnswerType = {
             name,
+            icon: null,
             attributes: attributes.reduce<Record<string, string>>(
                 (acc, attr) => ({
                     ...acc,
@@ -219,7 +220,8 @@ export default function CreateGame() {
     // Map answer values to correct answer
     const handleAnswerSave = (
         oldName: string,
-        values: { attributes: Record<string, string> }
+        values: { attributes: Record<string, string>},
+        icon: null | string
     ) => {
         setAnswers((prev) => {
             const updated = { ...prev };
@@ -229,6 +231,7 @@ export default function CreateGame() {
                 updated[oldName] = {
                     name: oldName,
                     attributes: { ...values.attributes },
+                    icon: icon,
                 };
                 return updated;
             }
@@ -237,6 +240,7 @@ export default function CreateGame() {
             updated[tempAnswerName] = {
                 name: tempAnswerName,
                 attributes: { ...values.attributes },
+                icon: icon,
             };
 
             return updated;
