@@ -1,21 +1,29 @@
 'use client'
 import { useEffect, useState } from 'react';
 import { AttributeType, AnswerType } from '../attributes';
-import { EditableAnswer, Answer, EditableAttribute, Attribute } from '../components';
+import { EditableAnswer, Answer, EditableAttribute} from '../components';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { JsonParser } from '@/components/JsonParser';
 import { GameProps } from '../../play/components';
-import { useParams } from 'next/navigation'
+import { redirect, useParams } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext';
+import LoadingSpinner from '@/components/LoadingSpinner';
+import { toast } from "sonner";
+import { useRouter } from 'next/navigation';
 
 export default function CreateGame() {
+    const router = useRouter();
     const [attributes, setAttributes] = useState<AttributeType[]>([]);
     const [attrEditingName, setAttrEditingName] = useState<string | null>(null);
     const [answers, setAnswers] = useState<Record<string, AnswerType>>({});
     const [ansEditingName, setAnsEditingName] = useState<string | null>(null);
+    const [tempAnswerName, setTempAnswerName] = useState<string>("");
     const [gameName, setGameName] = useState<string>("Game Name");
+    const [isLoading, setIsLoading] = useState(true);
+    const [maxGuesses, setMaxGuesses] = useState<number>(6); 
+    const [maxGuessesInput, setMaxGuessesInput] = useState<string>('6');
 
     // Routing
     const params = useParams();
@@ -25,6 +33,8 @@ export default function CreateGame() {
     useEffect(() => {
         const loadGame = async () => {
             try {
+                if (gameId == 'new-game') return;
+
                 const response = await fetch(`http://localhost:3000/api/getGameById?id=${gameId}`);
 
                 if (!response.ok) {
@@ -37,6 +47,10 @@ export default function CreateGame() {
                     setGameName(data?.name);
                 }
 
+                if (data.maxGuesses !== undefined) {
+                    setMaxGuesses(data.maxGuesses);
+                }                
+
                 if (data.attributes) {
                     setAttributes(data?.attributes);
                 }
@@ -44,15 +58,16 @@ export default function CreateGame() {
                 if (data.answers) {
                     setAnswers(data?.answers);
                 }
-
             }
             catch (err) {
                 console.log('Error:', err);
             }
+            finally {
+                setIsLoading(false);
+            }
         };
-        if (gameId != 'new-game') {
-            loadGame();
-        }
+        
+        loadGame();
     }, [gameId]);
 
     const uploadGame = async () => {
@@ -60,20 +75,36 @@ export default function CreateGame() {
 
         try {
             const idToken = await currentUser.getIdToken();
-            const response = await fetch(`http://localhost:3000/api/uploadGame`, {
+            const response = await fetch('/api/uploadGame', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${idToken}`
                 },
-                body: JSON.stringify({ name: gameName, answers, attributes, uid: currentUser.uid }, null, 2)
+                body: JSON.stringify({ id: gameId, name: gameName, answers, attributes, maxGuesses }, null, 2)
+
             });
 
             const result = await response.json();
-            console.log('Server Response:', result);
-        }
-        catch (err) {
+            if (!response.ok) {
+                toast("❌ Upload failed!", {
+                    description: result.error
+                });
+            }
+            else {
+                toast("✅ Game uploaded!", {
+                    description: result.message
+                });
+
+                if (result.id) {
+                    router.push(`/play/${result.id}`);
+                }
+            }            
+        } catch (err) {
             console.log('Error:', err);
+            toast("❌ Upload failed", {
+                description: "Something went wrong while uploading the game.",
+            });
         }
     };
 
@@ -81,21 +112,47 @@ export default function CreateGame() {
         setAnswers(data.answers);
         setAttributes(data.attributes);
         setGameName(data.name);
+        if (data.maxGuesses) {
+            setMaxGuesses(data.maxGuesses);
+            setMaxGuessesInput(data.maxGuesses.toString());
+          }
     }
-
+ 
     const addAttribute = () => {
+        // Extract current attribute indices
+        const existingIndices = attributes
+            .map(attr => parseInt(attr.name.replace("Attribute ", ""), 10))
+            .filter(num => !isNaN(num));
+    
+        // Find the next available index
+        let newIndex = 0;
+        while (existingIndices.includes(newIndex)) {
+            newIndex++;
+        }
+    
         const newAttribute: AttributeType = {
-            name: `Attribute ${attributes.length}`,
+            name: `Attribute ${newIndex}`,
             type: 'String',
         };
-
+    
         setAttributes([...attributes, newAttribute]);
     };
+    
 
     const addAnswer = () => {
         if (!attributes.length) return;
 
-        const name = `Answer ${Object.keys(answers).length}`;
+        const existingIndices = Object.keys(answers)
+        .map((key) => parseInt(key.replace("Answer ", ""), 10))
+        .filter((num) => !isNaN(num));
+      
+        let newIndex = 0;
+        while (existingIndices.includes(newIndex)) {
+            newIndex++;
+        }
+        
+        let name = `Answer ${newIndex}`;
+      
         const newAnswer: AnswerType = {
             name,
             attributes: attributes.reduce<Record<string, string>>(
@@ -111,21 +168,40 @@ export default function CreateGame() {
     };
 
     // Map answer values to correct answer
-    const handleAnswerSave = (name: string, values: { attributes: Record<string, string> }) => {
-        setAnswers((prev) => ({
-            ...prev,
-            [name]: {
-                name,
-                attributes: { ...values.attributes },
-            },
-        }));
+    const handleAnswerSave = (
+    oldName: string,
+    values: { attributes: Record<string, string> }
+    ) => {
+    setAnswers((prev) => {
+        const updated = { ...prev };
 
-        setAnsEditingName(null);
-    };
+        // name hasn’t changed, just update attributes
+        if (oldName === tempAnswerName) {
+            updated[oldName] = {
+                name: oldName,
+                attributes: { ...values.attributes },
+            };
+            return updated;
+        }
+
+        delete updated[oldName];
+        updated[tempAnswerName] = {
+            name: tempAnswerName,
+            attributes: { ...values.attributes },
+        };
+
+        return updated;
+    });
+
+    setAnsEditingName(null);
+    setTempAnswerName('');
+};
+
 
     // Change ID (name) of current editing answer (called by clicking pen icon in 'Answer' component ./components.tsx)
     const handleAnswerEdit = (name: string) => {
         setAnsEditingName(name);
+        setTempAnswerName(name);  
     };
 
     // Change ID (name) of current editing attribute (called by clicking pen icon in 'Attribute' component ./components.tsx)
@@ -134,70 +210,126 @@ export default function CreateGame() {
     };
 
     const handleAttributeSave = (oldName: string, newName: string, type: string) => {
+        // Prevent duplicate attribute names (optional but recommended)
+        if (oldName !== newName && attributes.some(attr => attr.name === newName)) {
+            toast.error("An attribute with this name already exists.");
+            return;
+        }
+    
         setAttributes((prevAttributes) =>
             prevAttributes.map((attr) =>
-                // Check oldName to see if attribute key (name) changed 
                 attr.name === oldName ? { name: newName, type } : attr
             )
         );
-
-        // Update existing answers to correctly display changed attributes
+    
         setAnswers((prevAnswers) => {
-            // Copy existing attributes, keeping old values when renaming
-            const updatedAnswers: Record<string, AnswerType> = Object.keys(prevAnswers).reduce<Record<string, AnswerType>>(
-                (acc, answerKey) => {
-                    const answer = prevAnswers[answerKey];
-
-                    const updatedAttributes: Record<string, string> = Object.entries(answer.attributes).reduce<Record<string, string>>(
-                        (attrAcc, [key, value]) => {
-                            attrAcc[key === oldName ? newName : key] = value;
-                            return attrAcc;
-                        },
-                        {}
-                    );
-
-                    acc[answerKey] = { ...answer, attributes: updatedAttributes };
-                    return acc;
-                },
-                {} as Record<string, AnswerType> // Explicitly define the accumulator type
-            );
-
+            const updatedAnswers: Record<string, AnswerType> = Object.keys(prevAnswers).reduce((acc, key) => {
+                const answer = prevAnswers[key];
+                const updatedAttributes: Record<string, string> = {};
+    
+                for (const [attrName, value] of Object.entries(answer.attributes)) {
+                    const newAttrName = attrName === oldName ? newName : attrName;
+                    updatedAttributes[newAttrName] = value;
+                }
+    
+                acc[key] = { ...answer, attributes: updatedAttributes };
+                return acc;
+            }, {} as Record<string, AnswerType>);
+    
             return updatedAnswers;
         });
-
+    
+        // ✅ This closes the editor view even if nothing changed
         setAttrEditingName(null);
     };
+    
+
+    if (isLoading) {
+        return (
+            <LoadingSpinner />
+        );
+    }
 
     const content = (
         <div className='m-5'>
 
             <div className="flex flex-col items-center text-center space-y-3 mb-6">
                 <h1 className="text-3xl font-bold">CREATE GAME</h1>
-
                 <Input
                     value={gameName}
                     onChange={(e) => setGameName(e.target.value)}
                     className="w-[300px] text-center border border-gray-300 rounded-lg px-2 py-1"
                 />
+                <label className="text-sm font-medium">Max Guesses</label>
+                <Input
+                    type="number"
+                    min={1}
+                    step={1}
+                    value={maxGuessesInput}
+                    onChange={(e) => {
+                        const cleaned = e.target.value.replace(/^0+(?=\d)/, '');
+                        setMaxGuessesInput(cleaned);
+                    }}
+                    onBlur={() => {
+                        const parsed = parseInt(maxGuessesInput, 10);
+                        if (!isNaN(parsed) && parsed >= 1) {
+                            setMaxGuesses(parsed);
+                        } 
+                        else {
+                            setMaxGuesses(1);
+                            setMaxGuessesInput('1');
+                        }
+                    }}
+                    className="w-[300px] text-center border border-gray-300 rounded-lg px-2 py-1"
+                    />
             </div>
 
-
-
-
-            <h1 className='font-bold'>Attribute List</h1>
+            <h2 className="text-2xl font-bold text-center mb-4">Attribute List</h2>
             <div className="flex flex-col items-center mt-6 w-full">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
-                    {attributes.map((attribute, index) => (
-                        <Card key={index}>
-                            <CardContent className="p-4">
-                                {attrEditingName === attribute.name ? (
-                                    <EditableAttribute attribute={attribute} onSave={handleAttributeSave} />
-                                ) : (
-                                    <Attribute attribute={attribute} onEdit={handleAttributeEdit} />
-                                )}
-                            </CardContent>
-                        </Card>
-                    ))}
+            <div className="flex flex-wrap gap-2 justify-center w-full">
+                {attributes.map((attribute, index) => {
+                    if (attrEditingName === attribute.name) {
+                        return (
+                        <div key={index} className="w-full max-w-sm">
+                            <EditableAttribute attribute={attribute} onSave={handleAttributeSave} />
+                        </div>
+                        );
+                    } else {
+                        return (
+                            <Card 
+                                key={index} 
+                                className="transition-all hover:shadow-xl hover:-translate-y-1 cursor-pointer m-2"
+                                onClick={() => handleAttributeEdit(attribute.name)}
+                                >                          
+                                <CardContent className="p-4 relative flex justify-between items-center gap-4">
+                                    <div>
+                                    <span className="font-semibold">{attribute.name}</span>
+                                    <span className="text-gray-500 ml-2">({attribute.type})</span>
+                                    </div>
+                                    <Button
+                                    variant="destructive"
+                                    size="sm"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setAttributes(attributes.filter((_, i) => i !== index));
+                                        setAnswers((prev) => {
+                                        const updated = { ...prev };
+                                        Object.keys(updated).forEach((key) => {
+                                            delete updated[key].attributes[attribute.name];
+                                        });
+                                        return updated;
+                                        });
+                                    }}
+                                    >
+                                    Delete
+                                    </Button>
+                                </CardContent>
+                                </Card>
+
+                        );
+                    }
+                    })}
+
                 </div>
 
                 <div className="flex space-x-2 mt-4">
@@ -207,28 +339,10 @@ export default function CreateGame() {
                     >
                         + Add Attribute
                     </Button>
-                    {attributes.length > 0 && (
-                        <Button
-                            onClick={() => {
-                                const last = attributes[attributes.length - 1].name;
-                                setAttributes(attributes.slice(0, -1));
-                                setAnswers((prev) => {
-                                    const updated = { ...prev };
-                                    Object.keys(updated).forEach((key) => {
-                                        delete updated[key].attributes[last];
-                                    });
-                                    return updated;
-                                });
-                            }}
-                            className="bg-red-500 text-white px-4 py-2 rounded-full"
-                        >
-                            Remove
-                        </Button>
-                    )}
                 </div>
             </div>
-
-            <h1 className='font-bold'>Answer List</h1>
+            <h2 className="text-2xl font-bold text-center mb-7"></h2>
+            <h2 className="text-2xl font-bold text-center mb-2">Answer List</h2>
             <div className="flex flex-col items-center mt-10 w-full">
                 <div className="flex space-x-2 mb-4">
                     <Button
@@ -237,20 +351,6 @@ export default function CreateGame() {
                     >
                         + Add Answer
                     </Button>
-                    {Object.keys(answers).length > 0 && (
-                        <Button
-                            onClick={() => {
-                                const answerKeys = Object.keys(answers);
-                                const last = answerKeys[answerKeys.length - 1];
-                                const updated = { ...answers };
-                                delete updated[last];
-                                setAnswers(updated);
-                            }}
-                            className="bg-blue-500 text-white px-4 py-2 rounded-full"
-                        >
-                            Remove
-                        </Button>
-                    )}
                 </div>
 
 
@@ -259,7 +359,7 @@ export default function CreateGame() {
 
             {attributes.length > 0 && Object.keys(answers).length > 0 && (
                 <div className="mt-6 w-full overflow-x-auto">
-                    <h2 className="text-xl font-semibold text-center mb-2">Answers</h2>
+                    <h2 className="text-2xl font-bold text-center mb-2">Answers</h2>
                     <div className="border border-gray-300 rounded-lg shadow-sm">
                         <table className="w-full text-sm text-left border-collapse">
                             <thead className="bg-gray-100">
@@ -275,7 +375,17 @@ export default function CreateGame() {
                             <tbody>
                                 {Object.entries(answers).map(([answerKey, answer], rowIndex) => (
                                     <tr key={rowIndex} className="hover:bg-gray-50">
-                                        <td className="border px-4 py-2 font-medium">{answer.name}</td>
+                                        <td className="border px-4 py-2">
+                                            {ansEditingName === answer.name ? 
+                                            (
+                                                <input
+                                                    type="text"
+                                                    className="w-full px-2 py-1 border border-gray-300 rounded"
+                                                    value={tempAnswerName}
+                                                    onChange={(e) => setTempAnswerName(e.target.value)}
+                                                /> 
+                                            ) : (answer.name)}  
+                                        </td>
 
                                         {attributes.map((attr, attrIndex) => (
                                             <td key={attrIndex} className="border px-2 py-1 text-center">
@@ -303,27 +413,39 @@ export default function CreateGame() {
                                             </td>
                                         ))}
 
-                                        <td className="border px-2 py-1 text-center">
-                                            {ansEditingName === answer.name ? (
-                                                <Button
-                                                    onClick={() =>
-                                                        handleAnswerSave(answer.name, { attributes: answer.attributes })
-                                                    }
-                                                    size="sm"
-                                                    className="bg-green-500 text-white"
-                                                >
-                                                    Save
-                                                </Button>
-                                            ) : (
-                                                <Button
-                                                    onClick={() => handleAnswerEdit(answer.name)}
-                                                    size="sm"
-                                                    className="bg-blue-500 text-white"
-                                                >
-                                                    Edit
-                                                </Button>
-                                            )}
+                                        <td className="border px-2 py-1 text-center flex justify-center gap-2">
+                                        {ansEditingName === answer.name ? (
+                                            <Button
+                                            onClick={() => handleAnswerSave(answer.name, { attributes: answer.attributes })}
+                                            size="sm"
+                                            className="bg-green-500 text-white"
+                                            >
+                                            Save
+                                            </Button>
+                                        ) : (
+                                            <>
+                                            <Button
+                                                onClick={() => handleAnswerEdit(answer.name)}
+                                                size="sm"
+                                                className="bg-blue-500 text-white"
+                                            >
+                                                Edit
+                                            </Button>
+                                            <Button
+                                                onClick={() => {
+                                                const updated = { ...answers };
+                                                delete updated[answer.name];
+                                                setAnswers(updated);
+                                                }}
+                                                size="sm"
+                                                className="bg-red-500 text-white"
+                                            >
+                                                Delete
+                                            </Button>
+                                            </>
+                                        )}
                                         </td>
+
                                     </tr>
                                 ))}
                             </tbody>
@@ -331,12 +453,14 @@ export default function CreateGame() {
                         </table>
                     </div>
 
-                    <Button
-                        onClick={addAnswer}
-                        className="w-full mt-4 bg-gray-200 text-black px-4 py-2 rounded-lg"
-                    >
-                        Add Possible Answer
-                    </Button>
+                    <div className="flex justify-center mt-6">
+                        <Button
+                            onClick={uploadGame}
+                            className="bg-green-400 hover:bg-green-600 text-black font-semibold px-6 py-2 rounded-full shadow-md transition duration-300"
+                        >
+                            Upload Game
+                        </Button>
+                    </div>
                 </div>
             )}
             <a
@@ -346,18 +470,13 @@ export default function CreateGame() {
                 className='decoration-dashed underline table'
                 href={
                     'data:application/json;charset=utf-8,' +
-                    encodeURIComponent(JSON.stringify({ name: gameName, answers, attributes }, null, 2))
+                    encodeURIComponent(JSON.stringify({ name: gameName, answers, attributes, uid: currentUser?.uid || '', maxGuesses }, null, 2))
                 }
             >
                 Get Game as JSON
             </a>
             <JsonParser onParse={handleJSON} />
-            <Button
-                onClick={uploadGame}
-                className="bg-green-300 text-black px-4 py-2 rounded-full"
-            >
-                Upload Game
-            </Button>
+            
         </div>
     );
 

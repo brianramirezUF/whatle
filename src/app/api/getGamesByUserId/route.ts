@@ -22,7 +22,8 @@ export async function GET(req: Request) {
                 uid: data.uid,
                 name: data.name,
                 icon: data.icon,
-                plays: data.plays
+                daily_plays: data.daily_plays,
+                total_plays: data.total_plays
             };
         });
 

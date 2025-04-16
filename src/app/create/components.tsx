@@ -1,6 +1,6 @@
 import { Icons } from '@/components/icons'
 import { useState } from 'react';
-import { Guess, AttributeType, AnswerType, comparisons  } from './attributes';
+import { Guess, AttributeType, AnswerType } from './attributes';
 import { Card, CardContent } from "@/components/ui/card";
 import React from 'react';
 
@@ -36,9 +36,9 @@ const EditableAnswer: React.FC<EditableAnswerProps> = ({ attributes, answer, onS
   };
 
   return (
-      <div className="p-4 border rounded-lg shadow-md bg-white">
+    <div className="p-6 border rounded-2xl shadow-lg bg-white hover:shadow-xl transition">
           <span className='font-semibold text-lg'>{answer.name}</span>
-          <table className="w-full border-collapse mt-2">
+          <table className="w-full text-sm border-separate border-spacing-y-1">
               <thead>
                   <tr className="border-b">
                       <th className="p-2 text-left">Name</th>
@@ -79,7 +79,7 @@ const Answer: React.FC<AnswerProps> = ({ attributes, answer, onEdit }) => {
   return (
       <div className="p-4 border rounded-lg shadow-md bg-white">
           <span className='font-semibold text-lg'>{answer.name}</span>
-          <table className="w-full border-collapse mt-2">
+          <table className="w-full text-sm border-separate border-spacing-y-1">
               <thead>
                   <tr className="border-b">
                       <th className="p-2 text-left">Name</th>
@@ -115,11 +115,17 @@ const EditableAttribute: React.FC<EditableAttributeProps> = ({ attribute, onSave
   return (
       <div className='p-4 border rounded-lg shadow-md bg-white flex gap-4 items-center'>
           <input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder='Name'
-              className='p-2 border rounded w-1/2 bg-gray-100'
-          />
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                    onSave(attribute.name, name, type);
+                    }
+                }}
+                placeholder='Name'
+                className='p-2 border rounded w-1/2 bg-gray-100'
+            />
+
           <select
               value={type}
               onChange={(e) => setType(e.target.value)}

@@ -25,3 +25,57 @@
 .card-content {
     font-size: 100%;
 }
+
+
+@keyframes flip-in {
+    0% {
+      transform: rotateX(90deg);
+      opacity: 0;
+    }
+    100% {
+      transform: rotateX(0);
+      opacity: 1;
+    }
+  }
+  
+  .flip-in {
+    animation: flip-in 0.4s ease forwards;
+    transform-origin: top;
+    backface-visibility: hidden;
+    opacity: 0;
+  }
+  
+
+  @keyframes fade-in {
+    0% {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .fade-in {
+    animation: fade-in 0.4s ease forwards;
+    opacity: 0;
+  }
+  
+
+  @keyframes pop-fade-in {
+    0% {
+      opacity: 0;
+      transform: scale(0.8);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  
+  .lost-text {
+    animation: pop-fade-in 0.6s ease-out forwards;
+    opacity: 0;
+  }
+  

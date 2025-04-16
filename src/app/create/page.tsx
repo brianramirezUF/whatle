@@ -14,28 +14,22 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import ProtectedRoute from '@/components/ProtectedRoute'
 import { useAuth } from '@/contexts/AuthContext'
-
-interface Game {
-    id: string,
-    uid: string,
-    name: string,
-    icon: string,
-    plays: string
-};
+import LoadingSpinner from '@/components/LoadingSpinner'
+import { GameCard, GameCardProps } from '@/components/GameCard'
 
 export default function GameList() {
     const [games, setGames] = useState([]);
     // TODO: add UseContext
     const [uid, setUID] = useState('');
     const { currentUser } = useAuth();
-    const [isLoading, setLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
 
     useEffect(() => {
         const fetchGames = async () => {
             try {
                 // TODO: uncomment when added UseContext for uid
-                const response = await fetch(`http://localhost:3000/api/getGamesByUserId?uid=${currentUser?.uid}`);
+                const response = await fetch(`/api/getGamesByUserId?uid=${currentUser?.uid}`);
 
                 if (!response.ok) {
                     throw new Error('Failed to fetch games');
@@ -46,14 +40,14 @@ export default function GameList() {
             } catch (error: any) {
                 setError(error.message);
             } finally {
-                setLoading(false);
+                setIsLoading(false);
             }
         };
         fetchGames();
     }, [uid]);
 
     if (isLoading) {
-        return <div>Loading...</div>;
+        return <LoadingSpinner />;
     }
 
     if (error) {
@@ -62,23 +56,10 @@ export default function GameList() {
 
     const gamesList = games.length ? (
         <Carousel>
-            <CarouselContent className='pb-4'>
-                {games.map((game: Game, index) => (
+            <CarouselContent className='pb-4 w-full max-w-5xl mx-auto'>
+                {games.map((game: GameCardProps, index) => (
                     <CarouselItem key={index} className={games.length < 3 ? '' : 'basis-1/3'}>
-                        <div className='p-1'>
-                            <Link href={`create/${game.id}`}>
-                                <Card
-                                    className='card'
-                                    style={game.icon ? {
-                                        backgroundImage: `url(${game.icon})`,
-                                    } : {}}
-                                >
-                                    <CardContent className='card-content flex aspect-square items-center justify-center p-6'>
-                                        <span className='text-3xl font-semibold text'>{game.name}</span>
-                                    </CardContent>
-                                </Card>
-                            </Link>
-                        </div>
+                        <GameCard {...game} play={false} />
                     </CarouselItem>
                 ))}
             </CarouselContent>

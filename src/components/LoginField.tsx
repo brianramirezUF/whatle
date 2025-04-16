@@ -4,11 +4,15 @@ import { RedirectButton } from "./Buttons";
 import { auth } from "@/config/firebase";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { useRouter } from "next/navigation";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import "./styles.css";
 
 function LoginField() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
     const router = useRouter();
 
     const handleLogin = async (email: string, password: string) => {
@@ -17,34 +21,64 @@ function LoginField() {
             await signInWithEmailAndPassword(auth, email, password);
             router.push('/');
         } catch (error: any) {
-            setError(error.message);
+            setError("Invalid login, please try again.");
             console.error("Login Error", error);
         }
     }
 
     return (
-        <>
-            <div>
-                <input 
-                    type="email" 
-                    placeholder="Enter email" 
-                    value={email} 
-                    onChange={(e) => setEmail(e.target.value)} 
-                />
-            </div>
-            <div>
-                <input 
-                    type="password" 
-                    placeholder="Enter password" 
-                    value={password} 
-                    onChange={(e) => setPassword(e.target.value)} 
-                />
-            </div>
+        <div className="login-container">
+            <h1 className="login-title text-center font-medium text-[40px]">
+                Log in
+            </h1>
+            <h2 className="login-title text-center font-medium">
+                Email
+            </h2>
+            <Input 
+                type="email" 
+                placeholder="Enter email" 
+                value={email} 
+                onChange={(e) => setEmail(e.target.value)} 
+                className="w-[300px] border border-gray-300 rounded-lg px-2 py-1"
+            />
+            <h2 className="login-title  text-center font-medium">
+                Password
+            </h2>
+            <Input 
+                type={showPassword == false ? "password" : "text"}
+                placeholder="Enter password" 
+                value={password} 
+                onChange={(e) => setPassword(e.target.value)} 
+                className="w-[300px] border border-gray-300 rounded-lg px-2 py-1"
+            />
             {error && <p className="text-red-500">{error}</p>}
-            <button onClick={() => handleLogin(email, password)}>Login</button>
-            <br></br>
-            <RedirectButton url="/signup" text="Don't have an account? Signup here"></RedirectButton>
-        </>
+            <div className="login-button-container">
+                <Checkbox
+                    id="show"
+                    checked={showPassword}
+                    onCheckedChange={(checked) => setShowPassword(Boolean(checked))}
+                />
+                <label
+                    htmlFor="show"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 m-3"
+                >
+                    Show password
+                </label>
+            </div>
+            <div className="login-button-container">
+                <button
+                    onClick={() => handleLogin(email, password)} className="login-button bg-gray-200 text-black"
+                >
+                    Log in
+                </button>
+                <RedirectButton
+                    url="/signup"
+                    text="Sign up"
+                    className="login-button bg-black text-white"
+                >
+                </RedirectButton>
+            </div>
+        </div>
     )
 }
 
