@@ -24,6 +24,8 @@ export default function CreateGame() {
     const [isLoading, setIsLoading] = useState(true);
     const [maxGuesses, setMaxGuesses] = useState<number>(6); 
     const [maxGuessesInput, setMaxGuessesInput] = useState<string>('6');
+    const [tag, setTag] = useState('');
+
 
     // Routing
     const params = useParams();
@@ -81,7 +83,7 @@ export default function CreateGame() {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${idToken}`
                 },
-                body: JSON.stringify({ id: gameId, name: gameName, answers, attributes, maxGuesses }, null, 2)
+                body: JSON.stringify({ id: gameId, name: gameName, answers, attributes, maxGuesses, tag }, null, 2)
 
             });
 
@@ -283,6 +285,23 @@ export default function CreateGame() {
                     className="w-[300px] text-center border border-gray-300 rounded-lg px-2 py-1"
                     />
             </div>
+            {/*category dropdown*/}
+            <div className="flex flex-col items-center text-center space-y-2 mb-6">
+                <label className="text-sm font-medium">Select a Category</label>
+                <select
+                    value={tag}
+                    onChange={(e) => setTag(e.target.value)}
+                    className="w-[300px] text-center border border-gray-300 rounded-lg px-2 py-1"
+                >
+                    <option value="">-- Choose a Tag --</option>
+                    <option value="Games">Games</option>
+                    <option value="TV/Movies">TV/Movies</option>
+                    <option value="IRL">IRL</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+
+
 
             <h2 className="text-2xl font-bold text-center mb-4">Attribute List</h2>
             <div className="flex flex-col items-center mt-6 w-full">
