@@ -1,21 +1,32 @@
-import { NextResponse } from "next/server";
-import { db } from "@/config/firebase";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { NextResponse } from 'next/server';
+import { db } from '@/config/firebase';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { adminAuth, adminDB } from '@/config/firebaseAdmin';
 
 export async function POST(req: Request) {
   try {
-    const { userId, gameId, name, won, timeTaken } = await req.json();
-    console.log("Received update history request:", { userId, gameId, name, won, timeTaken });
+    const { gameId, name, won, timeTaken } = await req.json();
+    
+    console.log('Received update history request:', { gameId, name, won, timeTaken });
 
-    if (!userId || !gameId || !name || typeof won !== "boolean" || typeof timeTaken !== "number") {
-      return NextResponse.json({ error: "Missing or invalid parameters" }, { status: 400 });
+    if (!gameId || !name || typeof won !== 'boolean' || typeof timeTaken !== 'number') {
+      return NextResponse.json({ error: 'Missing or invalid parameters' }, { status: 400 });
     }
 
-    const userRef = doc(db, "users", userId);
+    const idToken = req.headers.get('Authorization')?.split('Bearer ')[1];
+    if (!idToken) {
+      return NextResponse.json({ error: 'Unauthorized: No token provided' }, { status: 401 });
+    }
+    
+    // Verify the ID token
+    const decodedToken = await adminAuth.verifyIdToken(idToken);
+    const uid = decodedToken.uid; // Extract uid from the decoded token
+    
+    const userRef = doc(db, 'users', uid);
     const userSnap = await getDoc(userRef);
 
     if (!userSnap.exists()) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
     const userData = userSnap.data();
@@ -42,18 +53,18 @@ export async function POST(req: Request) {
     };
 
     await setDoc(userRef, { ...userData, history: updatedHistory });
-    /*console.log("✅ Firestore updated for user:", userId);
-    console.log("📦 Updated history object:", updatedHistory);*/
+    /*console.log('✅ Firestore updated for user:', userId);
+    console.log('📦 Updated history object:', updatedHistory);*/
 
-    const gameRef = doc(db, 'games', gameId);
-    const gameSnap = await getDoc(gameRef);
-    
-    if (!gameSnap.exists()) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    const gameRef = adminDB.collection('games').doc(gameId);
+    const gameSnap = await gameRef.get();
+
+    if (!gameSnap.exists) {
+      return NextResponse.json({ error: 'Game not found' }, { status: 404 });
     }
-    
+
     const gameData = gameSnap.data();
-    await setDoc(gameRef, {...gameData, daily_plays: gameData.daily_plays + 1, total_plays: gameData.total_plays + 1 });
+    await gameRef.set({...gameData, daily_plays: gameData?.daily_plays + 1, total_plays: gameData?.total_plays + 1 });
 
     return NextResponse.json({ success: true }, { status: 200 });
 
