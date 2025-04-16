@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect } from "react";
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import Link from "next/link";
 import { Logo } from "./Logo";
 import { Input } from "@/components/ui/input";
@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/button";
 import { nanoid } from "nanoid";
 import { cn } from "@/lib/utils";
 import { useAuth } from '@/contexts/AuthContext';
+import { auth } from '@/config/firebase';
+import { signOut } from 'firebase/auth';
 
 import {
   NavigationMenu,
@@ -36,6 +38,7 @@ import React from "react";
 export default function NavBar() {
   const { currentUser, loading } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
+  const router = useRouter();
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(event.target.value);
@@ -44,6 +47,15 @@ export default function NavBar() {
   const handleSearchSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     console.log("Search Query:", searchQuery);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      router.push('/login');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
   };
 
   return (
@@ -107,6 +119,11 @@ export default function NavBar() {
                   History
                 </Button>
               </Link>
+              {/* <Link href="/history" passHref> */}
+                <Button variant="link" className="text-sm select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground" onClick={handleLogout}>
+                  Log out
+                </Button>
+              {/* </Link> */}
             </>
           )}
       </div>

@@ -116,14 +116,14 @@ function SignupField(){
             </div>
             <div className="login-button-container">
                 <button
-                    onClick={() => handleSignUp(email, password)}className="login-button bg-gray-200 text-black"
+                    onClick={() => handleSignUp(email, password)}className="login-button bg-black text-white"
                 >
                     Sign up
                 </button>
                 <RedirectButton
                     url="/login"
-                    text="Log in"
-                    className="login-button bg-black text-white"
+                    text="Log into an existing account"
+                    className="login-button bg-gray-200 text-black"
                 >
                 </RedirectButton>
             </div>
