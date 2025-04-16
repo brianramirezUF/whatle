@@ -84,10 +84,16 @@ export default function CreateGame() {
             });
 
             const result = await response.json();
-            console.log('Server Response:', result);
-            toast("✅ Game uploaded!", {
-                description: `${gameName} was saved successfully.`,
-            });
+            if (!response.ok) {
+                toast("❌ Upload failed!", {
+                    description: `Error: ${result.error}.`,
+                });
+            }
+            else {
+                toast("✅ Game uploaded!", {
+                    description: `${gameName} was saved successfully.`,
+                });
+            }            
         } catch (err) {
             console.log('Error:', err);
             toast("❌ Upload failed", {
