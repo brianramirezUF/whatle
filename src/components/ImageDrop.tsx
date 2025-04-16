@@ -1,17 +1,38 @@
 'use client'
+import React, { useState, useRef, useImperativeHandle, forwardRef, useEffect } from 'react';
 import { useAuth } from "@/contexts/AuthContext";
-import { useState, useRef, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2, Upload, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-function ImageDrop() {
-    const [image, setImage] = useState<string | null>(null);
+type ImageDropHandle = {
+    getImageLink: () => string | null;
+    setImageLink: (link: string | null) => void;
+};
+
+interface ImageDropProps {
+    onImageLinkChange?: (link: string | null) => void;
+}
+
+const ImageDrop = forwardRef<ImageDropHandle, ImageDropProps>(({ onImageLinkChange }, ref) => {
+    const [imageLink, setImageLinkState] = useState<string | null>(null);
     const { currentUser, imgurTokens, refreshImgurTokens } = useAuth();
     const [uploading, setUploading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+    useImperativeHandle(ref, () => ({
+        getImageLink: () => imageLink,
+        setImageLink: (link: string | null) => setImageLink(link)
+    }));
+
+    const setImageLink = (link: string | null) => {
+        setImageLinkState(link);
+        if (onImageLinkChange) {
+            onImageLinkChange(link);
+        }
+    };
 
     const upload = async (file: File) => {
         try {
@@ -21,33 +42,30 @@ function ImageDrop() {
             const formData = new FormData();
             formData.append("image", file);
             if (!imgurTokens) {
-                throw new Error("Missing imgur tokens")
+                throw new Error("Missing imgur tokens");
             }
             const url = `/api/uploadToImgur?imgurAccessToken=${encodeURIComponent(imgurTokens.accessToken)}&imgurRefreshToken=${encodeURIComponent(imgurTokens.refreshToken)}`;
 
-            const response = await fetch(url, {
+            let response = await fetch(url, {
                 method: "POST",
                 body: formData,
             });
 
             if (!response.ok) {
-                try {
-                    if(!currentUser){
-                        throw new Error("User not logged in");
-                    }
-                    console.log("Old", imgurTokens);
-                    const refreshedTokens = await refreshImgurTokens(currentUser.uid, imgurTokens.refreshToken);
-                    console.log("New", refreshedTokens);
-                    if(!refreshedTokens){
-                        throw new Error("Failed to refresh tokens");
-                    }
-                    const url = `/api/uploadToImgur?imgurAccessToken=${encodeURIComponent(refreshedTokens.accessToken)}&imgurRefreshToken=${encodeURIComponent(refreshedTokens.refreshToken)}`;
-                    await fetch(url, {
-                        method: "POST",
-                        body: formData,
-                    });
+                if (!currentUser) {
+                    throw new Error("User not logged in");
+                }
+                const refreshedTokens = await refreshImgurTokens(currentUser.uid, imgurTokens.refreshToken);
+                if (!refreshedTokens) {
+                    throw new Error("Failed to refresh tokens");
+                }
+                const url = `/api/uploadToImgur?imgurAccessToken=${encodeURIComponent(refreshedTokens.accessToken)}&imgurRefreshToken=${encodeURIComponent(refreshedTokens.refreshToken)}`;
+                response = await fetch(url, {
+                    method: "POST",
+                    body: formData,
+                });
 
-                } catch {
+                if (!response.ok) {
                     throw new Error("Upload failed");
                 }
             }
@@ -71,14 +89,15 @@ function ImageDrop() {
             return;
         }
 
-        setImage(URL.createObjectURL(file));
         const data = await upload(file);
 
         if (data?.status === 200) {
+            setImageLink(data.data.link);
             try {
                 await fetch('/api/uploadImgurToFirebase', {
                     method: 'POST',
-                    body: data.data.link,
+                    body: JSON.stringify({ link: data.data.link }),
+                    headers: { "Content-Type": "application/json" }
                 });
             } catch (error) {
                 console.error("Failed to save on Firebase", error);
@@ -94,10 +113,10 @@ function ImageDrop() {
             return;
         }
 
-        setImage(URL.createObjectURL(file));
         const data = await upload(file);
 
         if (data?.status === 200) {
+            setImageLink(data.data.link);
             try {
                 await fetch('/api/uploadImgurToFirebase', {
                     method: 'POST',
@@ -107,6 +126,15 @@ function ImageDrop() {
             } catch (error) {
                 console.error("Failed to save on Firebase", error);
             }
+        }
+    };
+
+    const handleRemove = () => {
+        setImageLink(null);
+        setUploading(false);
+        setError(null);
+        if (fileInputRef.current) {
+            fileInputRef.current.value = ""; // Reset file input value
         }
     };
 
@@ -124,7 +152,7 @@ function ImageDrop() {
                 <div
                     onDragOver={(e) => e.preventDefault()}
                     onDrop={handleDrop}
-                    onClick={() => fileInputRef.current?.click()} // ✅ Now works correctly
+                    onClick={(e) => !imageLink && fileInputRef.current?.click()}
                     className={cn(
                         "relative flex flex-col items-center justify-center w-full h-60 border-2 border-dashed rounded-xl p-4 cursor-pointer",
                         uploading ? "border-gray-400" : "border-gray-300 hover:border-gray-500"
@@ -132,13 +160,18 @@ function ImageDrop() {
                 >
                     {uploading ? (
                         <Loader2 className="animate-spin text-gray-500 w-8 h-8" />
-                    ) : image ? (
+                    ) : imageLink ? (
                         <div className="relative w-full h-full flex flex-col items-center">
-                            <img src={image} alt="Uploaded" className="w-full h-48 object-cover rounded-lg shadow" />
+                            <a href={imageLink} target="_blank" rel="noopener noreferrer" className="w-full h-48">
+                                <img src={imageLink} alt="Uploaded" className="w-full h-full object-cover rounded-lg shadow" />
+                            </a>
                             <Button
                                 variant="destructive"
                                 className="mt-2 flex items-center gap-1"
-                                onClick={() => setImage(null)}
+                                onClick={(e) => {
+                                    e.stopPropagation(); // Prevent triggering file input click
+                                    handleRemove();
+                                }}
                             >
                                 <Trash2 size={16} />
                                 Remove
@@ -157,6 +190,8 @@ function ImageDrop() {
             </CardContent>
         </Card>
     );
-}
+});
+
+ImageDrop.displayName = 'ImageDrop';
 
 export { ImageDrop };

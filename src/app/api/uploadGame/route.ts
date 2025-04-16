@@ -48,7 +48,8 @@ export async function POST(req: Request) {
                 correct_answer: randomAnswer,
                 uid,
                 daily_plays: 0,
-                total_plays: 0
+                total_plays: 0,
+                icon: null
             });
 
             return NextResponse.json({ id: gameDoc.id, message: `${body.name} was uploaded successfully!` }, { status: 201 });
@@ -70,7 +71,8 @@ export async function POST(req: Request) {
                     attributes: body.attributes,
                     maxGuessses: body.maxGuesses, 
                     correct_answer: randomAnswer, 
-                    uid 
+                    uid,
+                    icon: body.icon
                 });
             }
             else {
@@ -80,7 +82,8 @@ export async function POST(req: Request) {
                     answers: body.answers, 
                     attributes: body.attributes,
                     maxGuessses: body.maxGuesses, 
-                    uid 
+                    uid,
+                    icon: body.icon
                 });
             }
 
