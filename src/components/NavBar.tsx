@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { nanoid } from "nanoid";
 import { cn } from "@/lib/utils";
 import { useAuth } from '@/contexts/AuthContext';
+import { GameCardProps } from "@/components/GameCard";
 
 import {
   NavigationMenu,
@@ -34,13 +35,32 @@ import {
 import React from "react";
 
 export default function NavBar() {
+  
+const [searchResults, setSearchResults] = useState<GameCardProps[]>([]);
+
   const { currentUser, loading } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
 
-  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(event.target.value);
+  const handleSearchChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const query = event.target.value;
+    setSearchQuery(query);
+  
+    if (query.length === 0) {
+      setSearchResults([]);
+      return;
+    }
+  
+    try {
+      const res = await fetch(`/api/searchGames?name=${encodeURIComponent(query)}`);
+      const data: GameCardProps[] = await res.json();
+      console.log("Search results:", data);
+      setSearchResults(data);
+    } catch (err) {
+      console.error("Search error:", err);
+      setSearchResults([]);
+    }
   };
-
+  
   const handleSearchSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     console.log("Search Query:", searchQuery);
@@ -64,20 +84,31 @@ export default function NavBar() {
           </Button>
         </Link>
         <CategoriesDropdown></CategoriesDropdown>
-        <form
-          onSubmit={handleSearchSubmit}
-          className="relative flex items-center">
-          <Input
-            type="text"
-            placeholder="Search"
-            value={searchQuery}
-            onChange={handleSearchChange}
-            className="h-8 w-48 rounded-md pr-10 text-sm"
-          />
-          <button type="submit" className="absolute right-2">
-            <Search className="h-4 w-4 text-gray-500" />
-          </button>
-        </form>
+        <form onSubmit={handleSearchSubmit} className="relative flex flex-col">
+          <div className="flex items-center">
+            <Input
+              type="text"
+              placeholder="Search"
+              value={searchQuery}
+              onChange={handleSearchChange}
+              className="h-8 w-48 rounded-md pr-10 text-sm"
+            />
+            <button type="submit" className="absolute right-2">
+              <Search className="h-4 w-4 text-gray-500" />
+            </button>
+          </div>
+          {searchResults.length > 0 && (
+          <div className="absolute z-50 top-full left-0 mt-1 w-48 bg-white border rounded shadow">
+            {searchResults.map((game) => (
+              <Link key={game.id} href={`/play/${game.id}`}>
+                <div className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm">
+                  {game.name}
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+      </form>
       </div>
       {/* sign up, login cbuttons */}
       <div className="flex items-center space-x-4">
