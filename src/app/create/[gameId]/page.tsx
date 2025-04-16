@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react';
 import { AttributeType, AnswerType } from '../attributes';
-import { EditableAnswer, Answer, EditableAttribute, Attribute } from '../components';
+import { EditableAnswer, Answer, EditableAttribute} from '../components';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -107,13 +107,25 @@ export default function CreateGame() {
     }
  
     const addAttribute = () => {
+        // Extract current attribute indices
+        const existingIndices = attributes
+            .map(attr => parseInt(attr.name.replace("Attribute ", ""), 10))
+            .filter(num => !isNaN(num));
+    
+        // Find the next available index
+        let newIndex = 0;
+        while (existingIndices.includes(newIndex)) {
+            newIndex++;
+        }
+    
         const newAttribute: AttributeType = {
-            name: `Attribute ${attributes.length}`,
+            name: `Attribute ${newIndex}`,
             type: 'String',
         };
-
+    
         setAttributes([...attributes, newAttribute]);
     };
+    
 
     const addAnswer = () => {
         if (!attributes.length) return;
@@ -186,39 +198,39 @@ export default function CreateGame() {
     };
 
     const handleAttributeSave = (oldName: string, newName: string, type: string) => {
+        // Prevent duplicate attribute names (optional but recommended)
+        if (oldName !== newName && attributes.some(attr => attr.name === newName)) {
+            toast.error("An attribute with this name already exists.");
+            return;
+        }
+    
         setAttributes((prevAttributes) =>
             prevAttributes.map((attr) =>
-                // Check oldName to see if attribute key (name) changed 
                 attr.name === oldName ? { name: newName, type } : attr
             )
         );
-
-        // Update existing answers to correctly display changed attributes
+    
         setAnswers((prevAnswers) => {
-            // Copy existing attributes, keeping old values when renaming
-            const updatedAnswers: Record<string, AnswerType> = Object.keys(prevAnswers).reduce<Record<string, AnswerType>>(
-                (acc, answerKey) => {
-                    const answer = prevAnswers[answerKey];
-
-                    const updatedAttributes: Record<string, string> = Object.entries(answer.attributes).reduce<Record<string, string>>(
-                        (attrAcc, [key, value]) => {
-                            attrAcc[key === oldName ? newName : key] = value;
-                            return attrAcc;
-                        },
-                        {}
-                    );
-
-                    acc[answerKey] = { ...answer, attributes: updatedAttributes };
-                    return acc;
-                },
-                {} as Record<string, AnswerType> // Explicitly define the accumulator type
-            );
-
+            const updatedAnswers: Record<string, AnswerType> = Object.keys(prevAnswers).reduce((acc, key) => {
+                const answer = prevAnswers[key];
+                const updatedAttributes: Record<string, string> = {};
+    
+                for (const [attrName, value] of Object.entries(answer.attributes)) {
+                    const newAttrName = attrName === oldName ? newName : attrName;
+                    updatedAttributes[newAttrName] = value;
+                }
+    
+                acc[key] = { ...answer, attributes: updatedAttributes };
+                return acc;
+            }, {} as Record<string, AnswerType>);
+    
             return updatedAnswers;
         });
-
+    
+        // ✅ This closes the editor view even if nothing changed
         setAttrEditingName(null);
     };
+    
 
     if (isLoading) {
         return (
@@ -262,35 +274,53 @@ export default function CreateGame() {
 
             <h2 className="text-2xl font-bold text-center mb-4">Attribute List</h2>
             <div className="flex flex-col items-center mt-6 w-full">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
-                    {attributes.map((attribute, index) => (
-                        <Card key={index}>
+            <div className="flex flex-wrap gap-2 justify-center w-full">
+                {attributes.map((attribute, index) => {
+                    if (attrEditingName === attribute.name) {
+                        return (
+                        <div key={index} className="w-full max-w-sm">
+                            <EditableAttribute attribute={attribute} onSave={handleAttributeSave} />
+                        </div>
+                        );
+                    } else {
+                        return (
+                            <Card 
+                            key={index} 
+                            className="transition-all hover:shadow-xl hover:-translate-y-1 cursor-pointer m-2"
+                          >                          
                             <CardContent className="p-4 relative">
-                            {attrEditingName === attribute.name ? (
-                                <EditableAttribute attribute={attribute} onSave={handleAttributeSave} />
-                            ) : (
-                                <>
-                                <Attribute attribute={attribute} onEdit={handleAttributeEdit} />
-                                <button
-                                    className="absolute top-2 right-2 text-red-500 hover:text-red-700 text-lg"
-                                    onClick={() => {
+                            <div
+                                onClick={() => handleAttributeEdit(attribute.name)}
+                                className="flex justify-between items-center w-full gap-4 cursor-pointer"
+                            >
+                                <div>
+                                <span className="font-semibold">{attribute.name}</span>
+                                <span className="text-gray-500 ml-2">({attribute.type})</span>
+                                </div>
+                                <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={(e) => {
+                                    e.stopPropagation();
                                     setAttributes(attributes.filter((_, i) => i !== index));
                                     setAnswers((prev) => {
-                                        const updated = { ...prev };
-                                        Object.keys(updated).forEach((key) => {
+                                    const updated = { ...prev };
+                                    Object.keys(updated).forEach((key) => {
                                         delete updated[key].attributes[attribute.name];
-                                        });
-                                        return updated;
                                     });
-                                    }}
+                                    return updated;
+                                    });
+                                }}
                                 >
-                                    ✕
-                                </button>
-                                </>
-                            )}
+                                Delete
+                                </Button>
+                            </div>
                             </CardContent>
-                      </Card>                      
-                    ))}
+                        </Card>
+                        );
+                    }
+                    })}
+
                 </div>
 
                 <div className="flex space-x-2 mt-4">
