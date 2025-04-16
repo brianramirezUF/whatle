@@ -285,38 +285,35 @@ export default function CreateGame() {
                     } else {
                         return (
                             <Card 
-                            key={index} 
-                            className="transition-all hover:shadow-xl hover:-translate-y-1 cursor-pointer m-2"
-                          >                          
-                            <CardContent className="p-4 relative">
-                            <div
+                                key={index} 
+                                className="transition-all hover:shadow-xl hover:-translate-y-1 cursor-pointer m-2"
                                 onClick={() => handleAttributeEdit(attribute.name)}
-                                className="flex justify-between items-center w-full gap-4 cursor-pointer"
-                            >
-                                <div>
-                                <span className="font-semibold">{attribute.name}</span>
-                                <span className="text-gray-500 ml-2">({attribute.type})</span>
-                                </div>
-                                <Button
-                                variant="destructive"
-                                size="sm"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    setAttributes(attributes.filter((_, i) => i !== index));
-                                    setAnswers((prev) => {
-                                    const updated = { ...prev };
-                                    Object.keys(updated).forEach((key) => {
-                                        delete updated[key].attributes[attribute.name];
-                                    });
-                                    return updated;
-                                    });
-                                }}
-                                >
-                                Delete
-                                </Button>
-                            </div>
-                            </CardContent>
-                        </Card>
+                                >                          
+                                <CardContent className="p-4 relative flex justify-between items-center gap-4">
+                                    <div>
+                                    <span className="font-semibold">{attribute.name}</span>
+                                    <span className="text-gray-500 ml-2">({attribute.type})</span>
+                                    </div>
+                                    <Button
+                                    variant="destructive"
+                                    size="sm"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setAttributes(attributes.filter((_, i) => i !== index));
+                                        setAnswers((prev) => {
+                                        const updated = { ...prev };
+                                        Object.keys(updated).forEach((key) => {
+                                            delete updated[key].attributes[attribute.name];
+                                        });
+                                        return updated;
+                                        });
+                                    }}
+                                    >
+                                    Delete
+                                    </Button>
+                                </CardContent>
+                                </Card>
+
                         );
                     }
                     })}
