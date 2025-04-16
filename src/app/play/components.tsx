@@ -263,6 +263,7 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name, gameId, maxGuess
                   if (e.key == 'Enter') e.preventDefault();
                 }}
                 onFocus={() => setShowDropdown(filteredAnswers.length > 0)}
+                onBlur={() => setShowDropdown(false)}
                 placeholder="Type to search..."
                 className="w-full border rounded p-2"
               />
