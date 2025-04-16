@@ -73,17 +73,23 @@ export default function GameList() {
         </Carousel>
     ) : 'No Games';
 
-    const content = (
-        <div className='container'>
-            <h1 className='title text-center font-medium'>
-                Edit Your Existing Games:
-            </h1>
-            {gamesList}
-            <h1 className='subtitle text-center font-medium'>
-                Create A New Game:
-            </h1>
-            <RedirectButton url='/create/new-game' text='Create' className='button  w-[125px] h-[40px]' />
-        </div>
+   const content = (
+   <div className="container-custom pt-2 px-4 mt-16">
+        <h1 className='title text-center font-medium'>
+            Create A New Game:
+        </h1>
+        <div className="flex justify-center">
+            <RedirectButton 
+                url='/create/new-game' 
+                text='Create' 
+                className='button w-[125px] h-[40px]' 
+            />
+            </div>
+                <h1 className='subtitle text-center font-medium mb-42'>
+                    Edit Your Existing Games:
+                </h1>
+                {gamesList}
+            </div>
     );
 
     return <ProtectedRoute>{content}</ProtectedRoute>;
