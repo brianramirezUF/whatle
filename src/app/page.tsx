@@ -40,7 +40,7 @@ import { RedirectButton } from '@/components/Buttons'
 import "./styles.css";
 import Link from "next/link";
 import LoadingSpinner from '@/components/LoadingSpinner';
-import { GameCard, GameCardProps } from '@/components/GameCard'
+import { GameCard, GameCardProps, padWithFiller } from '@/components/GameCard'
 
 export default function Home(){
   const [popularGames, setPopularGames] = useState<GameCardProps[]>([]);
@@ -68,6 +68,9 @@ export default function Home(){
     )
   }
 
+  const paddedGames = padWithFiller(popularGames, 3); 
+  console.log(paddedGames);
+
   return(
       <div className="container">
         <h1 className="title text-center font-medium">
@@ -75,7 +78,7 @@ export default function Home(){
         </h1>
         <Carousel>
           <CarouselContent className="pb-4 w-full max-w-5xl mx-auto">
-          {popularGames.map((game, index) => (
+          {paddedGames.map((game, index) => (
             <CarouselItem key={index} className="basis-1/3">
               <GameCard {...game} />
             </CarouselItem>

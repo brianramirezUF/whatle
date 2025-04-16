@@ -15,7 +15,7 @@ import Link from 'next/link';
 import ProtectedRoute from '@/components/ProtectedRoute'
 import { useAuth } from '@/contexts/AuthContext'
 import LoadingSpinner from '@/components/LoadingSpinner'
-import { GameCard, GameCardProps } from '@/components/GameCard'
+import { GameCard, GameCardProps, padWithFiller } from '@/components/GameCard'
 
 export default function GameList() {
     const [games, setGames] = useState([]);
@@ -54,11 +54,14 @@ export default function GameList() {
         return <div>Error: {error}</div>;
     }
 
-    const gamesList = games.length ? (
+    const paddedGames = padWithFiller(games, 3); 
+    console.log(paddedGames);
+
+    const gamesList = paddedGames.length ? (
         <Carousel>
             <CarouselContent className='pb-4 w-full max-w-5xl mx-auto'>
-                {games.map((game: GameCardProps, index) => (
-                    <CarouselItem key={index} className={games.length < 3 ? '' : 'basis-1/3'}>
+                {paddedGames.map((game: GameCardProps, index) => (
+                    <CarouselItem key={index} className={paddedGames.length < 3 ? '' : 'basis-1/3'}>
                         <GameCard {...game} play={false} />
                     </CarouselItem>
                 ))}
