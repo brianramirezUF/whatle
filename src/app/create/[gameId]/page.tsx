@@ -1,7 +1,8 @@
 'use client'
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import { AttributeType, AnswerType } from '../attributes';
-import { EditableAnswer, Answer, EditableAttribute} from '../components';
+import { AnswerCard, EditableAttribute } from '../components';
+//import { EditableAnswer, Answer, EditableAttribute} from '../components';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -13,6 +14,7 @@ import LoadingSpinner from '@/components/LoadingSpinner';
 import { toast } from "sonner";
 import { useRouter } from 'next/navigation';
 import { ImageDrop } from '@/components/ImageDrop';
+import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export default function CreateGame() {
     const router = useRouter();
@@ -23,7 +25,7 @@ export default function CreateGame() {
     const [tempAnswerName, setTempAnswerName] = useState<string>("");
     const [gameName, setGameName] = useState<string>("Game Name");
     const [isLoading, setIsLoading] = useState(true);
-    const [maxGuesses, setMaxGuesses] = useState<number>(6); 
+    const [maxGuesses, setMaxGuesses] = useState<number>(6);
     const [maxGuessesInput, setMaxGuessesInput] = useState<string>('6');
     const imageDropRef = useRef<{ getImageLink: () => string | null; setImageLink: (link: string | null) => void }>(null);
     const [imageLink, setImageLink] = useState<string | null>(null);
@@ -32,10 +34,44 @@ export default function CreateGame() {
         console.log('Image Link updated:', imageLink);
     }, [imageLink]);
 
+    // Pagination
+    const [searchTerm, setSearchTerm] = useState("");
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 6;
+
     // Routing
     const params = useParams();
     const gameId = params.gameId;
     const { currentUser } = useAuth();
+
+
+    // Filter answers based on search term
+    const filteredAnswers = useMemo(() => {
+        if (!searchTerm.trim()) return Object.values(answers);
+
+        const lowercaseSearch = searchTerm.toLowerCase();
+        return Object.values(answers).filter(answer => {
+            // Search in answer name
+            if (answer.name.toLowerCase().includes(lowercaseSearch)) return true;
+
+            // Search in attribute values
+            for (const [key, value] of Object.entries(answer.attributes)) {
+                if (value && value.toLowerCase().includes(lowercaseSearch)) return true;
+            }
+
+            return false;
+        });
+    }, [answers, searchTerm]);
+
+    // Get paginated answers
+    const paginatedAnswers = useMemo(() => {
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        return filteredAnswers.slice(startIndex, startIndex + itemsPerPage);
+    }, [filteredAnswers, currentPage]);
+
+    // Calculate total pages
+    const totalPages = Math.ceil(filteredAnswers.length / itemsPerPage);
+
 
     useEffect(() => {
         const loadGame = async () => {
@@ -56,7 +92,7 @@ export default function CreateGame() {
 
                 if (data.maxGuesses !== undefined) {
                     setMaxGuesses(data.maxGuesses);
-                }                
+                }
 
                 if (data.attributes) {
                     setAttributes(data?.attributes);
@@ -79,7 +115,7 @@ export default function CreateGame() {
                 setIsLoading(false);
             }
         };
-        
+
         loadGame();
     }, [gameId]);
 
@@ -112,7 +148,7 @@ export default function CreateGame() {
                 if (result.id) {
                     router.push(`/play/${result.id}`);
                 }
-            }            
+            }
         } catch (err) {
             console.log('Error:', err);
             toast("❌ Upload failed", {
@@ -128,44 +164,44 @@ export default function CreateGame() {
         if (data.maxGuesses) {
             setMaxGuesses(data.maxGuesses);
             setMaxGuessesInput(data.maxGuesses.toString());
-          }
+        }
     }
- 
+
     const addAttribute = () => {
         // Extract current attribute indices
         const existingIndices = attributes
             .map(attr => parseInt(attr.name.replace("Attribute ", ""), 10))
             .filter(num => !isNaN(num));
-    
+
         // Find the next available index
         let newIndex = 0;
         while (existingIndices.includes(newIndex)) {
             newIndex++;
         }
-    
+
         const newAttribute: AttributeType = {
             name: `Attribute ${newIndex}`,
             type: 'String',
         };
-    
+
         setAttributes([...attributes, newAttribute]);
     };
-    
+
 
     const addAnswer = () => {
         if (!attributes.length) return;
 
         const existingIndices = Object.keys(answers)
-        .map((key) => parseInt(key.replace("Answer ", ""), 10))
-        .filter((num) => !isNaN(num));
-      
+            .map((key) => parseInt(key.replace("Answer ", ""), 10))
+            .filter((num) => !isNaN(num));
+
         let newIndex = 0;
         while (existingIndices.includes(newIndex)) {
             newIndex++;
         }
-        
+
         let name = `Answer ${newIndex}`;
-      
+
         const newAnswer: AnswerType = {
             name,
             attributes: attributes.reduce<Record<string, string>>(
@@ -182,39 +218,38 @@ export default function CreateGame() {
 
     // Map answer values to correct answer
     const handleAnswerSave = (
-    oldName: string,
-    values: { attributes: Record<string, string> }
+        oldName: string,
+        values: { attributes: Record<string, string> }
     ) => {
-    setAnswers((prev) => {
-        const updated = { ...prev };
+        setAnswers((prev) => {
+            const updated = { ...prev };
 
-        // name hasn’t changed, just update attributes
-        if (oldName === tempAnswerName) {
-            updated[oldName] = {
-                name: oldName,
+            // name hasn’t changed, just update attributes
+            if (oldName === tempAnswerName) {
+                updated[oldName] = {
+                    name: oldName,
+                    attributes: { ...values.attributes },
+                };
+                return updated;
+            }
+
+            delete updated[oldName];
+            updated[tempAnswerName] = {
+                name: tempAnswerName,
                 attributes: { ...values.attributes },
             };
+
             return updated;
-        }
+        });
 
-        delete updated[oldName];
-        updated[tempAnswerName] = {
-            name: tempAnswerName,
-            attributes: { ...values.attributes },
-        };
-
-        return updated;
-    });
-
-    setAnsEditingName(null);
-    setTempAnswerName('');
-};
-
+        setAnsEditingName(null);
+        setTempAnswerName('');
+    };
 
     // Change ID (name) of current editing answer (called by clicking pen icon in 'Answer' component ./components.tsx)
     const handleAnswerEdit = (name: string) => {
         setAnsEditingName(name);
-        setTempAnswerName(name);  
+        setTempAnswerName(name);
     };
 
     // Change ID (name) of current editing attribute (called by clicking pen icon in 'Attribute' component ./components.tsx)
@@ -228,34 +263,33 @@ export default function CreateGame() {
             toast.error("An attribute with this name already exists.");
             return;
         }
-    
+
         setAttributes((prevAttributes) =>
             prevAttributes.map((attr) =>
                 attr.name === oldName ? { name: newName, type } : attr
             )
         );
-    
+
         setAnswers((prevAnswers) => {
             const updatedAnswers: Record<string, AnswerType> = Object.keys(prevAnswers).reduce((acc, key) => {
                 const answer = prevAnswers[key];
                 const updatedAttributes: Record<string, string> = {};
-    
+
                 for (const [attrName, value] of Object.entries(answer.attributes)) {
                     const newAttrName = attrName === oldName ? newName : attrName;
                     updatedAttributes[newAttrName] = value;
                 }
-    
+
                 acc[key] = { ...answer, attributes: updatedAttributes };
                 return acc;
             }, {} as Record<string, AnswerType>);
-    
+
             return updatedAnswers;
         });
-    
-        // ✅ This closes the editor view even if nothing changed
+
         setAttrEditingName(null);
     };
-    
+
 
     if (isLoading) {
         return (
@@ -289,60 +323,60 @@ export default function CreateGame() {
                         const parsed = parseInt(maxGuessesInput, 10);
                         if (!isNaN(parsed) && parsed >= 1) {
                             setMaxGuesses(parsed);
-                        } 
+                        }
                         else {
                             setMaxGuesses(1);
                             setMaxGuessesInput('1');
                         }
                     }}
                     className="w-[300px] text-center border border-gray-300 rounded-lg px-2 py-1"
-                    />
+                />
             </div>
 
             <h2 className="text-2xl font-bold text-center mb-4">Attribute List</h2>
             <div className="flex flex-col items-center mt-6 w-full">
-            <div className="flex flex-wrap gap-2 justify-center w-full">
-                {attributes.map((attribute, index) => {
-                    if (attrEditingName === attribute.name) {
-                        return (
-                        <div key={index} className="w-full max-w-sm">
-                            <EditableAttribute attribute={attribute} onSave={handleAttributeSave} />
-                        </div>
-                        );
-                    } else {
-                        return (
-                            <Card 
-                                key={index} 
-                                className="transition-all hover:shadow-xl hover:-translate-y-1 cursor-pointer m-2"
-                                onClick={() => handleAttributeEdit(attribute.name)}
-                                >                          
-                                <CardContent className="p-4 relative flex justify-between items-center gap-4">
-                                    <div>
-                                    <span className="font-semibold">{attribute.name}</span>
-                                    <span className="text-gray-500 ml-2">({attribute.type})</span>
-                                    </div>
-                                    <Button
-                                    variant="destructive"
-                                    size="sm"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        setAttributes(attributes.filter((_, i) => i !== index));
-                                        setAnswers((prev) => {
-                                        const updated = { ...prev };
-                                        Object.keys(updated).forEach((key) => {
-                                            delete updated[key].attributes[attribute.name];
-                                        });
-                                        return updated;
-                                        });
-                                    }}
-                                    >
-                                    Delete
-                                    </Button>
-                                </CardContent>
+                <div className="flex flex-wrap gap-2 justify-center w-full">
+                    {attributes.map((attribute, index) => {
+                        if (attrEditingName === attribute.name) {
+                            return (
+                                <div key={index} className="w-full max-w-sm">
+                                    <EditableAttribute attribute={attribute} onSave={handleAttributeSave} />
+                                </div>
+                            );
+                        } else {
+                            return (
+                                <Card
+                                    key={index}
+                                    className="transition-all hover:shadow-xl hover:-translate-y-1 cursor-pointer m-2"
+                                    onClick={() => handleAttributeEdit(attribute.name)}
+                                >
+                                    <CardContent className="p-4 relative flex justify-between items-center gap-4">
+                                        <div>
+                                            <span className="font-semibold">{attribute.name}</span>
+                                            <span className="text-gray-500 ml-2">({attribute.type})</span>
+                                        </div>
+                                        <Button
+                                            variant="destructive"
+                                            size="sm"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setAttributes(attributes.filter((_, i) => i !== index));
+                                                setAnswers((prev) => {
+                                                    const updated = { ...prev };
+                                                    Object.keys(updated).forEach((key) => {
+                                                        delete updated[key].attributes[attribute.name];
+                                                    });
+                                                    return updated;
+                                                });
+                                            }}
+                                        >
+                                            Delete
+                                        </Button>
+                                    </CardContent>
                                 </Card>
 
-                        );
-                    }
+                            );
+                        }
                     })}
 
                 </div>
@@ -367,119 +401,90 @@ export default function CreateGame() {
                         + Add Answer
                     </Button>
                 </div>
-
-
             </div>
+            <div className="mt-8 w-full">
+                <div className="flex flex-col lg:flex-row justify-between items-center mb-6">
+                    <h2 className="text-2xl font-bold mb-2 lg:mb-0">Answers</h2>
 
-
-            {attributes.length > 0 && Object.keys(answers).length > 0 && (
-                <div className="mt-6 w-full overflow-x-auto">
-                    <h2 className="text-2xl font-bold text-center mb-2">Answers</h2>
-                    <div className="border border-gray-300 rounded-lg shadow-sm">
-                        <table className="w-full text-sm text-left border-collapse">
-                            <thead className="bg-gray-100">
-                                <tr>
-                                    <th className="border px-4 py-2">Name</th>
-                                    {attributes.map((attr, index) => (
-                                        <th key={index} className="border px-4 py-2 text-center">
-                                            {attr.name}
-                                        </th>
-                                    ))}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {Object.entries(answers).map(([answerKey, answer], rowIndex) => (
-                                    <tr key={rowIndex} className="hover:bg-gray-50">
-                                        <td className="border px-4 py-2">
-                                            {ansEditingName === answer.name ? 
-                                            (
-                                                <input
-                                                    type="text"
-                                                    className="w-full px-2 py-1 border border-gray-300 rounded"
-                                                    value={tempAnswerName}
-                                                    onChange={(e) => setTempAnswerName(e.target.value)}
-                                                /> 
-                                            ) : (answer.name)}  
-                                        </td>
-
-                                        {attributes.map((attr, attrIndex) => (
-                                            <td key={attrIndex} className="border px-2 py-1 text-center">
-                                                {ansEditingName === answer.name ? (
-                                                    <input
-                                                        type="text"
-                                                        className="w-full px-2 py-1 border border-gray-300 rounded"
-                                                        value={answer.attributes[attr.name] || ""}
-                                                        onChange={(e) =>
-                                                            setAnswers((prev) => ({
-                                                                ...prev,
-                                                                [answerKey]: {
-                                                                    ...prev[answerKey],
-                                                                    attributes: {
-                                                                        ...prev[answerKey].attributes,
-                                                                        [attr.name]: e.target.value,
-                                                                    },
-                                                                },
-                                                            }))
-                                                        }
-                                                    />
-                                                ) : (
-                                                    <span>{answer.attributes[attr.name]}</span>
-                                                )}
-                                            </td>
-                                        ))}
-
-                                        <td className="border px-2 py-1 text-center flex justify-center gap-2">
-                                        {ansEditingName === answer.name ? (
-                                            <Button
-                                            onClick={() => handleAnswerSave(answer.name, { attributes: answer.attributes })}
-                                            size="sm"
-                                            className="bg-green-500 text-white"
-                                            >
-                                            Save
-                                            </Button>
-                                        ) : (
-                                            <>
-                                            <Button
-                                                onClick={() => handleAnswerEdit(answer.name)}
-                                                size="sm"
-                                                className="bg-blue-500 text-white"
-                                            >
-                                                Edit
-                                            </Button>
-                                            <Button
-                                                onClick={() => {
-                                                const updated = { ...answers };
-                                                delete updated[answer.name];
-                                                setAnswers(updated);
-                                                }}
-                                                size="sm"
-                                                className="bg-red-500 text-white"
-                                            >
-                                                Delete
-                                            </Button>
-                                            </>
-                                        )}
-                                        </td>
-
-                                    </tr>
-                                ))}
-                            </tbody>
-
-                        </table>
-                    </div>
-
-                    <div className="flex justify-center mt-6">
-                        <Button
-                            onClick={uploadGame}
-                            className="bg-green-400 hover:bg-green-600 text-black font-semibold px-6 py-2 rounded-full shadow-md transition duration-300"
-                        >
-                            Upload Game
-                        </Button>
+                    <div className="relative w-full lg:w-1/3">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                        <Input
+                            placeholder="Search answers..."
+                            value={searchTerm}
+                            onChange={(e) => {
+                                setSearchTerm(e.target.value);
+                                setCurrentPage(1); // Reset to first page on search
+                            }}
+                            className="pl-10"
+                        />
                     </div>
                 </div>
-            )}
+                {attributes.length > 0 && Object.keys(answers).length > 0 ? (
+                    <>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {paginatedAnswers.map((answer) => (
+                                <AnswerCard
+                                    key={answer.name}
+                                    attributes={attributes}
+                                    answer={answer}
+                                    isEditing={ansEditingName === answer.name}
+                                    onEdit={handleAnswerEdit}
+                                    onSave={handleAnswerSave}
+                                    onDelete={() => {
+                                        const updated = { ...answers };
+                                        delete updated[answer.name];
+                                        setAnswers(updated);
+                                    }}
+                                    setTempName={setTempAnswerName}
+                                />
+                            ))}
+                        </div>
+
+                        {/* Pagination controls */}
+                        {totalPages > 1 && (
+                            <div className="flex justify-center items-center mt-6 space-x-2">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                    disabled={currentPage === 1}
+                                >
+                                    <ChevronLeft size={16} />
+                                </Button>
+
+                                <span className="text-sm">
+                                    Page {currentPage} of {totalPages}
+                                </span>
+
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                                    disabled={currentPage === totalPages}
+                                >
+                                    <ChevronRight size={16} />
+                                </Button>
+                            </div>
+                        )}
+
+                        <div className="flex justify-center mt-8">
+                            <Button
+                                onClick={uploadGame}
+                                className="bg-green-500 hover:bg-green-600 text-white font-semibold px-6 py-2 rounded-lg shadow-md transition duration-300"
+                            >
+                                Upload Game
+                            </Button>
+                        </div>
+                    </>
+                ) : (
+                    <div className="text-center p-8 border border-dashed rounded-lg">
+                        <p className="text-gray-500">No answers created yet. Add attributes and create answers to see them here.</p>
+                    </div>
+                )}
+            </div>
+
             <a
-                download = {gameName + '.json'}
+                download={gameName + '.json'}
                 target='_blank'
                 rel='noopener noreferrer'
                 className='decoration-dashed underline table'
@@ -491,7 +496,7 @@ export default function CreateGame() {
                 Get Game as JSON
             </a>
             <JsonParser onParse={handleJSON} />
-            
+
         </div>
     );
 
