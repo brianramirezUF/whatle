@@ -115,11 +115,17 @@ const EditableAttribute: React.FC<EditableAttributeProps> = ({ attribute, onSave
   return (
       <div className='p-4 border rounded-lg shadow-md bg-white flex gap-4 items-center'>
           <input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder='Name'
-              className='p-2 border rounded w-1/2 bg-gray-100'
-          />
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                    onSave(attribute.name, name, type);
+                    }
+                }}
+                placeholder='Name'
+                className='p-2 border rounded w-1/2 bg-gray-100'
+            />
+
           <select
               value={type}
               onChange={(e) => setType(e.target.value)}
