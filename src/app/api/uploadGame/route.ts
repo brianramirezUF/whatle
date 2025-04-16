@@ -37,10 +37,19 @@ export async function POST(req: Request) {
 
             // Game does not exist and name is not duplicate, create new document
             const keys = Object.keys(body.answers);
-            const randomAnswer = body.answers[keys[Math.floor(Math.random() * keys.length)]];
+            const randomAnswer = keys[Math.floor(Math.random() * keys.length)];
 
             const gameDoc = gamesRef.doc();
-            await gameDoc.set({ ...body, correct_answer: randomAnswer, uid, daily_plays: 0, total_plays: 0 });
+            await gameDoc.set({ 
+                name: body.name,
+                answers: body.answers,
+                attributes: body.attributes,
+                maxGuessses: body.maxGuesses,
+                correct_answer: randomAnswer,
+                uid,
+                daily_plays: 0,
+                total_plays: 0
+            });
 
             return NextResponse.json({ id: gameDoc.id, message: `${body.name} was uploaded successfully!` }, { status: 201 });
 
@@ -48,7 +57,32 @@ export async function POST(req: Request) {
         else {
             // Game exists, update document
             const gameData = gameDoc.data();
-            await gameDoc.ref.set({ ...body, ...gameData, name: body.name, answers: body.answers, attributes: body.attributes, uid });
+
+            let randomAnswer;
+            const keys = Object.keys(body.answers);
+            if (!keys.includes(gameData?.correct_answer)) {
+                // Create new correct answer (old one deleted)
+                randomAnswer = keys[Math.floor(Math.random() * keys.length)];
+                await gameDoc.ref.set({
+                    ...gameData, 
+                    name: body.name, 
+                    answers: body.answers, 
+                    attributes: body.attributes,
+                    maxGuessses: body.maxGuesses, 
+                    correct_answer: randomAnswer, 
+                    uid 
+                });
+            }
+            else {
+                await gameDoc.ref.set({
+                    ...gameData, 
+                    name: body.name, 
+                    answers: body.answers, 
+                    attributes: body.attributes,
+                    maxGuessses: body.maxGuesses, 
+                    uid 
+                });
+            }
 
             return NextResponse.json({ id: gameDoc.id, message: `${body.name} was updated successfully!` }, { status: 200 });
         }
