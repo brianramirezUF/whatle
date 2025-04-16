@@ -1,6 +1,4 @@
 import { NextResponse } from 'next/server';
-import { db } from '@/config/firebase';
-import { doc, collection, setDoc, query, getDocs, where } from 'firebase/firestore';
 import { adminAuth, adminDB } from '@/config/firebaseAdmin';
 
 // TODO: update firebase rules and authentication to verify correct user is updating correct
@@ -29,14 +27,14 @@ export async function POST(req: Request) {
             }
         }
 
-        // Game names are unique on a per user basis (two users can have the same game name,
-        // but one user cannot have multiple of the same name)
-        const nameQuery = await gamesRef.where('name', '==', body.name).where('uid', '==', uid).get();
-        if (!nameQuery.empty) {
-            return NextResponse.json({ error: `Game of the same name "${body.name}" already exists in your account!` }, { status: 500 });;
-        }
-
         if (!gameDoc) {
+            // Game names are unique on a per user basis (two users can have the same game name,
+            // but one user cannot have multiple of the same name)
+            const nameQuery = await gamesRef.where('name', '==', body.name).where('uid', '==', uid).get();
+            if (!nameQuery.empty) {
+                return NextResponse.json({ error: `Game of the same name "${body.name}" already exists in your account!` }, { status: 500 });;
+            }
+
             // Game does not exist and name is not duplicate, create new document
             const keys = Object.keys(body.answers);
             const randomAnswer = body.answers[keys[Math.floor(Math.random() * keys.length)]];

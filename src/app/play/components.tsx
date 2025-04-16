@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { GuessStatus } from '@/lib/guessComparison';
 import React from 'react';
 import "./styles.css";
-import { getAuth } from "firebase/auth";
+import { useAuth } from '@/contexts/AuthContext';
 import { ConfettiBurst } from '@/components/ConfettiBurst';
 
 type GuessResult = {
@@ -37,6 +37,8 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name, gameId, maxGuess
   const [won, setWon] = useState(false);
   const [isLost, setIsLost] = useState(false);
   const [confettiBursts, setConfettiBursts] = useState<{ id: number; x: number; y: number }[]>([]);
+  const { currentUser } = useAuth();
+  
 
   if (!Object.keys(answers).length) {
     return <h1>No answers.</h1>
@@ -101,9 +103,6 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name, gameId, maxGuess
 
     setGuesses((prev) => [...prev, { result: results, name: guess }]);
 
-    const auth = getAuth();
-    const currentUser = auth.currentUser;
-
     if (!currentUser) {
       console.error("❌ No user is logged in.");
       alert("❌ You must be logged in to track progress.");
@@ -115,7 +114,6 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name, gameId, maxGuess
     const timeTaken = Math.floor(Math.random() * 100) + 1;
 
     const payload = { 
-      userId,
       gameId,
       name,
       won: isWin,
@@ -168,10 +166,12 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name, gameId, maxGuess
     // update if win OR lose
     if (isWin || isGuessLimitReached) {
       try {
+        const idToken = await currentUser.getIdToken();
         const res = await fetch("/api/updateUserHistory", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${idToken}`
           },
           body: JSON.stringify(payload),
         });
@@ -205,7 +205,6 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name, gameId, maxGuess
       return (
         <React.Fragment key={`row-${rowIndex}`}>
           <div>
-            <>{console.log(answers[guess.name].icon)}</>
             <Card className="p-2 bg-gray-100 flex font-bold items-center justify-center aspect-square min-w-[100px] max-w-[300px] card"
               style={answers[guess.name].icon ? {
                 backgroundImage: `url(${answers[guess.name].icon})`,

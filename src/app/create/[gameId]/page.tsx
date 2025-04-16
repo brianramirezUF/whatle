@@ -7,12 +7,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { JsonParser } from '@/components/JsonParser';
 import { GameProps } from '../../play/components';
-import { useParams } from 'next/navigation'
+import { redirect, useParams } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { toast } from "sonner";
+import { useRouter } from 'next/navigation';
 
 export default function CreateGame() {
+    const router = useRouter();
     const [attributes, setAttributes] = useState<AttributeType[]>([]);
     const [attrEditingName, setAttrEditingName] = useState<string | null>(null);
     const [answers, setAnswers] = useState<Record<string, AnswerType>>({});
@@ -93,6 +95,10 @@ export default function CreateGame() {
                 toast("✅ Game uploaded!", {
                     description: result.message
                 });
+
+                if (result.id) {
+                    router.push(`/play/${result.id}`);
+                }
             }            
         } catch (err) {
             console.log('Error:', err);

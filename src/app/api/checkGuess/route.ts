@@ -50,7 +50,6 @@ export async function POST(req: Request) {
         const isWin = (gameData.correct_answer == guess);
         return NextResponse.json({ results, isWin, guess }, { status: 200 });
     }
-
     catch (error: any) {
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
