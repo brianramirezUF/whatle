@@ -134,6 +134,7 @@ const EditableAttribute: React.FC<EditableAttributeProps> = ({ attribute, onSave
               <option value='String'>String</option>
               <option value='Number'>Number</option>
               <option value='Boolean'>Boolean</option>
+              <option value='Collection'>Collection</option>
           </select>
           <button onClick={() => onSave(attribute.name, name, type)} className="px-4 py-2 bg-blue-500 text-white rounded">
               Save

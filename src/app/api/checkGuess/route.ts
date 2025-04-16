@@ -35,7 +35,7 @@ export async function POST(req: Request) {
             const correctAttribute = correctAnswer.attributes[curAttribute.name];
             const guessedAttribute = guessedAnswer.attributes[curAttribute.name];
 
-            if (correctAttribute.includes(',')) {
+            if (correctAttribute.includes(',') && curAttribute.type == 'Collection') {
                 const answerArray = correctAttribute.split(',');
                 const guessArray = guessedAttribute.split(',');
                 result = comparisons['Collection'](guessArray, answerArray);
