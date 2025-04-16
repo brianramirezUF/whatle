@@ -375,22 +375,15 @@ export default function CreateGame() {
                     </Button>
                 </div>
             </div>
-            <h2 className="text-2xl font-bold text-center mb-7"></h2>
-            <h2 className="text-2xl font-bold text-center mb-2">Answer List</h2>
-            <div className="flex flex-col items-center mt-10 w-full">
-                <div className="flex space-x-2 mb-4">
+            <div className="mt-8 w-full">
+                <div className="flex flex-col lg:flex-row justify-between items-center mb-6">
+                    <h2 className="text-2xl font-bold mb-2 lg:mb-0">Answers</h2>
                     <Button
                         onClick={addAnswer}
                         className="bg-blue-300 text-black px-4 py-2 rounded-full"
                     >
                         + Add Answer
                     </Button>
-                </div>
-            </div>
-            <div className="mt-8 w-full">
-                <div className="flex flex-col lg:flex-row justify-between items-center mb-6">
-                    <h2 className="text-2xl font-bold mb-2 lg:mb-0">Answers</h2>
-
                     <div className="relative w-full lg:w-1/3">
                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
                         <Input
