@@ -12,7 +12,7 @@ export default function GamesCategoryPage() {
   useEffect(() => {
     const fetchGames = async () => {
       try {
-        const q = query(collection(db, 'games'), where('tag', '==', 'games'));
+        const q = query(collection(db, 'games'), where('tag', '==', 'Games'));
         const snapshot = await getDocs(q);
 
         const gameList: GameCardProps[] = snapshot.docs.map((doc) => {
