@@ -457,20 +457,6 @@ export default function CreateGame() {
                     </div>
                 </div>
             )}
-            <a
-                download = {gameName + '.json'}
-                target='_blank'
-                rel='noopener noreferrer'
-                className='decoration-dashed underline table'
-                href={
-                    'data:application/json;charset=utf-8,' +
-                    encodeURIComponent(JSON.stringify({ name: gameName, answers, attributes, uid: currentUser?.uid || '', maxGuesses }, null, 2))
-                }
-            >
-                Get Game as JSON
-            </a>
-            <JsonParser onParse={handleJSON} />
-            
         </div>
     );
 
