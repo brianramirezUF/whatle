@@ -53,14 +53,13 @@ const compareNumber = (guess: number, answer: number): GuessCorrectness => {
 };
 
 const compareBoolean = (guess: string | boolean, answer: string | boolean): GuessCorrectness => {
-    // Normalize guess and answer to boolean if they are strings
+    // Normalize guess and answer if they are strings
     if (typeof guess === 'string') {
         guess = guess.trim().toLowerCase() === 'true';
     }
     if (typeof answer === 'string') {
         answer = answer.trim().toLowerCase() === 'true';
     }
-
     return {
         status: guess === answer ? GuessStatus.CORRECT : GuessStatus.INCORRECT,
         details: guess.toString()
