@@ -4,8 +4,7 @@ if (!admin.apps.length) {
     const serviceAccount = require('./serviceAccount.json');
 
     admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount),
-        projectId: serviceAccount.projectId
+        credential: admin.credential.cert(serviceAccount)
     });
 }
 
