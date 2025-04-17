@@ -1,4 +1,3 @@
-import { Icons } from '@/components/icons';
 import { useEffect, useState, useRef } from 'react';
 import { Guess, AttributeType, AnswerType } from '../create/attributes';
 import { Card, CardContent } from "@/components/ui/card";
