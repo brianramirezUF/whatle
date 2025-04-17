@@ -44,7 +44,7 @@ export async function POST(req: Request) {
                 name: body.name,
                 answers: body.answers,
                 attributes: body.attributes,
-                maxGuessses: body.maxGuesses,
+                maxGuesses: body.maxGuesses,
                 tag: body.tag,
                 correct_answer: randomAnswer,
                 uid,
