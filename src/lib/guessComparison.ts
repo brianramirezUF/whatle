@@ -79,24 +79,26 @@ const compareCollection = (guess: Array<string>, answer: Array<string>): GuessCo
 
     console.log('Correct:', correct);
     console.log('Extra:', extra);
-    console.log('Missing Count:', missingCount)
+    console.log('Missing Count:', missingCount);
+
+    const joinedGuess = safeGuess.join(', ');
 
     if (missingCount === 0 && extra.length === 0) {
         return {
             status: GuessStatus.CORRECT,
-            details: safeGuess.join()
+            details: joinedGuess
         };
     }
     else if (missingCount === answer.length) {
         return {
             status: GuessStatus.INCORRECT,
-            details: safeGuess.join()
+            details: joinedGuess
         };
     }
     else {
         return {
             status: GuessStatus.PARTIAL,
-            details: safeGuess.join(',')
+            details: joinedGuess
         };
     }
 };
