@@ -85,19 +85,23 @@ export const GameCardContent: React.FC<GameCardContentProps> = ({ id, name, dail
                     <span className={`text-3xl font-semibold text text-center ${name !== "..." ? "text-black bg-white p-2 rounded-md" : "text-gray-400"}`}>{name}</span>
                 </CardContent>
                 <CardFooter className={`flex justify-center items-center pt-2 pb-3 px-4 gap-2 ${name === "..." ? "invisible" : ""}`}>
-                    <div
-                        className='flex items-center justify-center gap-1 rounded-xl bg-logo-green px-2 py-1 mx-1 my-3 text-sm text-[#1D4B2D] shadow-md backdrop-blur-md transition-all hover:shadow-lg hover:-translate-y-0.5 cursor-pointer w-[130px] h-[40px]'
-                    >
-                        <Link href={`${basePath}play/${id}`} className="font-bold">Play</Link>
-                    </div>
+                    <Link href={`${basePath}play/${id}`}>
+                        <div
+                            className='flex items-center justify-center gap-1 rounded-xl bg-logo-green px-2 py-1 mx-1 my-3 text-sm text-[#1D4B2D] shadow-md backdrop-blur-md transition-all hover:shadow-lg hover:-translate-y-0.5 cursor-pointer w-[130px] h-[40px]'
+                        >
+                            <span className="font-bold">Play</span>
+                        </div>
+                    </Link>
                     {uid === "" || currUid === "" || uid !== currUid
                         ? null
                         : (
-                            <div
-                                className="flex items-center justify-center gap-1 rounded-xl bg-logo-yellow px-2 py-1 my-3 text-sm text-yellow-800 shadow-md backdrop-blur-md transition-all hover:shadow-lg hover:-translate-y-0.5 cursor-pointer w-[130px] h-[40px]"
-                            >
-                                <Link href={`${basePath}create/${id}`} className="font-bold">Edit</Link>
-                            </div>
+                            <Link href={`${basePath}create/${id}`}>
+                                <div
+                                    className="flex items-center justify-center gap-1 rounded-xl bg-logo-yellow px-2 py-1 my-3 text-sm text-yellow-800 shadow-md backdrop-blur-md transition-all hover:shadow-lg hover:-translate-y-0.5 cursor-pointer w-[130px] h-[40px]"
+                                >
+                                    <span className="font-bold">Edit</span>
+                                </div>
+                            </Link>
                         )}
                 </CardFooter>
             </Card>
