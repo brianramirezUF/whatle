@@ -80,7 +80,7 @@ export default function CreateGame() {
             try {
                 if (gameId == 'new-game') return;
 
-                const response = await fetch(`http://localhost:3000/api/getGameById?id=${gameId}`);
+                const response = await fetch(`/api/getGameById?id=${gameId}`);
 
                 if (!response.ok) {
                     throw new Error('Failed to fetch game');

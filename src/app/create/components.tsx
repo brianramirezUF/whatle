@@ -113,6 +113,7 @@ const CollectionInput: React.FC<{
                 <Button
                     type="button"
                     variant="outline"
+                    onMouseDown={(e) => e.preventDefault()}
                     onClick={addItem}
                     disabled={!currentInput.trim()}
                 >
@@ -159,14 +160,15 @@ const AnswerCard: React.FC<{
 
     const [name, setName] = useState(answer.name);
     const [tempAnswerName, setTempAnswerName] = useState(answer.name);
-    
+
     const imageDropRef = useRef<{ getImageLink: () => string | null; setImageLink: (link: string | null) => void }>(null);
     const [imageLink, setImageLink] = useState<string | null>(answer.icon);
 
+    const [selectOpen, setSelectOpen] = useState(false);
 
     useEffect(() => {
         if (isEditing) {
-            if(imageDropRef.current){
+            if (imageDropRef.current) {
                 imageDropRef.current.setImageLink(answer.icon);
             }
         }
@@ -200,6 +202,7 @@ const AnswerCard: React.FC<{
             case 'boolean':
                 return (
                     <Select
+                        onOpenChange={setSelectOpen}
                         value={value.toLowerCase()}
                         onValueChange={(newValue) => handleChange(attribute.name, newValue)}
                     >
@@ -252,6 +255,7 @@ const AnswerCard: React.FC<{
 
     return (
         <div
+            tabIndex={0}
             className={`p-5 border rounded-xl transition-all duration-300 ${isEditing
                 ? "shadow-lg ring-2 ring-blue-300 bg-white"
                 : "bg-white shadow hover:shadow-lg hover:-translate-y-1 cursor-pointer"
@@ -260,6 +264,15 @@ const AnswerCard: React.FC<{
             onKeyDown={(e) => {
                 if (e.key === 'Enter' && isEditing) {
                     handleSave();
+                }
+                else if (e.key === 'Enter') {
+                    onEdit(answer.name);
+                }
+            }}
+            onBlur={(e) => {
+                if (selectOpen) return;
+                if (!e.currentTarget?.contains(e.relatedTarget)) {
+                    handleSave(); // or your blur action
                 }
             }}
         >
@@ -277,16 +290,16 @@ const AnswerCard: React.FC<{
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
                         <h3 className="font-semibold text-lg mb-3">{answer.name}</h3>
                         {answer.icon && (
-                        <img 
-                            src={answer.icon} 
-                            alt="icon"
-                            style={{
-                            width: '40px',
-                            height: '40px',
-                            borderRadius: '30%',
-                            objectFit: 'cover'
-                            }}
-                        />
+                            <img
+                                src={answer.icon}
+                                alt="icon"
+                                style={{
+                                    width: '40px',
+                                    height: '40px',
+                                    borderRadius: '30%',
+                                    objectFit: 'cover'
+                                }}
+                            />
                         )}
                     </div>
                 </>

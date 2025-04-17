@@ -176,26 +176,26 @@ export function CategoriesDropdown() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="">
-        <DropdownMenuItem>
-          <Link href="/categories/games" passHref>
+        <Link href="/categories/games" passHref>
+          <DropdownMenuItem>
             Games
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem>
-          <Link href="/categories/tvmovies" passHref>
+          </DropdownMenuItem>
+        </Link>
+        <Link href="/categories/tvmovies" passHref>
+          <DropdownMenuItem>
             TV/Movies
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem>
-          <Link href="/categories/irl" passHref>
+          </DropdownMenuItem>
+        </Link>
+        <Link href="/categories/irl" passHref>
+          <DropdownMenuItem>
             IRL
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem>
-          <Link href="/categories/other" passHref>
+          </DropdownMenuItem>
+        </Link>
+        <Link href="/categories/other" passHref>
+          <DropdownMenuItem>
             Other
-          </Link>
-        </DropdownMenuItem>
+          </DropdownMenuItem>
+        </Link>
       </DropdownMenuContent>
     </DropdownMenu>
   );
