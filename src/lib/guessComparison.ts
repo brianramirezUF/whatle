@@ -67,9 +67,12 @@ const compareBoolean = (guess: string | boolean, answer: string | boolean): Gues
 };
 
 const compareCollection = (guess: Array<string>, answer: Array<string>): GuessCorrectness => {
-    const correct = answer.filter(x => guess.includes(x));
-    const extra = guess.filter(x => !answer.includes(x));
-    const missingCount = answer.length - correct.length;
+    const guessArr = Array.isArray(guess) ? guess : String(guess).split(',').map(s => s.trim());
+    const answerArr = Array.isArray(answer) ? answer : String(answer).split(',').map(s => s.trim());
+
+    const correct = answerArr.filter(x => guessArr.includes(x));
+    const extra = guessArr.filter(x => !answerArr.includes(x));
+    const missingCount = answerArr.length - correct.length;
 
     console.log('Correct:', correct);
     console.log('Extra:', extra);
