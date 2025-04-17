@@ -178,7 +178,9 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name, gameId, maxGuess
 
   const renderHeaders = () => (
     <>
-      <div></div>
+      <Card key={`header-name`} className="bg-gray-100 text-center font-bold p-2 border min-w-[100px] max-w-[300px]">
+          {'Guess'}
+        </Card>
       {attributes.map((attr: AttributeType, index: number) => (
         <Card key={`header-${index}`} className="bg-gray-100 text-center font-bold p-2 border min-w-[100px] max-w-[300px]">
           {attr.name}
