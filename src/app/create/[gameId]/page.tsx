@@ -134,8 +134,6 @@ export default function CreateGame() {
     useEffect(() => {
         if (imageDropRef.current && imageLink) {
             imageDropRef.current.setImageLink(imageLink);
-        } else {
-            console.error("imageDropRef.current is null");
         }
     }, [imageDropRef, imageLink]);
 
