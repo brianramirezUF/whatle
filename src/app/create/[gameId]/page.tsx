@@ -15,6 +15,13 @@ import { toast } from "sonner";
 import { useRouter } from 'next/navigation';
 import { ImageDrop } from '@/components/ImageDrop';
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue
+} from "@/components/ui/select";
 
 export default function CreateGame() {
     const router = useRouter();
@@ -106,12 +113,7 @@ export default function CreateGame() {
 
                 if (data.icon) {
                     console.log("Setting icon to", data.icon);
-                    if(imageDropRef.current){
-                        imageDropRef.current.setImageLink(data.icon);
-                    }
-                    else {
-                        console.log("imageDropRef.current is null");
-                    }
+                    setImageLink(data.icon);
                 }
 
                 if (data.tag) {
@@ -128,6 +130,12 @@ export default function CreateGame() {
 
         loadGame();
     }, [gameId]);
+
+    useEffect(() => {
+        if (imageDropRef.current && imageLink) {
+            imageDropRef.current.setImageLink(imageLink);
+        }
+    }, [imageDropRef, imageLink]);
 
     const uploadGame = async () => {
         if (!currentUser) return;
@@ -230,7 +238,7 @@ export default function CreateGame() {
     // Map answer values to correct answer
     const handleAnswerSave = (
         oldName: string,
-        values: { attributes: Record<string, string>},
+        values: { attributes: Record<string, string> },
         icon: null | string
     ) => {
         setAnswers((prev) => {
@@ -347,23 +355,32 @@ export default function CreateGame() {
                 />
             </div>
             {/*category dropdown*/}
-            <div className="flex flex-col items-center text-center space-y-2 mb-6">
-                <label className="text-sm font-medium">Select a Category</label>
-                <select
+            <div className="flex flex-col items-center space-y-2 mb-6">
+                <Select
                     value={tag}
-                    onChange={(e) => setTag(e.target.value)}
-                    className="w-[300px] text-center border border-gray-300 rounded-lg px-2 py-1"
+                    onValueChange={(value) => setTag(value)}
                 >
-                    <option value="">-- Choose a Tag --</option>
-                    <option value="Games">Games</option>
-                    <option value="TV/Movies">TV/Movies</option>
-                    <option value="IRL">IRL</option>
-                    <option value="Other">Other</option>
-                </select>
+                    <SelectTrigger className="w-[300px]">
+                        <div className="flex-1 text-center">
+                            <SelectValue placeholder="Choose a Tag" />
+                        </div>
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value='Games'>
+                            <div className="w-full text-center">Games</div>
+                        </SelectItem>
+                        <SelectItem value='TV/Movies'>
+                            <div className="w-full text-center">TV/Movies</div>
+                        </SelectItem>
+                        <SelectItem value='IRL'>
+                            <div className="w-full text-center">IRL</div>
+                        </SelectItem>
+                        <SelectItem value='Other'>
+                            <div className="w-full text-center">Other</div>
+                        </SelectItem>
+                    </SelectContent>
+                </Select>
             </div>
-
-
-
             <h2 className="text-2xl font-bold text-center mb-4">Attribute List</h2>
             <div className="flex flex-col items-center mt-6 w-full">
                 <div className="flex flex-wrap gap-2 justify-center w-full">
