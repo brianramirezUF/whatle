@@ -46,7 +46,10 @@
 }
 
 .text {
-    background-color: white;
-    border-radius: 25px;
     padding: 10px;
+    text-shadow: 
+    0px 0px 5px #000, 
+    0px 0px 10px #000, 
+    0px 0px 15px #000, 
+    0px 0px 20px #000;
 }
