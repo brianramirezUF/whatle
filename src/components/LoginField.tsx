@@ -67,14 +67,14 @@ function LoginField() {
             </div>
             <div className="login-button-container">
                 <button
-                    onClick={() => handleLogin(email, password)} className="login-button bg-gray-200 text-black"
+                    onClick={() => handleLogin(email, password)} className="login-button bg-black text-white"
                 >
                     Log in
                 </button>
                 <RedirectButton
                     url="/signup"
-                    text="Sign up"
-                    className="login-button bg-black text-white"
+                    text="Create an account"
+                    className="login-button bg-gray-200 text-black"
                 >
                 </RedirectButton>
             </div>

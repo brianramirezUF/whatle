@@ -113,7 +113,7 @@ export default function History(){
           <TableCaption className="text-center">Your top 3 played games.</TableCaption>
           <TableHeader>
             <TableRow className="table-row">
-              <TableHead className="w-[125px]"></TableHead>
+              <TableHead className="w-[200px] text-right"></TableHead>
               <TableHead className="w-[50px]"></TableHead>
               <TableHead className="w-[125px] text-center">Number of Plays</TableHead>
               <TableHead className="w-[125px] text-center">Percent Solved</TableHead>
@@ -123,7 +123,7 @@ export default function History(){
           <TableBody>
             {topGames.map((game, index) => ( game != undefined ?
               <TableRow className="table-row" key={game.id}>
-                <TableCell className="w-[125px] text-right medium-cell">
+                <TableCell className="w-[200px] text-right medium-cell whitespace-nowrap overflow-hidden text-ellipsis">
                   {game.name}
                 </TableCell>
                 <TableCell
