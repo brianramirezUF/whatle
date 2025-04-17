@@ -352,11 +352,11 @@ interface EditableAttributeProps {
 // Component enabled when an attribute is being edited (pen button on 'Attribute' component clicked)
 const EditableAttribute: React.FC<EditableAttributeProps> = ({ attribute, onSave }) => {
     const [name, setName] = useState(attribute.name);
-    const [type, setType] = useState(attribute.type);
+    const [type, setType] = useState<string>(attribute.type);
 
     return (
         <div className='p-4 border rounded-lg shadow-md bg-white flex gap-4 items-center'>
-            <input
+            <Input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 onKeyDown={(e) => {
@@ -365,19 +365,22 @@ const EditableAttribute: React.FC<EditableAttributeProps> = ({ attribute, onSave
                     }
                 }}
                 placeholder='Name'
-                className='p-2 border rounded w-1/2 bg-gray-100'
             />
 
-            <select
+            <Select
                 value={type}
-                onChange={(e) => setType(e.target.value)}
-                className='p-2 border rounded bg-gray-100'
+                onValueChange={(value) => setType(value)}
             >
-                <option value='String'>String</option>
-                <option value='Number'>Number</option>
-                <option value='Boolean'>Boolean</option>
-                <option value='Collection'>Collection</option>
-            </select>
+                <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select a value" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value='String'>String</SelectItem>
+                    <SelectItem value='Number'>Number</SelectItem>
+                    <SelectItem value='Boolean'>Boolean</SelectItem>
+                    <SelectItem value='Collection'>Collection</SelectItem>
+                </SelectContent>
+            </Select>
             <button onClick={() => onSave(attribute.name, name, type)} className="px-4 py-2 bg-blue-500 text-white rounded">
                 Save
             </button>
