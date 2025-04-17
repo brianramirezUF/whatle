@@ -311,7 +311,7 @@ export default function CreateGame() {
     }
 
     return (
-        <div className="container mx-auto px-4 py-6 max-w-7xl">
+        <div className="mx-auto px-4 py-6 max-w-7xl">
             <h1 className="text-3xl font-bold text-center mb-8">CREATE GAME</h1>
 
             {/* Game Configuration Section - Top Row */}
@@ -431,9 +431,9 @@ export default function CreateGame() {
                 </div>
             </div>
 
-            {/* Main Content - Two Column Layout */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* Attributes Column */}
+            {/* Main Content - Adjusted Column Layout */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Attributes Column - Now takes 1/3 of the space */}
                 <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
                     <div className="flex justify-between items-center mb-6">
                         <h2 className="text-2xl font-bold">Attributes</h2>
@@ -445,11 +445,11 @@ export default function CreateGame() {
                         </Button>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 gap-3">
                         {attributes.map((attribute, index) => {
                             if (attrEditingName === attribute.name) {
                                 return (
-                                    <div key={index} className="col-span-full">
+                                    <div key={index}>
                                         <EditableAttribute attribute={attribute} onSave={handleAttributeSave} />
                                     </div>
                                 );
@@ -496,8 +496,8 @@ export default function CreateGame() {
                     )}
                 </div>
 
-                {/* Answers Column */}
-                <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                {/* Answers Column - Now takes 2/3 of the space */}
+                <div className="lg:col-span-2 bg-white p-6 rounded-lg shadow-sm border border-gray-200">
                     <div className="flex justify-between items-center mb-6">
                         <h2 className="text-2xl font-bold">Answers</h2>
                         <Button
@@ -522,53 +522,56 @@ export default function CreateGame() {
                                 className="pl-10"
                             />
                         </div>
+
+                        {/* Pagination controls */}
+                        {totalPages > 1 && (
+                            <div className="flex justify-center items-center mt-4 space-x-2">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                    disabled={currentPage === 1}
+                                >
+                                    <ChevronLeft size={16} />
+                                </Button>
+
+                                <span className="text-sm">
+                                    Page {currentPage} of {totalPages}
+                                </span>
+
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                                    disabled={currentPage === totalPages}
+                                >
+                                    <ChevronRight size={16} />
+                                </Button>
+                            </div>
+                        )}
                     </div>
 
                     {attributes.length > 0 && Object.keys(answers).length > 0 ? (
-                        <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-2">
-                            {paginatedAnswers.map((answer) => (
-                                <AnswerCard
-                                    key={answer.name}
-                                    attributes={attributes}
-                                    answer={answer}
-                                    isEditing={ansEditingName === answer.name}
-                                    onEdit={handleAnswerEdit}
-                                    onSave={handleAnswerSave}
-                                    onDelete={() => {
-                                        const updated = { ...answers };
-                                        delete updated[answer.name];
-                                        setAnswers(updated);
-                                    }}
-                                    setTempName={setTempAnswerName}
-                                />
-                            ))}
-
-                            {/* Pagination controls */}
-                            {totalPages > 1 && (
-                                <div className="flex justify-center items-center mt-4 py-2 space-x-2">
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                                        disabled={currentPage === 1}
-                                    >
-                                        <ChevronLeft size={16} />
-                                    </Button>
-
-                                    <span className="text-sm">
-                                        Page {currentPage} of {totalPages}
-                                    </span>
-
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                                        disabled={currentPage === totalPages}
-                                    >
-                                        <ChevronRight size={16} />
-                                    </Button>
-                                </div>
-                            )}
+                        <div className="max-h-[60vh] overflow-y-auto px-2 py-1">
+                            {/* Two-column grid for answers */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                {paginatedAnswers.map((answer) => (
+                                    <AnswerCard
+                                        key={answer.name}
+                                        attributes={attributes}
+                                        answer={answer}
+                                        isEditing={ansEditingName === answer.name}
+                                        onEdit={handleAnswerEdit}
+                                        onSave={handleAnswerSave}
+                                        onDelete={() => {
+                                            const updated = { ...answers };
+                                            delete updated[answer.name];
+                                            setAnswers(updated);
+                                        }}
+                                        setTempName={setTempAnswerName}
+                                    />
+                                ))}
+                            </div>
                         </div>
                     ) : (
                         <div className="text-center p-6 border border-dashed border-gray-300 rounded-lg">
