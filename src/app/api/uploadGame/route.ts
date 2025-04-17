@@ -50,7 +50,7 @@ export async function POST(req: Request) {
                 uid,
                 daily_plays: 0,
                 total_plays: 0,
-                icon: null
+                icon: body.icon
             });
 
             return NextResponse.json({ id: gameDoc.id, message: `${body.name} was uploaded successfully!` }, { status: 201 });
