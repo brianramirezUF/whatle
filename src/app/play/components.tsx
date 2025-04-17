@@ -104,7 +104,7 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name, gameId, maxGuess
 
     if (!currentUser) {
       console.error("❌ No user is logged in.");
-      alert("❌ You must be logged in to track progress.");
+      //alert("❌ You must be logged in to track progress.");
       return;
     }
 
