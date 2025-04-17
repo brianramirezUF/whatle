@@ -1,4 +1,3 @@
-import { Icons } from '@/components/icons'
 import { useState, useEffect, useMemo, useRef, KeyboardEvent } from 'react';
 import { Guess, AttributeType, AnswerType } from './attributes';
 import { Card, CardContent } from "@/components/ui/card";
@@ -269,12 +268,12 @@ const AnswerCard: React.FC<{
                     onEdit(answer.name);
                 }
             }}
-            onBlur={(e) => {
+            /*onBlur={(e) => {
                 if (selectOpen) return;
                 if (!e.currentTarget?.contains(e.relatedTarget)) {
-                    handleSave(); // or your blur action
+                    handleSave();
                 }
-            }}
+            }}*/
         >
             {isEditing ? (
                 <Input
