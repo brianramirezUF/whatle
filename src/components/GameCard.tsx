@@ -82,7 +82,7 @@ export const GameCardContent: React.FC<GameCardContentProps> = ({ id, name, dail
                     </div>
                 </CardHeader>
                 <CardContent className='card-content flex aspect-square items-center justify-center p-6'>
-                    <span className={`text-3xl font-semibold text text-center ${name !== "..." ? "text-black bg-white p-2 rounded-md" : "text-gray-400"}`}>{name}</span>
+                    <span className={`text-3xl font-semibold text text-center ${name !== "..." ? "text-white" : "text-gray-400"}`}>{name}</span>
                 </CardContent>
                 <CardFooter className={`flex justify-center items-center pt-2 pb-3 px-4 gap-2 ${name === "..." ? "invisible" : ""}`}>
                     <Link href={`${basePath}play/${id}`}>
