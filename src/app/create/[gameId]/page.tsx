@@ -105,8 +105,12 @@ export default function CreateGame() {
                 }
 
                 if (data.icon) {
+                    console.log("Setting icon to", data.icon);
                     if(imageDropRef.current){
                         imageDropRef.current.setImageLink(data.icon);
+                    }
+                    else {
+                        console.log("imageDropRef.current is null");
                     }
                 }
 

@@ -1,38 +1,41 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/config/firebase';
-import { doc, collection, updateDoc, getDocs } from 'firebase/firestore';
+import { adminDB } from '@/config/firebaseAdmin';
 
 export async function GET(req: Request) {
-    const authHeader = req.headers.get('authorization');
-    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    const authHeader = req.headers.get('x-cron-secret');
+    if (authHeader !== `${process.env.CRON_SECRET}`) {
         return NextResponse.json({ error: 'Unauthorized.' }, { status: 401 });
     }
 
     try {
-        const gameSnapshot = await getDocs(collection(db, 'games'));
+        const gameSnapshot = await adminDB.collection('games').get();
 
         const updatePromises = gameSnapshot.docs.map(async (docSnap) => {
             const gameData = docSnap.data();
             const answers = gameData.answers;
 
-            // Game has no answers :(
-            if (!answers || answers.length === 0) {
+            // Game has no answers field :(
+            if (!answers) {
                 return;
             }
 
+            // Game has no answer values :(
             const keys = Object.keys(answers);
-            const randomAnswer = answers[keys[Math.floor(Math.random() * keys.length)]];
+            if (keys.length === 0) {
+                return;
+            }
 
-            await updateDoc(docSnap.ref, {
+            const randomAnswer = keys[Math.floor(Math.random() * keys.length)];
+            await adminDB.collection('games').doc(docSnap.id).update({
                 correct_answer: randomAnswer,
-                daily_plays: 0,
+                daily_plays: 0
             });
         });
 
         await Promise.all(updatePromises);
 
         return NextResponse.json({ message: 'Games updated successfully' }, { status: 200 });
-    } 
+    }
     catch (error: any) {
         console.error('Cron job error:', error);
         return NextResponse.json({ error: error.message }, { status: 500 });
