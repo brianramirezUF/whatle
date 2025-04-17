@@ -32,25 +32,33 @@ export async function POST(req: Request) {
             let result;
             const curAttribute = gameData.attributes[i];
             
-            const correctAttribute = correctAnswer.attributes[curAttribute.name];
-            const guessedAttribute = guessedAnswer.attributes[curAttribute.name];
+            let correctAttribute = correctAnswer.attributes[curAttribute.name];
+            let guessedAttribute = guessedAnswer.attributes[curAttribute.name];
 
-            if (correctAttribute.includes(',') && curAttribute.type == 'Collection') {
-                const answerArray = correctAttribute.split(',');
-                const guessArray = guessedAttribute.split(',');
+            if (!correctAttribute) {
+                correctAttribute = 'N/A';
+            }
+
+            if (!guessedAttribute) {
+                guessedAttribute = 'N/A';
+            }
+
+            if (curAttribute.type === 'Collection' && typeof correctAttribute === 'string' && typeof guessedAttribute === 'string') {
+                const answerArray = correctAttribute.split(',').map(s => s.trim());
+                const guessArray = guessedAttribute.split(',').map(s => s.trim());
                 result = comparisons['Collection'](guessArray, answerArray);
-            }
-            else {
+              } 
+              else {
                 result = comparisons[curAttribute.type as keyof typeof comparisons](guessedAttribute, correctAttribute);
-            }
+              }              
             
             results.push(result);
         }
-        
         const isWin = (gameData.correct_answer == guess);
         return NextResponse.json({ results, isWin, guess }, { status: 200 });
     }
     catch (error: any) {
+        console.error("Error in checkGuess API:", error);
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }

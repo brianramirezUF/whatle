@@ -31,7 +31,9 @@ export async function GET(req: Request)  {
             uid: gameData.uid,
             daily_plays: gameData.daily_plays,
             total_plays: gameData.total_plays,
-            maxGuesses: gameData.maxGuesses ?? null 
+            maxGuesses: gameData.maxGuesses ?? null ,
+            icon: gameData.icon,
+            tag: gameData.tag
         }, 
         { status: 200 });
     } 
