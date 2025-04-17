@@ -32,16 +32,8 @@ export async function POST(req: Request) {
             let result;
             const curAttribute = gameData.attributes[i];
             
-            let correctAttribute = correctAnswer.attributes[curAttribute.name];
-            let guessedAttribute = guessedAnswer.attributes[curAttribute.name];
-
-            if (!correctAttribute) {
-                correctAttribute = 'N/A';
-            }
-
-            if (!guessedAttribute) {
-                guessedAttribute = 'N/A';
-            }
+            const correctAttribute = correctAnswer.attributes[curAttribute.name];
+            const guessedAttribute = guessedAnswer.attributes[curAttribute.name];
 
             if (correctAttribute.includes(',') && curAttribute.type == 'Collection') {
                 const answerArray = correctAttribute.split(',');
