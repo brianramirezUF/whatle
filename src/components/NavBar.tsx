@@ -24,11 +24,12 @@ export default function NavBar() {
   const router = useRouter();
   const searchRef = useRef<HTMLFormElement>(null);
   const anyGameHasIcon = searchResults.some(game => game.icon);
+  const [showSearchDropdown, setShowSearchDropdown] = useState(false);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
-        setSearchResults([]);
+        setShowSearchDropdown(false);
       }
     };
 
@@ -41,6 +42,7 @@ export default function NavBar() {
   const handleSearchChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const query = event.target.value;
     setSearchQuery(query);
+    setShowSearchDropdown(true);
 
     if (query.length === 0) {
       setSearchResults([]);
@@ -50,7 +52,7 @@ export default function NavBar() {
     try {
       const res = await fetch(`/api/searchGames?name=${encodeURIComponent(query)}`);
       const data: GameCardProps[] = await res.json();
-      console.log("Search results:", data);
+      // console.log("Search results:", data);
       setSearchResults(data);
     } catch (err) {
       console.error("Search error:", err);
@@ -59,8 +61,7 @@ export default function NavBar() {
   };
 
   const handleSearchSubmit = (event: React.FormEvent) => {
-    event.preventDefault();
-    console.log("Search Query:", searchQuery);
+    setShowSearchDropdown(false);
   };
 
   const handleLogout = async () => {
@@ -97,16 +98,17 @@ export default function NavBar() {
               placeholder="Search"
               value={searchQuery}
               onChange={handleSearchChange}
+              onClick={() => setShowSearchDropdown(true)}
               className="h-8 w-48 rounded-md pr-10 text-sm"
             />
             <button type="submit" className="absolute right-2">
               <Search className="h-4 w-4 text-gray-500" />
             </button>
           </div>
-          {searchResults.length > 0 && (
+          {(searchResults.length > 0 && showSearchDropdown) && (
             <div className="absolute z-50 top-full left-0 mt-1 w-64 bg-white border rounded shadow">
               {searchResults.map((game) => (
-                <Link key={game.id} href={`/play/${game.id}`}>
+                <Link key={game.id} href={`/play/${game.id}`} onClick={handleSearchSubmit}>
                   <div className="px-4 py-2 flex items-center hover:bg-gray-100 cursor-pointer text-sm">
                     {game.icon && (
                       <img src={game.icon} alt={game.name} className="h-8 w-8 mr-4 object-contain" />
