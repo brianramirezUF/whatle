@@ -49,7 +49,8 @@ export async function POST(req: Request) {
                 correct_answer: randomAnswer,
                 uid,
                 daily_plays: 0,
-                total_plays: 0
+                total_plays: 0,
+                icon: null
             });
 
             return NextResponse.json({ id: gameDoc.id, message: `${body.name} was uploaded successfully!` }, { status: 201 });
@@ -69,10 +70,11 @@ export async function POST(req: Request) {
                     name: body.name, 
                     answers: body.answers, 
                     attributes: body.attributes,
-                    maxGuessses: body.maxGuesses,
+                    maxGuesses: body.maxGuesses,
                     tag: body.tag, 
                     correct_answer: randomAnswer, 
-                    uid 
+                    uid,
+                    icon: body.icon
                 });
             }
             else {
@@ -81,9 +83,10 @@ export async function POST(req: Request) {
                     name: body.name, 
                     answers: body.answers, 
                     attributes: body.attributes,
-                    maxGuessses: body.maxGuesses,
-                    tag: body.tag, 
-                    uid 
+                    maxGuesses: body.maxGuesses, 
+                    uid,
+                    tag: body.tag,
+                    icon: body.icon
                 });
             }
 

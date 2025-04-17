@@ -12,6 +12,7 @@ export interface GameCardProps {
     categories?: string[],
     uid?: string,
     currUid?: string,
+    tag?: string
 };
 
 export interface GameCardContentProps {
@@ -49,13 +50,17 @@ export const GameCard: React.FC<GameCardProps> = ({ id, name, daily_plays, total
     );
 };
 
-export const GameCardContent: React.FC<GameCardContentProps> = ({ id, name, daily_plays, total_plays, icon, play = true, categories, uid = "", currUid = "" }) => { 
+export const GameCardContent: React.FC<GameCardContentProps> = ({ id, name, daily_plays, total_plays, icon, play = true, categories, uid = "", currUid = "" }) => {
+    const basePath = "/";
+
     return (
         <div className='p-1'>
             <Card
                 className='card transition-all hover:shadow-xl hover:-translate-y-1 cursor-pointer'
                 style={icon ? {
-                    backgroundImage: `url(${icon})`
+                    backgroundImage: `url(${icon})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
                 } : {}}
             >
                 <CardHeader className={name === "..." ? "invisible" : ""}>
@@ -77,36 +82,28 @@ export const GameCardContent: React.FC<GameCardContentProps> = ({ id, name, dail
                     </div>
                 </CardHeader>
                 <CardContent className='card-content flex aspect-square items-center justify-center p-6'>
-                    <span className={`text-3xl font-semibold text text-center ${name !== "..." ? "text-black" : "text-gray-400"}`}>{name}</span>
+                    <span className={`text-3xl font-semibold text text-center ${name !== "..." ? "text-white" : "text-gray-400"}`}>{name}</span>
                 </CardContent>
                 <CardFooter className={`flex justify-center items-center pt-2 pb-3 px-4 gap-2 ${name === "..." ? "invisible" : ""}`}>
-                    <div
-                        className='flex items-center justify-center gap-1 rounded-xl bg-logo-green px-2 py-1 mx-1 my-3 text-sm text-[#1D4B2D] shadow-md backdrop-blur-md transition-all hover:shadow-lg hover:-translate-y-0.5 cursor-pointer w-[130px] h-[40px]'
-                    >
-                        <Link href={`play/${id}`} className="font-bold">Play</Link>
-                    </div>
-                    {uid == "" || currUid == "" || uid !== currUid ?
-                        null
-                        :
+                    <Link href={`${basePath}play/${id}`}>
                         <div
-                            className="flex items-center justify-center gap-1 rounded-xl bg-logo-yellow px-2 py-1 my-3 text-sm text-yellow-800 shadow-md backdrop-blur-md transition-all hover:shadow-lg hover:-translate-y-0.5 cursor-pointer w-[130px] h-[40px]"
+                            className='flex items-center justify-center gap-1 rounded-xl bg-logo-green px-2 py-1 mx-1 my-3 text-sm text-[#1D4B2D] shadow-md backdrop-blur-md transition-all hover:shadow-lg hover:-translate-y-0.5 cursor-pointer w-[130px] h-[40px]'
                         >
-                            <Link href={`create/${id}`} className="font-bold">Edit</Link>
+                            <span className="font-bold">Play</span>
                         </div>
-                    }
+                    </Link>
+                    {uid === "" || currUid === "" || uid !== currUid
+                        ? null
+                        : (
+                            <Link href={`${basePath}create/${id}`}>
+                                <div
+                                    className="flex items-center justify-center gap-1 rounded-xl bg-logo-yellow px-2 py-1 my-3 text-sm text-yellow-800 shadow-md backdrop-blur-md transition-all hover:shadow-lg hover:-translate-y-0.5 cursor-pointer w-[130px] h-[40px]"
+                                >
+                                    <span className="font-bold">Edit</span>
+                                </div>
+                            </Link>
+                        )}
                 </CardFooter>
-                {/*<CardFooter className='justify-end pt-2 pb-3 px-4'>
-                    <div className='flex flex-wrap gap-2'>
-                        {categories && categories.map((category, index) => (
-                            <div
-                                key={index}
-                                className='flex items-center gap-1 rounded-xl bg-logo-green px-2 py-1 text-sm text-[#1D4B2D] shadow-md backdrop-blur-md transition-all hover:shadow-lg hover:-translate-y-0.5 cursor-pointer'
-                            >
-                                {category}
-                            </div>
-                        ))}
-                    </div>
-                </CardFooter>*/}
             </Card>
         </div>
     );

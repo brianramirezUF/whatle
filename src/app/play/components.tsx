@@ -1,5 +1,5 @@
-import { Icons } from '@/components/icons'
-import { useEffect, useState } from 'react';
+import { Icons } from '@/components/icons';
+import { useEffect, useState, useRef } from 'react';
 import { Guess, AttributeType, AnswerType } from '../create/attributes';
 import { Card, CardContent } from "@/components/ui/card";
 import { GuessStatus } from '@/lib/guessComparison';
@@ -38,7 +38,7 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name, gameId, maxGuess
   const [isLost, setIsLost] = useState(false);
   const [confettiBursts, setConfettiBursts] = useState<{ id: number; x: number; y: number }[]>([]);
   const { currentUser } = useAuth();
-  
+  const searchBarRef = useRef<HTMLDivElement>(null);
 
   if (!Object.keys(answers).length) {
     return <h1>No answers.</h1>
@@ -46,11 +46,6 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name, gameId, maxGuess
 
   const handleInputChange = (value: string) => {
     setCurGuess(value);
-    if (value.trim() === "") {
-      setFilteredAnswers([]);
-      setShowDropdown(false);
-      return;
-    }
 
     const matches = Object.values(answers).filter(ans =>
       ans.name.toLowerCase().includes(value.toLowerCase()) && !guessNames.includes(ans.name)
@@ -72,6 +67,7 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name, gameId, maxGuess
     setGuesses([]);
     setGuessNames([]);
     setCurGuess('');
+    setFilteredAnswers(Object.values(answers)); // Reset filtered answers
   };
 
   // Update guesses array (each guess is an index of an answer from the 'answers' array)
@@ -89,7 +85,7 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name, gameId, maxGuess
     if (!res.ok) {
       throw new Error('Failed to make guess.');
     }
-    
+
     const { results, isWin } = await res.json();
     setWon(isWin);
 
@@ -102,12 +98,15 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name, gameId, maxGuess
 
     setGuesses((prev) => [...prev, { result: results, name: guess }]);
 
+    // Reset filtered answers after guess
+    setFilteredAnswers(Object.values(answers).filter(ans => !guessNames.includes(ans.name))); 
+    setCurGuess(''); // Clear input field
+
     if (!currentUser) {
       console.error("❌ No user is logged in.");
-      alert("❌ You must be logged in to track progress.");
+      //alert("❌ You must be logged in to track progress.");
       return;
     }
-
 
     const userId = currentUser.uid;
     const timeTaken = Math.floor(Math.random() * 100) + 1;
@@ -122,8 +121,6 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name, gameId, maxGuess
     const launchBursts = (count = 5) => {
       const bursts = Array.from({ length: count }).map((_, i) => {
         const id = Date.now() + i;
-        // const x = Math.random() * window.innerWidth * 0.8 + window.innerWidth * 0.1;
-        // const y = Math.random() * window.innerHeight * 0.4 + window.innerHeight * 0.2;
         const screenCenterX = window.innerWidth / 2;
         const screenCenterY = window.innerHeight / 2;
 
@@ -131,13 +128,8 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name, gameId, maxGuess
         const jitterX = (Math.random() - 0.5) * jitterRange;
         const jitterY = (Math.random() - 0.5) * jitterRange;
 
-
-        //const jitterX = (Math.random() - 0.5) * 100; // -50 to +50 px
-        //const jitterY = (Math.random() - 0.5) * 100;
-
         const x = screenCenterX + jitterX;
         const y = screenCenterY + jitterY;
-
 
         return { id, x, y };
       });
@@ -158,8 +150,7 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name, gameId, maxGuess
     }
 
     if (isGuessLimitReached) { // losing animation
-      
-
+      // Add losing animation logic here if needed
     }
 
     // update if win OR lose
@@ -177,13 +168,10 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name, gameId, maxGuess
   
         if (!res.ok) {
           console.error("❌ API Error Response:");
-          // alert("❌ Failed to update Firebase: " + (data.error || "Unknown error"));
-          // return;
         }
   
       } catch (err: any) {
         console.error("❌ Network/Code Error:", err.message);
-        //alert("❌ Error updating Firebase: " + err.message);
       }
     }
   };
@@ -204,10 +192,9 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name, gameId, maxGuess
       return (
         <React.Fragment key={`row-${rowIndex}`}>
           <div>
-            <Card className="p-2 bg-gray-100 flex font-bold items-center justify-center aspect-square min-w-[100px] max-w-[300px] card"
-              style={answers[guess.name].icon ? {
-                backgroundImage: `url(${answers[guess.name].icon})`,
-              } : {}}
+            <Card
+              className="p-2 bg-gray-100 flex font-bold items-center justify-center aspect-square min-w-[100px] max-w-[300px] card"
+              style={answers[guess.name].icon ? { backgroundImage: `url(${answers[guess.name].icon})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}}
             >
               <CardContent className="card-content flex aspect-square items-center justify-center truncate">
                 <span className="text-2xl text">{guess.name}</span>
@@ -229,6 +216,19 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name, gameId, maxGuess
     });
   };
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchBarRef.current && !searchBarRef.current.contains(event.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+  
   return (
     <div className="flex flex-col justify-center items-center p-4">
       {maxGuesses && (
@@ -236,7 +236,6 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name, gameId, maxGuess
           Guesses: {guessNames.length} / {maxGuesses}
         </p>
       )}
-
 
       {confettiBursts.map((burst) => (
         <ConfettiBurst key={burst.id} x={burst.x} y={burst.y} id={burst.id} />
@@ -250,9 +249,8 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name, gameId, maxGuess
       <div className="max-w-6xl w-full flex flex-col bg-white rounded-lg p-6 mb-4 justify-center items-center">
         <h2 className="text-xl mb-4 font-bold text-center">{name}</h2>
 
-
-        {!won && !isLost &&
-          <div className="flex items-center gap-2 w-full max-w-md">
+        {!won && !isLost && (
+          <div className="flex items-center gap-2 w-full max-w-md" ref={searchBarRef}>
             <div className="relative w-full">
               <input
                 type="text"
@@ -261,18 +259,22 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name, gameId, maxGuess
                 onKeyDown={(e) => {
                   if (e.key == 'Enter') e.preventDefault();
                 }}
-                onFocus={() => setShowDropdown(filteredAnswers.length > 0)}
+                onFocus={() => setShowDropdown(true)} // Always show dropdown on focus
                 placeholder="Type to search..."
                 className="w-full border rounded p-2"
               />
               {showDropdown && (
-                <div className="absolute left-0 w-full bg-white border rounded shadow-md z-10 max-h-40 overflow-y-auto">
+                <div className="absolute left-0 w-full bg-white border rounded shadow-md z-10 max-h-96 overflow-y-auto">
                   {filteredAnswers.map((ans, index) => (
                     <div
                       key={index}
-                      className="p-2 hover:bg-gray-200 cursor-pointer"
-                      onClick={() => handleSelectGuess(ans.name)}>
-                      {ans.name}
+                      className="flex items-center p-4 hover:bg-gray-200 cursor-pointer"
+                      onClick={() => handleSelectGuess(ans.name)}
+                    >
+                      {ans.icon && (
+                        <img src={ans.icon} alt={ans.name} className="w-12 h-12 mr-4 rounded-full object-cover" />
+                      )}
+                      <span className="text-lg">{ans.name}</span>
                     </div>
                   ))}
                 </div>
@@ -283,7 +285,9 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name, gameId, maxGuess
               className="px-4 py-2 bg-red-500 text-white rounded">
               Guess
             </button>
-          </div>}
+          </div>
+        )}
+
         <div
           className="grid gap-2 mt-10"
           style={{ gridTemplateColumns: `repeat(${attributes.length + 1}, minmax(100px, 300px))` }}
@@ -292,9 +296,9 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name, gameId, maxGuess
           {renderRows()}
         </div>
 
-        <button onClick={resetGame} className="mt-4 px-4 py-2 bg-red-500 text-white rounded">
+        {/*<button onClick={resetGame} className="mt-4 px-4 py-2 bg-red-500 text-white rounded">
           Reset
-        </button>
+        </button>*/}
       </div>
     </div>
   );

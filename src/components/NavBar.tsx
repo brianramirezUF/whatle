@@ -1,72 +1,67 @@
 'use client'
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from 'next/navigation';
 import Link from "next/link";
 import { Logo } from "./Logo";
 import { Input } from "@/components/ui/input";
-import { Search, Menu, ChevronDown } from "lucide-react";
-import { Card } from "@/components/ui/card";
+import { Search, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { nanoid } from "nanoid";
-import { cn } from "@/lib/utils";
 import { useAuth } from '@/contexts/AuthContext';
 import { auth } from '@/config/firebase';
 import { signOut } from 'firebase/auth';
 import { GameCardProps } from "@/components/GameCard";
-
-import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuIndicator,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-  NavigationMenuViewport,
-  navigationMenuTriggerStyle
-}
-  from "@/components/ui/navigation-menu"
-
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-}
-  from "@/components/ui/dropdown-menu";
-import React from "react";
+} from "@/components/ui/dropdown-menu";
 
 export default function NavBar() {
-  
-const [searchResults, setSearchResults] = useState<GameCardProps[]>([]);
-
-  const { currentUser, loading } = useAuth();
+  const [searchResults, setSearchResults] = useState<GameCardProps[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const { currentUser } = useAuth();
   const router = useRouter();
+  const searchRef = useRef<HTMLFormElement>(null);
+  const anyGameHasIcon = searchResults.some(game => game.icon);
+  const [showSearchDropdown, setShowSearchDropdown] = useState(false);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setShowSearchDropdown(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const handleSearchChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const query = event.target.value;
     setSearchQuery(query);
-  
+    setShowSearchDropdown(true);
+
     if (query.length === 0) {
       setSearchResults([]);
       return;
     }
-  
+
     try {
       const res = await fetch(`/api/searchGames?name=${encodeURIComponent(query)}`);
       const data: GameCardProps[] = await res.json();
-      console.log("Search results:", data);
+      // console.log("Search results:", data);
       setSearchResults(data);
     } catch (err) {
       console.error("Search error:", err);
       setSearchResults([]);
     }
   };
-  
+
   const handleSearchSubmit = (event: React.FormEvent) => {
-    event.preventDefault();
-    console.log("Search Query:", searchQuery);
+    setShowSearchDropdown(false);
   };
 
   const handleLogout = async () => {
@@ -89,40 +84,45 @@ const [searchResults, setSearchResults] = useState<GameCardProps[]>([]);
       </div>
 
       {/* Middle Section */}
-      <div className="flex items-center space-x-6 ">
+      <div className="flex items-center space-x-6">
         <Link href="/" passHref>
           <Button variant="link" className="text-sm select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
             Popular
           </Button>
         </Link>
         <CategoriesDropdown></CategoriesDropdown>
-        <form onSubmit={handleSearchSubmit} className="relative flex flex-col">
+        <form onSubmit={handleSearchSubmit} className="relative flex flex-col" ref={searchRef}>
           <div className="flex items-center">
             <Input
               type="text"
               placeholder="Search"
               value={searchQuery}
               onChange={handleSearchChange}
+              onClick={() => setShowSearchDropdown(true)}
               className="h-8 w-48 rounded-md pr-10 text-sm"
             />
             <button type="submit" className="absolute right-2">
               <Search className="h-4 w-4 text-gray-500" />
             </button>
           </div>
-          {searchResults.length > 0 && (
-          <div className="absolute z-50 top-full left-0 mt-1 w-48 bg-white border rounded shadow">
-            {searchResults.map((game) => (
-              <Link key={game.id} href={`/play/${game.id}`}>
-                <div className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm">
-                  {game.name}
-                </div>
-              </Link>
-            ))}
-          </div>
-        )}
-      </form>
+          {(searchResults.length > 0 && showSearchDropdown) && (
+            <div className="absolute z-50 top-full left-0 mt-1 w-64 bg-white border rounded shadow">
+              {searchResults.map((game) => (
+                <Link key={game.id} href={`/play/${game.id}`} onClick={handleSearchSubmit}>
+                  <div className="px-4 py-2 flex items-center hover:bg-gray-100 cursor-pointer text-sm">
+                    {game.icon && (
+                      <img src={game.icon} alt={game.name} className="h-8 w-8 mr-4 object-contain" />
+                    )}
+                    <span className={`${anyGameHasIcon ? game.icon ? '' : 'ml-12' : ''} text-lg`}>{game.name}</span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+        </form>
       </div>
-      {/* sign up, login cbuttons */}
+
+      {/* Sign up, login buttons */}
       <div className="flex items-center space-x-4">
         {!currentUser ? (
           <>
@@ -137,28 +137,24 @@ const [searchResults, setSearchResults] = useState<GameCardProps[]>([]);
               </Button>
             </Link>
           </>
-        ) :
-          (
-            <>
-              <Link href="/create" passHref>
-                <Button variant="link" className="text-sm select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
-                  My Games
-                </Button>
-              </Link>
-              <Link href="/history" passHref>
-                <Button variant="link" className="text-sm select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
-                  History
-                </Button>
-              </Link>
-              {/* <Link href="/history" passHref> */}
-                <Button variant="link" className="text-sm select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground" onClick={handleLogout}>
-                  Log out
-                </Button>
-              {/* </Link> */}
-            </>
-          )}
+        ) : (
+          <>
+            <Link href="/create" passHref>
+              <Button variant="link" className="text-sm select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                My Games
+              </Button>
+            </Link>
+            <Link href="/history" passHref>
+              <Button variant="link" className="text-sm select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                History
+              </Button>
+            </Link>
+            <Button variant="link" className="text-sm select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground" onClick={handleLogout}>
+              Log out
+            </Button>
+          </>
+        )}
       </div>
-
     </nav>
   );
 }
@@ -182,26 +178,26 @@ export function CategoriesDropdown() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="">
-        <DropdownMenuItem>
-          <Link href="/categories/games" passHref>
+        <Link href="/categories/games" passHref>
+          <DropdownMenuItem>
             Games
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem>
-          <Link href="/categories/tvmovies" passHref>
+          </DropdownMenuItem>
+        </Link>
+        <Link href="/categories/tvmovies" passHref>
+          <DropdownMenuItem>
             TV/Movies
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem>
-          <Link href="/categories/irl" passHref>
+          </DropdownMenuItem>
+        </Link>
+        <Link href="/categories/irl" passHref>
+          <DropdownMenuItem>
             IRL
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem>
-          <Link href="/categories/other" passHref>
+          </DropdownMenuItem>
+        </Link>
+        <Link href="/categories/other" passHref>
+          <DropdownMenuItem>
             Other
-          </Link>
-        </DropdownMenuItem>
+          </DropdownMenuItem>
+        </Link>
       </DropdownMenuContent>
     </DropdownMenu>
   );
