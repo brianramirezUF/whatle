@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/config/firebase';
-import { collection, updateDoc, getDocs } from 'firebase/firestore';
+import { adminDB } from '@/config/firebaseAdmin';
 
 export async function GET(req: Request) {
     const authHeader = req.headers.get('x-cron-secret');
@@ -9,7 +8,7 @@ export async function GET(req: Request) {
     }
 
     try {
-        const gameSnapshot = await getDocs(collection(db, 'games'));
+        const gameSnapshot = await adminDB.collection('games').get();
 
         const updatePromises = gameSnapshot.docs.map(async (docSnap) => {
             const gameData = docSnap.data();
@@ -27,7 +26,7 @@ export async function GET(req: Request) {
             }
 
             const randomAnswer = keys[Math.floor(Math.random() * keys.length)];
-            await updateDoc(docSnap.ref, {
+            await adminDB.collection('games').doc(docSnap.id).update({
                 correct_answer: randomAnswer,
                 daily_plays: 0
             });
