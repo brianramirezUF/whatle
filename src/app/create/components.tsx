@@ -268,12 +268,12 @@ const AnswerCard: React.FC<{
                     onEdit(answer.name);
                 }
             }}
-            onBlur={(e) => {
+            /*onBlur={(e) => {
                 if (selectOpen) return;
                 if (!e.currentTarget?.contains(e.relatedTarget)) {
-                    handleSave(); // or your blur action
+                    handleSave();
                 }
-            }}
+            }}*/
         >
             {isEditing ? (
                 <Input
