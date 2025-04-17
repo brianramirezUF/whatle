@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import { AttributeType, AnswerType } from '../attributes';
 import { AnswerCard, EditableAttribute } from '../components';
 //import { EditableAnswer, Answer, EditableAttribute} from '../components';
@@ -13,6 +13,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { toast } from "sonner";
 import { useRouter } from 'next/navigation';
+import { ImageDrop } from '@/components/ImageDrop';
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export default function CreateGame() {
@@ -26,6 +27,12 @@ export default function CreateGame() {
     const [isLoading, setIsLoading] = useState(true);
     const [maxGuesses, setMaxGuesses] = useState<number>(6);
     const [maxGuessesInput, setMaxGuessesInput] = useState<string>('6');
+    const imageDropRef = useRef<{ getImageLink: () => string | null; setImageLink: (link: string | null) => void }>(null);
+    const [imageLink, setImageLink] = useState<string | null>(null);
+
+    useEffect(() => {
+        console.log('Image Link updated:', imageLink);
+    }, [imageLink]);
     const [tag, setTag] = useState('');
 
 
@@ -96,6 +103,16 @@ export default function CreateGame() {
                 if (data.answers) {
                     setAnswers(data?.answers);
                 }
+
+                if (data.icon) {
+                    if(imageDropRef.current){
+                        imageDropRef.current.setImageLink(data.icon);
+                    }
+                }
+
+                if (data.tag) {
+                    setTag(data.tag);
+                }
             }
             catch (err) {
                 console.log('Error:', err);
@@ -119,7 +136,7 @@ export default function CreateGame() {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${idToken}`
                 },
-                body: JSON.stringify({ id: gameId, name: gameName, answers, attributes, maxGuesses, tag }, null, 2)
+                body: JSON.stringify({ id: gameId, name: gameName, answers, attributes, maxGuesses, tag, icon: imageLink }, null, 2)
 
             });
 
@@ -193,6 +210,7 @@ export default function CreateGame() {
 
         const newAnswer: AnswerType = {
             name,
+            icon: null,
             attributes: attributes.reduce<Record<string, string>>(
                 (acc, attr) => ({
                     ...acc,
@@ -208,7 +226,8 @@ export default function CreateGame() {
     // Map answer values to correct answer
     const handleAnswerSave = (
         oldName: string,
-        values: { attributes: Record<string, string> }
+        values: { attributes: Record<string, string>},
+        icon: null | string
     ) => {
         setAnswers((prev) => {
             const updated = { ...prev };
@@ -218,6 +237,7 @@ export default function CreateGame() {
                 updated[oldName] = {
                     name: oldName,
                     attributes: { ...values.attributes },
+                    icon: icon,
                 };
                 return updated;
             }
@@ -226,6 +246,7 @@ export default function CreateGame() {
             updated[tempAnswerName] = {
                 name: tempAnswerName,
                 attributes: { ...values.attributes },
+                icon: icon,
             };
 
             return updated;
@@ -296,6 +317,8 @@ export default function CreateGame() {
                     onChange={(e) => setGameName(e.target.value)}
                     className="w-[300px] text-center border border-gray-300 rounded-lg px-2 py-1"
                 />
+                <h2 className="text-2xl font-bold text-center mb-4">Icon</h2>
+                <ImageDrop ref={imageDropRef} onImageLinkChange={setImageLink} />
                 <label className="text-sm font-medium">Max Guesses</label>
                 <Input
                     type="number"

@@ -11,12 +11,14 @@ interface AuthContextType {
     refreshToken: string;
   } | null;
   loading: boolean;
+  refreshImgurTokens: (uid: string, refreshToken: string) => Promise<{ accessToken: string, refreshToken: string } | null>;
 }
 
 const AuthContext = createContext<AuthContextType>({
   currentUser: null,
   imgurTokens: null,
-  loading: true
+  loading: true,
+  refreshImgurTokens: async () => { return null }
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -28,6 +30,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     refreshToken: string;
   } | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const refreshImgurTokens = async (uid: string, refreshToken: string) => {
+    const refreshUrl = `/api/auth/imgur-callback?access_token=${encodeURIComponent(refreshToken)}&state=${encodeURIComponent(uid)}`;
+    await fetch(refreshUrl);
+    const userDoc = await getDoc(doc(db, "users", uid));
+    if (userDoc.exists()) {
+      const userData = userDoc.data();
+      const updatedTokens = {
+        accessToken: userData.imgurAccessToken,
+        refreshToken: userData.imgurRefreshToken
+      };
+      setImgurTokens(updatedTokens);
+      return updatedTokens;
+    }
+    return null;
+  };
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -59,7 +77,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const value = {
     currentUser,
     imgurTokens,
-    loading
+    loading,
+    refreshImgurTokens
   };
 
   return (

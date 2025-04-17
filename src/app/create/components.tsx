@@ -1,5 +1,5 @@
 import { Icons } from '@/components/icons'
-import { useState, useEffect, KeyboardEvent } from 'react';
+import { useState, useEffect, useMemo, useRef, KeyboardEvent } from 'react';
 import { Guess, AttributeType, AnswerType } from './attributes';
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -12,6 +12,7 @@ import {
 import { Badge } from '@/components/Badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { ImageDrop } from '@/components/ImageDrop';
 import { Save, Edit2, Trash2, X, Plus } from 'lucide-react';
 
 // Type badge component to visually indicate attribute types
@@ -148,7 +149,7 @@ const AnswerCard: React.FC<{
     answer: AnswerType;
     isEditing: boolean;
     onEdit: (name: string) => void;
-    onSave: (name: string, values: { attributes: Record<string, string> }) => void;
+    onSave: (name: string, values: { attributes: Record<string, string> }, icon: null | string) => void;
     onDelete: (name: string) => void;
     setTempName: (tempName: string) => void;
 }> = ({ attributes, answer, isEditing, onEdit, onSave, onDelete, setTempName }) => {
@@ -158,6 +159,18 @@ const AnswerCard: React.FC<{
 
     const [name, setName] = useState(answer.name);
     const [tempAnswerName, setTempAnswerName] = useState(answer.name);
+    
+    const imageDropRef = useRef<{ getImageLink: () => string | null; setImageLink: (link: string | null) => void }>(null);
+    const [imageLink, setImageLink] = useState<string | null>(answer.icon);
+
+
+    useEffect(() => {
+        if (isEditing) {
+            if(imageDropRef.current){
+                imageDropRef.current.setImageLink(answer.icon);
+            }
+        }
+    }, [isEditing, answer]);
 
     useEffect(() => {
         if (!isEditing) {
@@ -176,7 +189,7 @@ const AnswerCard: React.FC<{
     };
 
     const handleSave = () => {
-        onSave(answer.name, values);
+        onSave(answer.name, values, imageLink);
     };
 
     const renderAttributeInput = (attribute: AttributeType) => {
@@ -260,7 +273,23 @@ const AnswerCard: React.FC<{
                     }}
                 />
             ) : (
-                <h3 className="font-semibold text-lg mb-3">{answer.name}</h3>
+                <>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                        <h3 className="font-semibold text-lg mb-3">{answer.name}</h3>
+                        {answer.icon && (
+                        <img 
+                            src={answer.icon} 
+                            alt="icon"
+                            style={{
+                            width: '40px',
+                            height: '40px',
+                            borderRadius: '30%',
+                            objectFit: 'cover'
+                            }}
+                        />
+                        )}
+                    </div>
+                </>
             )}
 
             <div className="space-y-2">
@@ -277,6 +306,9 @@ const AnswerCard: React.FC<{
                         </div>
                     </div>
                 ))}
+                {isEditing ? (
+                    <ImageDrop ref={imageDropRef} onImageLinkChange={setImageLink} />
+                ) : null}
             </div>
 
             <div className="mt-4 flex justify-end space-x-2">

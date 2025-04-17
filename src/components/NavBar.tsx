@@ -1,58 +1,52 @@
 'use client'
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from 'next/navigation';
 import Link from "next/link";
 import { Logo } from "./Logo";
 import { Input } from "@/components/ui/input";
-import { Search, Menu, ChevronDown } from "lucide-react";
-import { Card } from "@/components/ui/card";
+import { Search, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { nanoid } from "nanoid";
-import { cn } from "@/lib/utils";
 import { useAuth } from '@/contexts/AuthContext';
 import { auth } from '@/config/firebase';
 import { signOut } from 'firebase/auth';
 import { GameCardProps } from "@/components/GameCard";
-
-import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuIndicator,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-  NavigationMenuViewport,
-  navigationMenuTriggerStyle
-}
-  from "@/components/ui/navigation-menu"
-
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-}
-  from "@/components/ui/dropdown-menu";
-import React from "react";
+} from "@/components/ui/dropdown-menu";
 
 export default function NavBar() {
-  
-const [searchResults, setSearchResults] = useState<GameCardProps[]>([]);
-
-  const { currentUser, loading } = useAuth();
+  const [searchResults, setSearchResults] = useState<GameCardProps[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const { currentUser } = useAuth();
   const router = useRouter();
+  const searchRef = useRef<HTMLFormElement>(null);
+  const anyGameHasIcon = searchResults.some(game => game.icon);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setSearchResults([]);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const handleSearchChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const query = event.target.value;
     setSearchQuery(query);
-  
+
     if (query.length === 0) {
       setSearchResults([]);
       return;
     }
-  
+
     try {
       const res = await fetch(`/api/searchGames?name=${encodeURIComponent(query)}`);
       const data: GameCardProps[] = await res.json();
@@ -63,7 +57,7 @@ const [searchResults, setSearchResults] = useState<GameCardProps[]>([]);
       setSearchResults([]);
     }
   };
-  
+
   const handleSearchSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     console.log("Search Query:", searchQuery);
@@ -89,14 +83,14 @@ const [searchResults, setSearchResults] = useState<GameCardProps[]>([]);
       </div>
 
       {/* Middle Section */}
-      <div className="flex items-center space-x-6 ">
+      <div className="flex items-center space-x-6">
         <Link href="/" passHref>
           <Button variant="link" className="text-sm select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
             Popular
           </Button>
         </Link>
         <CategoriesDropdown></CategoriesDropdown>
-        <form onSubmit={handleSearchSubmit} className="relative flex flex-col">
+        <form onSubmit={handleSearchSubmit} className="relative flex flex-col" ref={searchRef}>
           <div className="flex items-center">
             <Input
               type="text"
@@ -110,19 +104,23 @@ const [searchResults, setSearchResults] = useState<GameCardProps[]>([]);
             </button>
           </div>
           {searchResults.length > 0 && (
-          <div className="absolute z-50 top-full left-0 mt-1 w-48 bg-white border rounded shadow">
-            {searchResults.map((game) => (
-              <Link key={game.id} href={`/play/${game.id}`}>
-                <div className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm">
-                  {game.name}
-                </div>
-              </Link>
-            ))}
-          </div>
-        )}
-      </form>
+            <div className="absolute z-50 top-full left-0 mt-1 w-64 bg-white border rounded shadow">
+              {searchResults.map((game) => (
+                <Link key={game.id} href={`/play/${game.id}`}>
+                  <div className="px-4 py-2 flex items-center hover:bg-gray-100 cursor-pointer text-sm">
+                    {game.icon && (
+                      <img src={game.icon} alt={game.name} className="h-8 w-8 mr-4 object-contain" />
+                    )}
+                    <span className={`${anyGameHasIcon ? game.icon ? '' : 'ml-12' : ''} text-lg`}>{game.name}</span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+        </form>
       </div>
-      {/* sign up, login cbuttons */}
+
+      {/* Sign up, login buttons */}
       <div className="flex items-center space-x-4">
         {!currentUser ? (
           <>
@@ -137,28 +135,24 @@ const [searchResults, setSearchResults] = useState<GameCardProps[]>([]);
               </Button>
             </Link>
           </>
-        ) :
-          (
-            <>
-              <Link href="/create" passHref>
-                <Button variant="link" className="text-sm select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
-                  My Games
-                </Button>
-              </Link>
-              <Link href="/history" passHref>
-                <Button variant="link" className="text-sm select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
-                  History
-                </Button>
-              </Link>
-              {/* <Link href="/history" passHref> */}
-                <Button variant="link" className="text-sm select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground" onClick={handleLogout}>
-                  Log out
-                </Button>
-              {/* </Link> */}
-            </>
-          )}
+        ) : (
+          <>
+            <Link href="/create" passHref>
+              <Button variant="link" className="text-sm select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                My Games
+              </Button>
+            </Link>
+            <Link href="/history" passHref>
+              <Button variant="link" className="text-sm select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                History
+              </Button>
+            </Link>
+            <Button variant="link" className="text-sm select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground" onClick={handleLogout}>
+              Log out
+            </Button>
+          </>
+        )}
       </div>
-
     </nav>
   );
 }
