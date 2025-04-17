@@ -70,9 +70,12 @@ const compareCollection = (guess: Array<string>, answer: Array<string>): GuessCo
     const guessArr = Array.isArray(guess) ? guess : String(guess).split(',').map(s => s.trim());
     const answerArr = Array.isArray(answer) ? answer : String(answer).split(',').map(s => s.trim());
 
-    const correct = answerArr.filter(x => guessArr.includes(x));
-    const extra = guessArr.filter(x => !answerArr.includes(x));
-    const missingCount = answerArr.length - correct.length;
+    const safeGuess: string[] = Array.isArray(guess) ? guess : [guess];
+    const safeAnswer: string[] = Array.isArray(answer) ? answer : [answer];
+
+    const correct = safeAnswer.filter((x) => safeGuess.includes(x));
+    const extra = safeGuess.filter((x) => !safeAnswer.includes(x));
+    const missingCount = safeAnswer.length - correct.length;
 
     console.log('Correct:', correct);
     console.log('Extra:', extra);
@@ -81,19 +84,19 @@ const compareCollection = (guess: Array<string>, answer: Array<string>): GuessCo
     if (missingCount === 0 && extra.length === 0) {
         return {
             status: GuessStatus.CORRECT,
-            details: guess.join()
+            details: safeGuess.join()
         };
     }
     else if (missingCount === answer.length) {
         return {
             status: GuessStatus.INCORRECT,
-            details: guess.join()
+            details: safeGuess.join()
         };
     }
     else {
         return {
             status: GuessStatus.PARTIAL,
-            details: guess.join(',')
+            details: safeGuess.join(',')
         };
     }
 };
