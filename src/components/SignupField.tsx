@@ -134,15 +134,28 @@ function SignupField(){
 function HandleCallback () {
 
     useEffect(() => {
-        const fragment = new URLSearchParams(window.location.hash.substring(1));
-        const refreshToken = fragment.get("refresh_token");
-        const user = new URLSearchParams(window.location.search).get("state");
+        const handleImgurCallback = async () => {
+            const fragment = new URLSearchParams(window.location.hash.substring(1));
+            const refreshToken = fragment.get("refresh_token");
+            const user = new URLSearchParams(window.location.search).get("state");
 
-        if (refreshToken && user) {
-            window.location.href = `/api/auth/imgur-callback?access_token=${refreshToken}&state=${user}`;
-        } else {
-            console.error("Missing access token or user state");
-        }
+            if (refreshToken && user) {
+                try {
+                    const response = await fetch(`/api/auth/imgur-callback?access_token=${refreshToken}&state=${user}`);
+                    if (response.ok) {
+                        window.location.href = "/successfulSignup";
+                    } else {
+                        console.error("Imgur callback API call failed");
+                    }
+                } catch (error) {
+                    console.error("An error occurred while handling the imgur callback: ", error);
+                }
+            } else {
+                console.error("Missing access token or user state");
+            }
+        };
+
+        handleImgurCallback();
     }, []);
 
     return (
