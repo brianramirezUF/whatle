@@ -296,9 +296,9 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name, gameId, maxGuess
           {renderRows()}
         </div>
 
-        <button onClick={resetGame} className="mt-4 px-4 py-2 bg-red-500 text-white rounded">
+        {/*<button onClick={resetGame} className="mt-4 px-4 py-2 bg-red-500 text-white rounded">
           Reset
-        </button>
+        </button>*/}
       </div>
     </div>
   );
