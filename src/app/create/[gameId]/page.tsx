@@ -33,6 +33,8 @@ export default function CreateGame() {
     useEffect(() => {
         console.log('Image Link updated:', imageLink);
     }, [imageLink]);
+    const [tag, setTag] = useState('');
+
 
     // Pagination
     const [searchTerm, setSearchTerm] = useState("");
@@ -130,7 +132,7 @@ export default function CreateGame() {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${idToken}`
                 },
-                body: JSON.stringify({ id: gameId, name: gameName, answers, attributes, maxGuesses, icon: imageLink }, null, 2)
+                body: JSON.stringify({ id: gameId, name: gameName, answers, attributes, maxGuesses, tag, icon: imageLink }, null, 2)
 
             });
 
@@ -336,6 +338,23 @@ export default function CreateGame() {
                     className="w-[300px] text-center border border-gray-300 rounded-lg px-2 py-1"
                 />
             </div>
+            {/*category dropdown*/}
+            <div className="flex flex-col items-center text-center space-y-2 mb-6">
+                <label className="text-sm font-medium">Select a Category</label>
+                <select
+                    value={tag}
+                    onChange={(e) => setTag(e.target.value)}
+                    className="w-[300px] text-center border border-gray-300 rounded-lg px-2 py-1"
+                >
+                    <option value="">-- Choose a Tag --</option>
+                    <option value="Games">Games</option>
+                    <option value="TV/Movies">TV/Movies</option>
+                    <option value="IRL">IRL</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+
+
 
             <h2 className="text-2xl font-bold text-center mb-4">Attribute List</h2>
             <div className="flex flex-col items-center mt-6 w-full">
@@ -394,22 +413,15 @@ export default function CreateGame() {
                     </Button>
                 </div>
             </div>
-            <h2 className="text-2xl font-bold text-center mb-7"></h2>
-            <h2 className="text-2xl font-bold text-center mb-2">Answer List</h2>
-            <div className="flex flex-col items-center mt-10 w-full">
-                <div className="flex space-x-2 mb-4">
+            <div className="mt-8 w-full">
+                <div className="flex flex-col lg:flex-row justify-between items-center mb-6">
+                    <h2 className="text-2xl font-bold mb-2 lg:mb-0">Answers</h2>
                     <Button
                         onClick={addAnswer}
                         className="bg-blue-300 text-black px-4 py-2 rounded-full"
                     >
                         + Add Answer
                     </Button>
-                </div>
-            </div>
-            <div className="mt-8 w-full">
-                <div className="flex flex-col lg:flex-row justify-between items-center mb-6">
-                    <h2 className="text-2xl font-bold mb-2 lg:mb-0">Answers</h2>
-
                     <div className="relative w-full lg:w-1/3">
                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
                         <Input

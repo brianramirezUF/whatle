@@ -73,8 +73,8 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name, gameId, maxGuess
   // Update guesses array (each guess is an index of an answer from the 'answers' array)
   const makeGuess = async (guess: string) => {
     if (!guess || won) return;
-
     if (guessNames.includes(guess)) return;
+    setGuessNames((prev) => [...prev, guess]);
 
     const res = await fetch("/api/checkGuess", {
       method: "POST",
@@ -88,7 +88,6 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name, gameId, maxGuess
 
     const { results, isWin } = await res.json();
     setWon(isWin);
-    setGuessNames((prev) => [...prev, guess]);
 
     const newGuessCount = guessNames.length + 1;
     const isGuessLimitReached = maxGuesses && newGuessCount >= maxGuesses && !isWin;

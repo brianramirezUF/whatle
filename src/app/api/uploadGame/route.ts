@@ -45,6 +45,7 @@ export async function POST(req: Request) {
                 answers: body.answers,
                 attributes: body.attributes,
                 maxGuessses: body.maxGuesses,
+                tag: body.tag,
                 correct_answer: randomAnswer,
                 uid,
                 daily_plays: 0,
@@ -69,7 +70,8 @@ export async function POST(req: Request) {
                     name: body.name, 
                     answers: body.answers, 
                     attributes: body.attributes,
-                    maxGuessses: body.maxGuesses, 
+                    maxGuessses: body.maxGuesses,
+                    tag: body.tag, 
                     correct_answer: randomAnswer, 
                     uid,
                     icon: body.icon
@@ -83,6 +85,7 @@ export async function POST(req: Request) {
                     attributes: body.attributes,
                     maxGuessses: body.maxGuesses, 
                     uid,
+                    tag: body.tag,
                     icon: body.icon
                 });
             }
