@@ -28,6 +28,7 @@ const ImageDrop = forwardRef<ImageDropHandle, ImageDropProps>(({ onImageLinkChan
     const [searchPage, setSearchPage] = useState<number>(1);
     const [searchResults, setSearchResults] = useState<any[]>([]); // Search results state
     const [isLoading, setIsLoading] = useState<boolean>(false); // Loading state
+    const searchInputRef = useRef<HTMLInputElement | null>(null); // Search input ref
 
     useImperativeHandle(ref, () => ({
         getImageLink: () => imageLink,
@@ -146,8 +147,13 @@ const ImageDrop = forwardRef<ImageDropHandle, ImageDropProps>(({ onImageLinkChan
         }
     };
 
-    const openModal = () => setIsModalOpen(true);
-    const closeModal = () => setIsModalOpen(false);
+    const openModal = () => {
+        setIsModalOpen(true);
+    };
+
+    const closeModal = () => {
+        setIsModalOpen(false);
+    };
 
     const handleImageSelect = (link: string, cover: string | null) => {
         const imageUrl = cover ? `https://i.imgur.com/${cover}.jpg` : link;
@@ -210,6 +216,9 @@ const ImageDrop = forwardRef<ImageDropHandle, ImageDropProps>(({ onImageLinkChan
             setSearchPage(1);
             setSearchInput('');
             fetchGallery('', 1);
+            if (searchInputRef.current) {
+                searchInputRef.current.focus(); // Automatically focus the search input
+            }
         }
     }, [isModalOpen]);
 
@@ -227,7 +236,7 @@ const ImageDrop = forwardRef<ImageDropHandle, ImageDropProps>(({ onImageLinkChan
                 <div
                     onDragOver={(e) => e.preventDefault()}
                     onDrop={handleDrop}
-                    onClick={(e) => !imageLink && fileInputRef.current?.click()}
+                    onClick={() => !imageLink && fileInputRef.current?.click()}
                     className={cn(
                         "relative flex flex-col items-center justify-center w-full h-60 border-2 border-dashed rounded-xl p-4 cursor-pointer",
                         uploading ? "border-gray-400" : "border-gray-300 hover:border-gray-500"
@@ -291,6 +300,7 @@ const ImageDrop = forwardRef<ImageDropHandle, ImageDropProps>(({ onImageLinkChan
                                 placeholder="Type to search..."
                                 value={searchInput}
                                 onChange={handleSearchInputChange}
+                                ref={searchInputRef}
                             />
                         </div>
                         {/* Display search results */}
