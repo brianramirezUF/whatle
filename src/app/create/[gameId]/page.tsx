@@ -108,13 +108,8 @@ export default function CreateGame() {
                 }
 
                 if (data.icon) {
-                    if (imageDropRef.current) {
-                        console.log("imageDropRef.current is NOT null");
-                        imageDropRef.current.setImageLink(data.icon);
-                    }
-                    else {
-                        console.error("imageDropRef.current is null");
-                    }
+                    console.log("Setting icon to", data.icon);
+                    setImageLink(data.icon);
                 }
 
                 if (data.tag) {
@@ -131,6 +126,12 @@ export default function CreateGame() {
 
         loadGame();
     }, [gameId]);
+
+    useEffect(() => {
+        if (imageDropRef.current && imageLink) {
+            imageDropRef.current.setImageLink(imageLink);
+        }
+    }, [imageDropRef, imageLink]);
 
     const uploadGame = async () => {
         if (!currentUser) return;
