@@ -12,6 +12,7 @@ export interface GameCardProps {
     categories?: string[],
     uid?: string,
     currUid?: string,
+    tag?: string
 };
 
 export interface GameCardContentProps {
@@ -49,13 +50,17 @@ export const GameCard: React.FC<GameCardProps> = ({ id, name, daily_plays, total
     );
 };
 
-export const GameCardContent: React.FC<GameCardContentProps> = ({ id, name, daily_plays, total_plays, icon, play = true, categories, uid = "", currUid = "" }) => { 
+export const GameCardContent: React.FC<GameCardContentProps> = ({ id, name, daily_plays, total_plays, icon, play = true, categories, uid = "", currUid = "" }) => {
+    const basePath = "/";
+
     return (
         <div className='p-1'>
             <Card
                 className='card transition-all hover:shadow-xl hover:-translate-y-1 cursor-pointer'
                 style={icon ? {
-                    backgroundImage: `url(${icon})`
+                    backgroundImage: `url(${icon})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
                 } : {}}
             >
                 <CardHeader className={name === "..." ? "invisible" : ""}>
@@ -77,36 +82,24 @@ export const GameCardContent: React.FC<GameCardContentProps> = ({ id, name, dail
                     </div>
                 </CardHeader>
                 <CardContent className='card-content flex aspect-square items-center justify-center p-6'>
-                    <span className={`text-3xl font-semibold text text-center ${name !== "..." ? "text-black" : "text-gray-400"}`}>{name}</span>
+                    <span className={`text-3xl font-semibold text text-center ${name !== "..." ? "text-black bg-white p-2 rounded-md" : "text-gray-400"}`}>{name}</span>
                 </CardContent>
                 <CardFooter className={`flex justify-center items-center pt-2 pb-3 px-4 gap-2 ${name === "..." ? "invisible" : ""}`}>
                     <div
                         className='flex items-center justify-center gap-1 rounded-xl bg-logo-green px-2 py-1 mx-1 my-3 text-sm text-[#1D4B2D] shadow-md backdrop-blur-md transition-all hover:shadow-lg hover:-translate-y-0.5 cursor-pointer w-[130px] h-[40px]'
                     >
-                        <Link href={`play/${id}`} className="font-bold">Play</Link>
+                        <Link href={`${basePath}play/${id}`} className="font-bold">Play</Link>
                     </div>
-                    {uid == "" || currUid == "" || uid !== currUid ?
-                        null
-                        :
-                        <div
-                            className="flex items-center justify-center gap-1 rounded-xl bg-logo-yellow px-2 py-1 my-3 text-sm text-yellow-800 shadow-md backdrop-blur-md transition-all hover:shadow-lg hover:-translate-y-0.5 cursor-pointer w-[130px] h-[40px]"
-                        >
-                            <Link href={`create/${id}`} className="font-bold">Edit</Link>
-                        </div>
-                    }
-                </CardFooter>
-                {/*<CardFooter className='justify-end pt-2 pb-3 px-4'>
-                    <div className='flex flex-wrap gap-2'>
-                        {categories && categories.map((category, index) => (
+                    {uid === "" || currUid === "" || uid !== currUid
+                        ? null
+                        : (
                             <div
-                                key={index}
-                                className='flex items-center gap-1 rounded-xl bg-logo-green px-2 py-1 text-sm text-[#1D4B2D] shadow-md backdrop-blur-md transition-all hover:shadow-lg hover:-translate-y-0.5 cursor-pointer'
+                                className="flex items-center justify-center gap-1 rounded-xl bg-logo-yellow px-2 py-1 my-3 text-sm text-yellow-800 shadow-md backdrop-blur-md transition-all hover:shadow-lg hover:-translate-y-0.5 cursor-pointer w-[130px] h-[40px]"
                             >
-                                {category}
+                                <Link href={`${basePath}create/${id}`} className="font-bold">Edit</Link>
                             </div>
-                        ))}
-                    </div>
-                </CardFooter>*/}
+                        )}
+                </CardFooter>
             </Card>
         </div>
     );

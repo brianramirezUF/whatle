@@ -109,6 +109,10 @@ export default function CreateGame() {
                         imageDropRef.current.setImageLink(data.icon);
                     }
                 }
+
+                if (data.tag) {
+                    setTag(data.tag);
+                }
             }
             catch (err) {
                 console.log('Error:', err);
