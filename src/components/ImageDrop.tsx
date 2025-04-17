@@ -3,7 +3,7 @@ import React, { useState, useRef, useImperativeHandle, forwardRef, useEffect } f
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, Upload, Trash2 } from "lucide-react";
+import { Loader2, Upload, Trash2, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type ImageDropHandle = {
@@ -17,18 +17,26 @@ interface ImageDropProps {
 
 const ImageDrop = forwardRef<ImageDropHandle, ImageDropProps>(({ onImageLinkChange }, ref) => {
     const [imageLink, setImageLinkState] = useState<string | null>(null);
+    const [isModalOpen, setIsModalOpen] = useState(false); // Modal state
+    const [searchInput, setSearchInput] = useState<string>(''); // Search input state
     const { currentUser, imgurTokens, refreshImgurTokens } = useAuth();
     const [uploading, setUploading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement | null>(null);
+    const modalContentRef = useRef<HTMLDivElement | null>(null); // Modal content ref
+    const debouncedSearchRef = useRef<NodeJS.Timeout | null>(null); // Debounce ref
+    const [searchPage, setSearchPage] = useState<number>(1);
+    const [searchResults, setSearchResults] = useState<any[]>([]); // Search results state
+    const [isLoading, setIsLoading] = useState<boolean>(false); // Loading state
 
     useImperativeHandle(ref, () => ({
         getImageLink: () => imageLink,
-        setImageLink: (link: string | null) => setImageLink(link)
+        setImageLink: (link: string | null) => setImageLink(link),
     }));
 
     const setImageLink = (link: string | null) => {
         setImageLinkState(link);
+        console.log('ImageLink Set:', link);  // Debugging log
         if (onImageLinkChange) {
             onImageLinkChange(link);
         }
@@ -59,8 +67,8 @@ const ImageDrop = forwardRef<ImageDropHandle, ImageDropProps>(({ onImageLinkChan
                 if (!refreshedTokens) {
                     throw new Error("Failed to refresh tokens");
                 }
-                const url = `/api/uploadToImgur?imgurAccessToken=${encodeURIComponent(refreshedTokens.accessToken)}&imgurRefreshToken=${encodeURIComponent(refreshedTokens.refreshToken)}`;
-                response = await fetch(url, {
+                const newUrl = `/api/uploadToImgur?imgurAccessToken=${encodeURIComponent(refreshedTokens.accessToken)}&imgurRefreshToken=${encodeURIComponent(refreshedTokens.refreshToken)}`;
+                response = await fetch(newUrl, {
                     method: "POST",
                     body: formData,
                 });
@@ -138,6 +146,73 @@ const ImageDrop = forwardRef<ImageDropHandle, ImageDropProps>(({ onImageLinkChan
         }
     };
 
+    const openModal = () => setIsModalOpen(true);
+    const closeModal = () => setIsModalOpen(false);
+
+    const handleImageSelect = (link: string, cover: string | null) => {
+        const imageUrl = cover ? `https://i.imgur.com/${cover}.jpg` : link;
+        setImageLink(imageUrl);
+        closeModal();
+    };
+
+    const fetchGallery = async (query: string, page: number) => {
+        try {
+            setIsLoading(true);
+            setSearchResults([]); // Clear current search results
+            if (modalContentRef.current) {
+                modalContentRef.current.scrollTo(0, 0); // Scroll to top of modal
+            }
+
+            if (!imgurTokens) {
+                throw new Error('Missing imgur token');
+            }
+            const galleryUrl = `/api/getImgurGallery?imgurAccessToken=${encodeURIComponent(imgurTokens.accessToken)}&searchQuery=${encodeURIComponent(query)}&page=${page}`;
+            const response = await fetch(galleryUrl);
+            const data = await response.json();
+            setSearchResults(data.data); // Store search results in the state
+        } catch (error) {
+            console.error("Failed to fetch gallery", error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setSearchInput(value);
+
+        // Debounce the search input to delay the API call until the user stops typing for 1.5 seconds
+        if (debouncedSearchRef.current) {
+            clearTimeout(debouncedSearchRef.current);
+        }
+
+        debouncedSearchRef.current = setTimeout(() => {
+            fetchGallery(value, 1);
+        }, 1500);
+    };
+
+    const handlePreviousPage = () => {
+        if (searchPage > 1) {
+            const newPage = searchPage - 1;
+            setSearchPage(newPage);
+            fetchGallery(searchInput, newPage);
+        }
+    };
+
+    const handleNextPage = () => {
+        const newPage = searchPage + 1;
+        setSearchPage(newPage);
+        fetchGallery(searchInput, newPage);
+    };
+
+    useEffect(() => {
+        if (isModalOpen) {
+            setSearchPage(1);
+            setSearchInput('');
+            fetchGallery('', 1);
+        }
+    }, [isModalOpen]);
+
     return (
         <Card className="max-w-lg mx-auto p-4">
             <CardContent>
@@ -187,7 +262,73 @@ const ImageDrop = forwardRef<ImageDropHandle, ImageDropProps>(({ onImageLinkChan
                 </div>
 
                 {error && <p className="mt-2 text-sm text-red-500">{error}</p>}
+
+                {/* Add Search Button */}
+                <div className="mt-4 flex justify-center">
+                    <Button variant="default" onClick={openModal}>
+                        Search
+                    </Button>
+                </div>
             </CardContent>
+
+            {/* Modal */}
+            {isModalOpen && (
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+                    <div ref={modalContentRef} className="relative bg-white p-6 w-3/4 max-w-5xl h-4/5 rounded-lg shadow-lg overflow-y-auto">
+                        <Button 
+                            variant="default"
+                            className="absolute top-2 right-2"
+                            onClick={closeModal}
+                        >
+                            <X size={20} />
+                        </Button>
+                        <h2 className="text-xl font-bold mb-4">Search</h2>
+                        {/* Centered Search Bar */}
+                        <div className="flex justify-center mt-4">
+                            <input
+                                type="text"
+                                className="border rounded p-2 w-3/4"
+                                placeholder="Type to search..."
+                                value={searchInput}
+                                onChange={handleSearchInputChange}
+                            />
+                        </div>
+                        {/* Display search results */}
+                        <div className="mt-4 grid grid-cols-5 gap-4">
+                            {searchResults.map((result, index) => (
+                                <div key={index} className="w-full h-48 cursor-pointer" onClick={() => handleImageSelect(result.link, result.cover)}>
+                                    <img src={result.cover ? `https://i.imgur.com/${result.cover}.jpg` : result.link} alt={result.title} className="w-full h-full object-cover rounded-lg shadow" />
+                                </div>
+                            ))}
+                        </div>
+                        {/* Pagination buttons or loader */}
+                        {isLoading ? (
+                            <div className="flex justify-center mt-4">
+                                <Loader2 className="animate-spin text-gray-500 w-8 h-8" />
+                            </div>
+                        ) : (
+                            <div className="mt-4 flex justify-between">
+                                <Button
+                                    variant="outline"
+                                    onClick={handlePreviousPage}
+                                    disabled={searchPage === 1}
+                                    className={searchPage === 1 ? "opacity-50 cursor-not-allowed" : ""}
+                                >
+                                    <ChevronLeft className="mr-2" />
+                                    Previous
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    onClick={handleNextPage}
+                                >
+                                    Next
+                                    <ChevronRight className="ml-2" />
+                                </Button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
         </Card>
     );
 });
