@@ -74,7 +74,7 @@ export default function GameList() {
     ) : 'No Games';
 
    const content = (
-   <div className="container-custom pt-2 px-4 mt-16">
+   <div className="container-custom pt-2 px-4 mt-0 mb-4">
         <h1 className='title text-center font-medium'>
             Create A New Game:
         </h1>
