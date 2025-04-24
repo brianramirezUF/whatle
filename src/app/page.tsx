@@ -28,22 +28,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Card, CardContent } from "@/components/ui/card"
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel"
-import { RedirectButton } from '@/components/Buttons'
-import "./styles.css";
-import Link from "next/link";
+import "@/app/styles.css";
 import LoadingSpinner from '@/components/LoadingSpinner';
-import { GameCard, GameCardProps, padWithFiller } from '@/components/GameCard';
+import { GameCardProps } from '@/components/GameCard';
+import { GameCarousel } from '@/components/GameCarousel';
 import { useAuth } from '@/contexts/AuthContext';
+import { RedirectButton } from '@/components/Buttons'
 
-export default function Home(){
+export default function Home() {
   const [popularGames, setPopularGames] = useState<GameCardProps[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { currentUser, loading } = useAuth();
@@ -65,37 +57,21 @@ export default function Home(){
         setIsLoading(false);
       });
   }, []);
-  
+
   if (isLoading) {
     return (
       <LoadingSpinner />
     )
   }
 
-  const paddedGames = padWithFiller(popularGames, 3); 
-  console.log(paddedGames);
-
-  return(
-      <div className="container">
-        <h1 className="title text-center font-medium">
-            Featured Games:
-        </h1>
-        <Carousel>
-          <CarouselContent className="pb-4 w-full max-w-5xl mx-auto">
-          {paddedGames.map((game, index) => (
-            <CarouselItem key={index} className="basis-1/3">
-              <GameCard {...game} currUid={currUid} />
-            </CarouselItem>
-          ))}
-          </CarouselContent>
-          <CarouselPrevious />
-          <CarouselNext />
-        </Carousel>
-        <h1 className="subtitle text-center font-medium">
-          Create Your Own Game:
-        </h1>
-        <RedirectButton url="/create" text="Create" className="button  w-[125px] h-[40px]"/>
+  return (
+    <main className="flex flex-col w-full min-h-screen pt-0 mt-0 relative">
+      <div className="flex-grow">
+        <div className="container mx-auto px-4">
+          <GameCarousel title="POPULAR GAMES" games={popularGames} />
+        </div>
       </div>
+    </main>
   )
 }
 

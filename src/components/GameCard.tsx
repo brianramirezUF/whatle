@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardFooter } from './ui/card';
+import { Edit } from 'lucide-react';
 
 export interface GameCardProps {
     id: string,
@@ -55,56 +56,50 @@ export const GameCardContent: React.FC<GameCardContentProps> = ({ id, name, dail
 
     return (
         <div className='p-1'>
-            <Card
-                className='card transition-all hover:shadow-xl hover:-translate-y-1 cursor-pointer'
-                style={icon ? {
-                    backgroundImage: `url(${icon})`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                } : {}}
-            >
-                <CardHeader className={name === "..." ? "invisible" : ""}>
-                    <div className='flex flex-wrap gap-2'>
-                        <div
-                            key='daily-plays'
-                            className='flex items-center gap-1 rounded-xl bg-logo-gray px-2 py-1 text-sm text-[#2D3748] shadow-md backdrop-blur-md'
-                        >
-                            <span role='img' aria-label='clock'>⏰</span>
-                            <span>{daily_plays} Today</span>
-                        </div>
-                        <div
-                            key='all-time-plays'
-                            className='flex items-center gap-1 rounded-xl bg-logo-yellow px-2 py-1 text-sm text-yellow-800 shadow-md backdrop-blur-md'
-                        >
-                            <span role='img' aria-label='trophy'>🏆</span>
-                            <span>{total_plays} All-Time</span>
-                        </div>
-                    </div>
-                </CardHeader>
-                <CardContent className='card-content flex aspect-square items-center justify-center p-6'>
-                    <span className={`text-3xl font-semibold text text-center ${name !== "..." ? "text-white" : "text-gray-400"}`}>{name}</span>
-                </CardContent>
-                <CardFooter className={`flex justify-center items-center pt-2 pb-3 px-4 gap-2 ${name === "..." ? "invisible" : ""}`}>
-                    <Link href={`${basePath}play/${id}`}>
-                        <div
-                            className='flex items-center justify-center gap-1 rounded-xl bg-logo-green px-2 py-1 mx-1 my-3 text-sm text-[#1D4B2D] shadow-md backdrop-blur-md transition-all hover:shadow-lg hover:-translate-y-0.5 cursor-pointer w-[130px] h-[40px]'
-                        >
-                            <span className="font-bold">Play</span>
-                        </div>
-                    </Link>
-                    {uid === "" || currUid === "" || uid !== currUid
-                        ? null
-                        : (
-                            <Link href={`${basePath}create/${id}`}>
-                                <div
-                                    className="flex items-center justify-center gap-1 rounded-xl bg-logo-yellow px-2 py-1 my-3 text-sm text-yellow-800 shadow-md backdrop-blur-md transition-all hover:shadow-lg hover:-translate-y-0.5 cursor-pointer w-[130px] h-[40px]"
+            <Link href={`${basePath}play/${id}`}>
+                <Card
+                    className='card transition-all hover:shadow-xl hover:-translate-y-1 cursor-pointer'
+                    style={icon ? {
+                        backgroundImage: `url(${icon})`,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                    } : {
+                        background: 'linear-gradient(to top right, white, #D8D8D8)'
+                    }}
+                >
+                    <CardHeader className={`z-10 p-3 ${name === "..." ? "invisible" : ""}`}>
+                        <div className='flex flex-wrap items-center gap-1.5 w-full'>
+                            <div
+                                key='daily-plays'
+                                className='flex items-center gap-1 rounded-full bg-logo-gray/75 px-2 py-0.5 text-xs font-medium text-gray-800 backdrop-blur'
+                            >
+                                <span role='img' aria-label='clock' className="text-xs">⏰</span>
+                                <span>{daily_plays} Today</span>
+                            </div>
+                            <div
+                                key='all-time-plays'
+                                className='flex items-center gap-1 rounded-full bg-logo-yellow/75 px-2 py-0.5 text-xs font-medium text-yellow-800 backdrop-blur'
+                            >
+                                <span role='img' aria-label='trophy' className="text-xs">🏆</span>
+                                <span>{total_plays}</span>
+                            </div>
+
+                            {uid === currUid && uid !== "" && currUid !== "" && name !== "..." && (
+                                <button
+                                    aria-label="Edit game"
+                                    className="ml-auto"
+                                    onClick={() => window.location.href = `${basePath}create/${id}`}
                                 >
-                                    <span className="font-bold">Edit</span>
-                                </div>
-                            </Link>
-                        )}
-                </CardFooter>
-            </Card>
+                                    <Edit className='p-1 rounded-full bg-logo-green/80 text-[#1D4B2D] transition-all hover:shadow-lg hover:-translate-y-0.5 cursor-pointer'></Edit>
+                                </button>
+                            )}
+                        </div>
+                    </CardHeader>
+                    <CardContent className='card-content flex aspect-square items-center justify-center p-6'>
+                        <span className={`text-3xl font-semibold text text-center ${name !== "..." ? "text-white" : "text-gray-400"}`}>{name}</span>
+                    </CardContent>
+                </Card>
+            </Link>
         </div>
     );
 };
