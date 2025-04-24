@@ -16,9 +16,10 @@ import ProtectedRoute from '@/components/ProtectedRoute'
 import { useAuth } from '@/contexts/AuthContext'
 import LoadingSpinner from '@/components/LoadingSpinner'
 import { GameCard, GameCardProps, padWithFiller } from '@/components/GameCard';
+import { GameCarousel } from '@/components/GameCarousel'
 
 export default function GameList() {
-    const [games, setGames] = useState([]);
+    const [games, setGames] = useState<GameCardProps[]>([]);
     // TODO: add UseContext
     const [uid, setUID] = useState('');
     const { currentUser } = useAuth();
@@ -56,40 +57,25 @@ export default function GameList() {
         return <div>Error: {error}</div>;
     }
 
-    const paddedGames = padWithFiller(games, 3); 
+    const paddedGames = padWithFiller(games, 3);
     console.log(paddedGames);
 
-    const gamesList = paddedGames.length ? (
-        <Carousel>
-            <CarouselContent className='pb-4 w-full max-w-5xl mx-auto'>
-                {paddedGames.map((game: GameCardProps, index) => (
-                    <CarouselItem key={index} className={paddedGames.length < 3 ? '' : 'basis-1/3'}>
-                        <GameCard {...game} currUid={currUid} play={false} />
-                    </CarouselItem>
-                ))}
-            </CarouselContent>
-            <CarouselPrevious />
-            <CarouselNext />
-        </Carousel>
-    ) : 'No Games';
-
-   const content = (
-   <div className="container-custom pt-2 px-4 mt-0 mb-4">
-        <h1 className='title text-center font-medium'>
-            Create A New Game:
-        </h1>
-        <div className="flex justify-center">
-            <RedirectButton 
-                url='/create/new-game' 
-                text='Create' 
-                className='button w-[125px] h-[40px]' 
-            />
+    const content = (
+        <div className="container pt-2 px-4 mt-0 mb-0">
+            <h1 className='title text-center font-medium'>
+                Create A New Game:
+            </h1>
+            <div className="flex justify-center">
+                <RedirectButton
+                    url='/create/new-game'
+                    text='Create'
+                    className='button w-[125px] h-[40px]'
+                />
             </div>
-                <h1 className='subtitle text-center font-medium mb-42'>
-                    Edit Your Existing Games:
-                </h1>
-                {gamesList}
-            </div>
+            {paddedGames.length ? (
+                <GameCarousel games={games} title='YOUR GAMES' />
+            ) : 'No Games'}
+        </div>
     );
 
     return <ProtectedRoute>{content}</ProtectedRoute>;
