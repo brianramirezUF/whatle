@@ -35,6 +35,7 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name, gameId, maxGuess
   const [showDropdown, setShowDropdown] = useState(false);
   const [won, setWon] = useState(false);
   const [isLost, setIsLost] = useState(false);
+  const [showWinText, setShowWinText] = useState(false);
   const [confettiBursts, setConfettiBursts] = useState<{ id: number; x: number; y: number }[]>([]);
   const { currentUser } = useAuth();
   const searchBarRef = useRef<HTMLDivElement>(null);
@@ -145,6 +146,7 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name, gameId, maxGuess
       setTimeout(() => {
         setConfettiBursts([]);
         launchBursts();
+        setShowWinText(true);
       }, attributes.length * 400);
     }
 
@@ -247,11 +249,17 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name, gameId, maxGuess
         <ConfettiBurst key={burst.id} x={burst.x} y={burst.y} id={burst.id} />
       ))}
 
-      {isLost && (
+      {isLost && showWinText && (
         <p className="mt-4 text-lg font-semibold text-red-600 lost-text">
           ❌ You lost! Try again next time! ❌
         </p>
       )}
+      {won && showWinText && (
+          <p className="mt-4 text-lg font-semibold text-green-600 lost-text">
+          🎉 You won! 🎉
+        </p>
+        )
+      }
       <div className="w-full flex flex-col bg-white rounded-lg p-3 md:p-6 mb-4 justify-center items-center">
         <h2 className="text-xl mb-4 font-bold text-center">{name}</h2>
 
