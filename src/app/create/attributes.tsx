@@ -35,28 +35,28 @@ export const Guess: React.FC<guessProps> = ({ details, status, rowIndex = 0, col
 
     return (
         <div
-        key={`cell-${rowIndex}-${colIndex}`}
-        style={{ animationDelay: `${colIndex * 0.4}s` }}
-        className="fade-in"
+            key={`cell-${rowIndex}-${colIndex}`}
+            style={rowIndex >= 0 ? { animationDelay: `${colIndex * 0.4}s` } : {}}
+            className={rowIndex >= 0 ? "fade-in" : ""}
         >
-        <Card
-            className="p-2 shadow-md flex items-center justify-center border aspect-square min-w-[100px] max-w-[300px]"
-            style={{
-            backgroundColor: status,
-            backgroundImage,
-            backgroundSize: 'cover',
-            backgroundRepeat: 'no-repeat',
-            backgroundPosition: 'center',
-            }}
-        >
-            <CardContent className="text-center ">
-            <div className="flex items-center justify-center">
-                <span className="text-2xl text-center guess-text text-white">
-                {details}
-                </span>
-            </div>
-            </CardContent>
-        </Card>
+            <Card
+                className="p-1 sm:p-2 shadow-md flex items-center justify-center border aspect-square min-w-[80px] md:min-w-[100px] max-w-[300px]"
+                style={{
+                    backgroundColor: status,
+                    backgroundImage,
+                    backgroundSize: 'cover',
+                    backgroundRepeat: 'no-repeat',
+                    backgroundPosition: 'center',
+                }}
+            >
+                <CardContent className="text-center p-0 sm:p-1">
+                    <div className="flex items-center justify-center h-full">
+                        <span className="text-sm sm:text-lg md:text-2xl font-semibold text-balance text-center text-white">
+                            {details}
+                        </span>
+                    </div>
+                </CardContent>
+            </Card>
         </div>
     );
 };

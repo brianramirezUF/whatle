@@ -98,7 +98,7 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name, gameId, maxGuess
     setGuesses((prev) => [...prev, { result: results, name: guess }]);
 
     // Reset filtered answers after guess
-    setFilteredAnswers(Object.values(answers).filter(ans => !guessNames.includes(ans.name))); 
+    setFilteredAnswers(Object.values(answers).filter(ans => !guessNames.includes(ans.name)));
     setCurGuess(''); // Clear input field
 
     if (!currentUser) {
@@ -110,7 +110,7 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name, gameId, maxGuess
     const userId = currentUser.uid;
     const timeTaken = Math.floor(Math.random() * 100) + 1;
 
-    const payload = { 
+    const payload = {
       gameId,
       name,
       won: isWin,
@@ -164,11 +164,11 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name, gameId, maxGuess
           },
           body: JSON.stringify(payload),
         });
-  
+
         if (!res.ok) {
           console.error("❌ API Error Response:");
         }
-  
+
       } catch (err: any) {
         console.error("❌ Network/Code Error:", err.message);
       }
@@ -177,28 +177,33 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name, gameId, maxGuess
 
   const renderHeaders = () => (
     <>
-      <Card key={`header-name`} className="bg-gray-100 text-center font-bold p-2 border min-w-[100px] max-w-[300px]">
-          {'Guess'}
-        </Card>
+      <Card key={`header-name`} className="bg-gray-100 text-center font-bold p-2 border min-w-[80px] md:min-w-[100px] max-w-[300px]">
+        {'Guess'}
+      </Card>
       {attributes.map((attr: AttributeType, index: number) => (
-        <Card key={`header-${index}`} className="bg-gray-100 text-center font-bold p-2 border min-w-[100px] max-w-[300px]">
-          {attr.name}
+        <Card key={`header-${index}`} className="bg-gray-100 text-center font-bold p-1 sm:p-2 border min-w-[80px] md:min-w-[100px] max-w-[300px]">
+          <div className="text-xs sm:text-sm md:text-base">
+            {attr.name}
+          </div>
         </Card>
       ))}
     </>
   );
 
   const renderRows = () => {
-    return guesses.map((guess, rowIndex) => {
+    return guesses.toReversed().map((guess, index) => {
+      const isNewestGuess = index === 0;
+      const rowIndex = guesses.length - 1 - index;
+
       return (
         <React.Fragment key={`row-${rowIndex}`}>
           <div>
             <Card
-              className="p-2 bg-gray-100 flex font-bold items-center justify-center aspect-square min-w-[100px] max-w-[300px] card"
+              className="p-2 bg-gray-100 flex font-bold items-center justify-center aspect-square min-w-[80px] md:min-w-[100px] max-w-[300px] card"
               style={answers[guess.name].icon ? { backgroundImage: `url(${answers[guess.name].icon})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}}
             >
               <CardContent className="card-content flex aspect-square items-center justify-center truncate">
-                <span className="text-2xl text">{guess.name}</span>
+                <span className="text-sm sm:text-lg md:text-2xl text-center text-balance text-white font-semibold text">{guess.name}</span>
               </CardContent>
             </Card>
           </div>
@@ -206,7 +211,7 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name, gameId, maxGuess
             <Guess
               key={`cell-${rowIndex}-${colIndex}`}
               colIndex={colIndex}
-              rowIndex={rowIndex}
+              rowIndex={isNewestGuess ? 0 : -1}
               guess={cur.guess || 'Value'}
               status={cur.status}
               details={cur.details}
@@ -229,9 +234,9 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name, gameId, maxGuess
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
-  
+
   return (
-    <div className="flex flex-col justify-center items-center p-4">
+    <div className="flex flex-col justify-center items-center p-2 md:p-4 w-full">
       {maxGuesses && (
         <p className="mt-2 text-sm text-gray-600 text-center">
           Guesses: {guessNames.length} / {maxGuesses}
@@ -247,7 +252,7 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name, gameId, maxGuess
           ❌ You lost! Try again next time! ❌
         </p>
       )}
-      <div className="max-w-6xl w-full flex flex-col bg-white rounded-lg p-6 mb-4 justify-center items-center">
+      <div className="w-full flex flex-col bg-white rounded-lg p-3 md:p-6 mb-4 justify-center items-center">
         <h2 className="text-xl mb-4 font-bold text-center">{name}</h2>
 
         {!won && !isLost && (
@@ -260,22 +265,22 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name, gameId, maxGuess
                 onKeyDown={(e) => {
                   if (e.key == 'Enter') e.preventDefault();
                 }}
-                onFocus={() => setShowDropdown(true)} // Always show dropdown on focus
+                onFocus={() => setShowDropdown(true)}
                 placeholder="Type to search..."
                 className="w-full border rounded p-2"
               />
               {showDropdown && (
-                <div className="absolute left-0 w-full bg-white border rounded shadow-md z-10 max-h-96 overflow-y-auto">
+                <div className="absolute left-0 w-full bg-white border rounded shadow-md z-10 max-h-60 sm:max-h-96 overflow-y-auto">
                   {filteredAnswers.map((ans, index) => (
                     <div
                       key={index}
-                      className="flex items-center p-4 hover:bg-gray-200 cursor-pointer"
+                      className="flex items-center p-2 md:p-4 hover:bg-gray-200 cursor-pointer"
                       onClick={() => handleSelectGuess(ans.name)}
                     >
                       {ans.icon && (
-                        <img src={ans.icon} alt={ans.name} className="w-12 h-12 mr-4 rounded-full object-cover" />
+                        <img src={ans.icon} alt={ans.name} className="w-8 h-8 md:w-12 md:h-12 mr-2 md:mr-4 rounded-full object-cover" />
                       )}
-                      <span className="text-lg">{ans.name}</span>
+                      <span className="text-sm md:text-lg truncate">{ans.name}</span>
                     </div>
                   ))}
                 </div>
@@ -283,23 +288,22 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name, gameId, maxGuess
             </div>
             <button
               onClick={() => makeGuess(curGuess)}
-              className="px-4 py-2 bg-red-500 text-white rounded">
+              className="px-3 py-2 bg-red-500 text-white rounded text-sm md:text-base whitespace-nowrap">
               Guess
             </button>
           </div>
         )}
 
         <div
-          className="grid gap-2 mt-10"
-          style={{ gridTemplateColumns: `repeat(${attributes.length + 1}, minmax(100px, 300px))` }}
+          className="grid gap-1 sm:gap-2 mt-6 sm:mt-10 w-full overflow-x-auto"
+          style={{
+            gridTemplateColumns: `repeat(${attributes.length + 1}, minmax(80px, 1fr))`,
+            maxWidth: '80%'
+          }}
         >
           {renderHeaders()}
           {renderRows()}
         </div>
-
-        {/*<button onClick={resetGame} className="mt-4 px-4 py-2 bg-red-500 text-white rounded">
-          Reset
-        </button>*/}
       </div>
     </div>
   );
