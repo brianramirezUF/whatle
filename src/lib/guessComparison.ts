@@ -28,27 +28,27 @@ const compareNumber = (guess: number, answer: number): GuessCorrectness => {
     if (guess < answer) {
         return {
             status: GuessStatus.UNDER,
-            details: guess.toString()
+            details: guess.toLocaleString('en')
         };
     }
 
     if (guess > answer) {
         return {
             status: GuessStatus.OVER,
-            details: guess.toString()
+            details: guess.toLocaleString('en')
         };
     }
 
     if (guess == answer) {
         return {
             status: GuessStatus.CORRECT,
-            details: guess.toString()
+            details: guess.toLocaleString('en')
         };
     }
 
     return {
         status: GuessStatus.INCORRECT,
-        details: guess.toString()
+        details: guess.toLocaleString('en')
     };
 };
 
@@ -62,7 +62,7 @@ const compareBoolean = (guess: string | boolean, answer: string | boolean): Gues
     }
     return {
         status: guess === answer ? GuessStatus.CORRECT : GuessStatus.INCORRECT,
-        details: guess.toString()
+        details: guess ? 'True' : 'False'
     };
 };
 
