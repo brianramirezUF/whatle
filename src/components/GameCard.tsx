@@ -88,7 +88,10 @@ export const GameCardContent: React.FC<GameCardContentProps> = ({ id, name, dail
                                 <button
                                     aria-label="Edit game"
                                     className="ml-auto"
-                                    onClick={() => window.location.href = `${basePath}create/${id}`}
+                                    onClick={(e) => { 
+                                        e.preventDefault();
+                                        window.location.href = `${basePath}create/${id}`
+                                }}
                                 >
                                     <Edit className='p-1 rounded-full bg-logo-green/80 text-[#1D4B2D] transition-all hover:shadow-lg hover:-translate-y-0.5 cursor-pointer'></Edit>
                                 </button>
