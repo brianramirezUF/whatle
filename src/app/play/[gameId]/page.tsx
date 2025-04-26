@@ -46,11 +46,12 @@ export default function PlayGame() {
     const content = (
         <div>
             {gameData ? <Game {...gameData} gameId={gameId} /> : 'Failed to load game.'}
-            <div>
-              <button onClick={doTestUpdate}>
-                Cron Update
-              </button>
-            </div>
+            {// <div>
+              // <button onClick={doTestUpdate}>
+                // Cron Update
+              // </button>
+            // </div>
+          } 
         </div>
         
     );
