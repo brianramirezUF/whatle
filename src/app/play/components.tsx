@@ -93,7 +93,10 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name, gameId, maxGuess
     const isGuessLimitReached = maxGuesses && newGuessCount >= maxGuesses && !isWin;
 
     if (isGuessLimitReached) {
-      setIsLost(true); // UI will still reflect loss
+      setIsLost(true);
+      setTimeout(() => {
+        setShowWinText(true);
+      }, attributes.length * 400);
     }
 
     setGuesses((prev) => [...prev, { result: results, name: guess }]);
@@ -102,13 +105,6 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name, gameId, maxGuess
     setFilteredAnswers(Object.values(answers).filter(ans => !guessNames.includes(ans.name)));
     setCurGuess(''); // Clear input field
 
-    if (!currentUser) {
-      console.error("❌ No user is logged in.");
-      //alert("❌ You must be logged in to track progress.");
-      return;
-    }
-
-    const userId = currentUser.uid;
     const timeTaken = Math.floor(Math.random() * 100) + 1;
 
     const payload = {
@@ -157,12 +153,33 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name, gameId, maxGuess
     // update if win OR lose
     if (isWin || isGuessLimitReached) {
       try {
+        if (!currentUser) {
+          throw new Error("❌ You must be logged in to track progress.");
+        }
+
         const idToken = await currentUser.getIdToken();
         const res = await fetch("/api/updateUserHistory", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${idToken}`
+          },
+          body: JSON.stringify(payload),
+        });
+
+        if (!res.ok) {
+          console.error("❌ API Error Response:");
+        }
+
+      } catch (err: any) {
+        console.error("❌ Network/Code Error:", err.message);
+      }
+
+      try {
+        const res = await fetch("/api/updateGameStats", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
           },
           body: JSON.stringify(payload),
         });
@@ -255,10 +272,10 @@ const Game: React.FC<GameProps> = ({ answers, attributes, name, gameId, maxGuess
         </p>
       )}
       {won && showWinText && (
-          <p className="mt-4 text-lg font-semibold text-green-600 lost-text">
+        <p className="mt-4 text-lg font-semibold text-green-600 lost-text">
           🎉 You won! 🎉
         </p>
-        )
+      )
       }
       <div className="w-full flex flex-col bg-white rounded-lg p-3 md:p-6 mb-4 justify-center items-center">
         <h2 className="text-xl mb-4 font-bold text-center">{name}</h2>
