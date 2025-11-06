@@ -2,8 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { adminDB } from '@/config/firebaseAdmin';
 
 export async function GET(req: Request) {
-    const authHeader = req.headers.get('x-cron-secret');
-    if (authHeader !== `${process.env.CRON_SECRET}`) {
+    const authHeader = req.headers.get('authorization');
+    const expected = process.env.CRON_SECRET;
+
+    if (!expected) {
+        return NextResponse.json({ error: 'Server not configured.' }, { status: 500 });
+    }
+
+    if (authHeader !== `Bearer ${expected}`) {
         return NextResponse.json({ error: 'Unauthorized.' }, { status: 401 });
     }
 
